@@ -1,0 +1,179 @@
+\section{Generatori pseudocasuali}
+
+\subsection{Sorgente binaria casuale}
+Genera una sequenza di bit:
+\begin{itemize}
+    \item $P(0) = P(1) = \frac{1}{2}$ ma si può indebolire richiedendo $P(0)>0, P(1)>0$ e immutabili durante il processo di generazione
+    \item La generazione di un bit è indipendente da quella di altri bit: non si può prevedere il valore di bit osservando quelli già generati
+\end{itemize}
+Perché possiamo indebolire la prima richiesta? Supponiamo che $P(0) > P(1)$ e si generi la sequenza:
+$$ 00|11|00|11|10|00|01|01|00 $$
+elimino le sottosequenze uguali ed associo ad ogni coppia un valore 0 o 1:
+$$ 01 \implies 0 $$
+$$ 10 \implies 1 $$
+ottenendo quindi:
+$$ 100 $$
+Questa sequenza ottenute sarà la nostra sequenza casuale.
+
+\subsubsection{Esistono vere sorgenti casuali?}
+Non lo sappiamo perché la fisica ci dice che ogni cosa lascia nello spazio e nel tempo dei rimasugli quindi non sembra essere ottenibile perfettamente.
+Quello che si fa è sfruttare dei fenomeni casuali naturali.
+
+\subsection{Generazione di sequenze brevi}
+Vediamo alcune tecniche di generazione di sequenze brevi:
+\begin{itemize}
+    \item Fenomeni casuali presenti in natura (sorgenti di casualità tipo rumore del microfono)
+    \item Processi software (come ad esempio la posizione della testina dell'hard disk o l'orologio del computer)
+    \item Generazione mediante algoritmi matematici. Questo ultimo tipo costituisce i \emph{generatori di numeri pseudo-casuali}. Non sono ovviamente sequenze casuali secondo Kolmogorov in quanto prodotte da un programma breve
+\end{itemize}
+
+\subsection{Generatore}
+E' un algoritmo che prende in input un \emph{seme} cioè una sequenza o un valore \emph{breve} e fornisce in output un \emph{flusso} di bit arbitrariamente lungo e periodico (cioè al suo interno contiene una sottosequenza che si ripete ogni tot periodo). Useremo quindi un periodo come sequenza casuale.
+
+Un generatore è tanto migliore tanto più è lungo il periodo! Nella pratica un generatore è un \emph{amplificatore} di casualità.
+
+Supponiamo 
+\begin{itemize}
+    \item $S$ : numero di bit del seme
+    \item $n$ : lunghezza della sequenza ottenuta
+\end{itemize}
+avremo necessariamente che:
+
+$$ \text{possibili sequenze diverse : } 2^{S} << 2^{n} \text{ : numero totale di sequenze lunghe n}$$
+
+questi processi sono deterministici in quanto dato un seme la sequenza generata è sempre la stessa, quindi il vero numero di sequenze possibili da generare è $2^{S}$.
+
+\subsection{Generatore lineare}
+$$ x_{i} = \left( a \cdot x_{i-1} + b \right) \mod m $$
+$$ a,b,m \in \mathbb{N} $$
+$$ x_{0} = \text{seme} $$
+I parametri vanno scelti in modo da poter generare tutti i valori da $0$ a $m-1$, quindi un periodo di lunghezza $m$. Inoltre appena $x_{i} = x_{0}$ la sequenza si ripete da capo. Per massimizzare il periodo ci servono:
+\begin{itemize}
+    \item $MCD(b, m) = 1$
+    \item $(a-1)$ deve essere divisibile per ogni fattore primo di $m$
+    \item $(a-1)$ deve essere un multiplo di 4 se $m$ lo è
+\end{itemize}
+Queste caratteristiche ci garantiscono dunque di ottenere una permutazione dei primi $m$ numeri.
+
+Es:
+$$ a=7, b=7, m=9, x_{0}=3 $$
+$$ x_i = (7x_{i-1} + 7) \mod 9 $$
+$$ \implies 3, 1, 5, 6, 4, 8, ... , 3 $$
+
+NB: posso ottenere un generatore di sequenze binarie facendo $\frac{x_i}{m}$ e prendendo la parità della prima cifra decimale.
+
+\subsection{Valutazione statistica}
+Per studiare un generatore di sequenze pseudo-casuali possiamo effettuare dei testi statistici valutando se la sequenza presenta le proprietà tipiche di una sequenza casuale:
+\begin{itemize}
+    \item \emph{test di frequenza}
+    \item \emph{poker test}: sottosequenza di lunghezza fissa siano equamente distribuite
+    \item \emph{test di autocorrelazione}: verifica che non ci siano regolarità nella sequenza
+    \item \emph{run test}: verifica che le sottosequenze massimali (più lunghe possibili) abbiano una frequenza esponenziale negativa: più è lunga e meno è probabile trovarla con decrescita esponenziale
+\end{itemize}
+
+\subsection{Test di prossimo bit}
+Per le applicazioni crittografiche si richiede anche il \emph{test di prossimo bit} (che implica anche i 4 test precedenti). Questo test controlla che sia impossibile fare previsioni sugli elementi della sequenza prima che siano stati generati. Se una sequenza passa questo test è impossibile fare previsioni sugli elementi della sequenza.
+
+Un generatore binario supera il test di prossimo bit se $ \nexists $ un algoritmo polinomiale in grado di prevedere il bit $(i+1)$esimo della sequenza a partire dalla conoscenza degli $i$ bit precedentemente generati, con probabilità $> \frac{1}{2}$. Questi generatori si chiamano \emph{crittograficamente sicuri}.
+
+\subsection{}{Generatore polinomiale}
+E' un altro generatore non crittograficamente sicuro ma che passa i test statistici. E' nella forma:
+$$ x_{i} = \left( a_{1}x_{i-1}^{t} + a_{2}x_{i-1}^{t-1} + ... + a_{t}x_{i-1} + a_{t+1} \right) \mod n $$
+
+Si noti che è una versione generalizzata di quello lineare, può essere usato come generatore di sequenze binarie:
+
+\begin{equation}
+    \frac{x_{i}}{n} = r_{i} \longrightarrow
+    \begin{cases}
+        \text{prima cifra decimale pari} \implies 0 \\
+        \text{prima cifra decimale dispari} \implies 1
+    \end{cases}
+\end{equation}
+
+\subsection{Costruzione di generatori crittograficamente sicuri con funzioni one-way}
+Una funzione \emph{one-way} è una funzione facile da calcolare ma difficile da invertire:
+$$ x \xrightarrow{f(x)} y \text{ : tempo polinomiale} $$
+$$ x \xrightarrow{f^{-1}(x)} y \text{ : tempo esponenziale} $$
+
+Una idea potrebbe essere: data una funzione $f$ one-way e dato un seme $s = x_{0}$ calcolo la sequenza:
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{c | c c c c c}
+        $S$: & $x$ & $f(x)$ & $f(x_{1}) = f(f(x))$ & ... & $f^{(n)}(x) = f(x_{n-1})$ \\
+         & $x_{0}$ & $x_{1}$ & $x_{2}$ & & $x_{n}$ \\
+    \end{tabular}
+\end{table}
+
+si prende quindi il seme e si itera la funzione one-way un numero arbitrario di volte. Tuttavia se conosco x la sequenza è prevedibile! Se invece \emph{restituisco la sequenza al contrario} il problema si risolve! Se ti do $x_{i+1}$ non puoi calcolare facilmente $x_{i}$ ma solo $x_{i+2}$ che però ti ho già restituito precedentemente. Bisognerebbe passare per una funzione esponenziale ad ogni passo.
+
+\subsection{Generatori binari crittograficamente sicuri}
+Si usano \emph{predicati hard core} delle funzioni one-way: $b(x)$ è un predicato hard core per la funzione one-way $f(x)$ se:
+\begin{itemize}
+    \item $b(x)$ è facile da calcolare conoscendo $x$
+    \item $b(x)$ è difficile da prevedere con probabilità $> \frac{1}{2}$ conoscendo solo $f(x)$
+\end{itemize}
+Es:
+$$ x \xrightarrow{} f(x) = x^2 \mod n \text{ (n non primo)} $$
+è una funzione one-way
+$$ n = 77, x = 10, y = 10^{2} \mod 77 = 23 $$
+il contrario prevederebbe una enumerazione di tutti i valori da 0 a $n-1$!
+$$ b(x) = \text{x è dispari} \text{ è un predicato hard core} $$
+
+\subsection{Generatore BBS}
+Il generatore BBS (Blum-Blum-Shub), nato nel 1986 è un generatore crittograficamente sicuro! Si prendono $p$, $q$ primi (grandi) che verificano:
+
+\begin{itemize}
+    \item $ p \mod 4 = 3 $
+    \item $ q \mod 4 = 3 $
+    \item $ MCD(2 \lfloor \frac{p}{4} \rfloor + 1, 2 \lfloor \frac{q}{4} \rfloor + 1) = 1 $
+\end{itemize}
+
+si procede:
+
+$$ n = p \cdot q $$
+$$ y | MCD(y, n) = 1 $$
+
+si calcola il seme $x_{0}$:
+
+$$ x_{0} = y^{2} \mod n $$
+
+si calcola una successione di $ m \leq n $ interi con:
+
+$$ x_{i} = (x_{i-1})^{2} \mod n $$
+$$ b_{i} = 1 \Longleftrightarrow x_{n-1} \text{ è dispari} $$
+
+si hanno quindi:
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{c c c}
+        $b_{0} = 1$ & $ \Longleftrightarrow $ & $ x_{n} $ è dispari\\
+        $b_{1} = 1$ & $ \Longleftrightarrow $ & $ x_{n-1} $ è dispari\\
+        ... & ... & ... \\
+        $b_{n} = 1$ & $ \Longleftrightarrow $ & $ x_{0} $ è dispari\\
+    \end{tabular}
+\end{table}
+
+e si restituiscono in ordine: $b_{0}, b_{1}, ..., b_{n}$
+
+I problemi di questo generatore sono: la lentezza, la necessità di numeri molto grandi e l'esecuzione di potenze di questi numeri già molto grandi. Ci sono altre tecniche usate, più veloci anche se meno sicure.
+
+\subsection{Generatore di numeri pseudocasuali basati su cifrari simmetrici}
+Si prendono un cifrario simmetrico ed una chiave, anziché usare un messaggio scegliamo un seme e produciamo la sequenza. Vediamo un esempio che sfrutta il DES ed è stato approvato dal FIPS (Federal Information Processing Standard):
+
+\begin{verbatim}
+    G = funzione di cifratura
+    r = #bit delle parole prodotte (rDES = 64 bit)
+    s = seme casuale di r bit
+    m = #parole da produrre
+    k = chiave segreta del cifrario
+
+    Generatore(s, m): // flusso di output di m * r bit
+        d = rappresentazione su r bit di data ed ora
+        y = G(d, k)
+        z = s
+        for(i = 1; i <= m; i++):
+            xi = G(y XOR z, k)
+            z = G(y XOR xi, k)
+            yield xi
+\end{verbatim}

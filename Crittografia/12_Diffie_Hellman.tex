@@ -1,0 +1,61 @@
+\section{Protocollo Diffie-Hellman}
+Questo protocollo permette la creazione di una chiave di sessione nella quale entrambi i lati partecipano in egual misura.
+
+NB: non è un protocollo di scambio di chiavi, la chiave non viaggia mai, ci si scambiano informazioni che permettono di costruirla. E' più una negoziazione.
+
+Alice e Bob si accordano pubblicamente su un numero $p$ primo molto grande ($\approx 1000$ bit) ed un generatore $g$ di $Z_p^*$. 
+
+NB: lavorare con un primo ci garantisce l'esistenza di un generatore di $Z_p^*$
+
+NB: non essendoci un algoritmo deterministico per avere un generatore possiamo affidarci alle coppie note raccomandate dal NIST
+
+L'algoritmo prosegue un questo modo:
+\begin{itemize}
+    \item Alice sceglie $x$ tale che $1 < x < p-1$ e calcola
+    $$ A = g^x \mod p $$
+    ed invia $A$ a Bob
+    \item Bob sceglie $y$ tale che $1 < y < p-1$ e calcola
+    $$ B = g^y \mod p $$
+    ed invia $B$ ad Alice
+    \item Alice calcola la chiave di sessione:
+    $$ K = B^x \mod p = g^{x \cdot y} \mod p $$
+    \item Bob calcola la chiave di sessione:
+    $$ K = A^y \mod p = g^{x \cdot y} \mod p $$
+\end{itemize}
+Entrambi hanno ottenuto lo stesso numero $K$.
+
+\subsection{Attacchi passivi}
+Il crittoanalista conosce $p$, $g$, $A$, $B$.
+Per calcolare la chiave di sessione bisogna trovare $x$ ed $y$:
+
+\begin{equation}
+    \begin{cases}
+    A = g^x \mod p \\
+    B = g^y \mod p
+    \end{cases}
+\end{equation}
+siamo di fronte al problema del logaritmo discreto! Possiamo solo eseguire un forza bruta ma se $p$ è abbastanza grande ed $x$ e $y$ sono scelti correttamente c'è poco da fare.
+
+
+\subsection{Attacchi attivi}
+Diffie-Hellman è vulnerabile agli attacchi \emph{man-in-the-middle}. Abbiamo Eve che si finge Alice agli occhi di Bob e Bob agli occhi di Alice:
+\begin{itemize}
+    \item Alice invia $ A = g^x \mod p$
+    \item Eve intercetta $A$ e lo sostituisce con $E = g^z \mod p$
+    \item Bob riceve $E$. Invia $ B = g^y \mod p $
+    \item Eve intercetta $B$ e lo sostituisce con $E = g^z \mod p$
+    \item Alice riceve $E$
+    \item Eve calcola:
+    \begin{itemize}
+        \item $K_A = A^z \mod p = g^{x \cdot y} \mod p$ per parlare con Alice
+        \item $K_B = B^z \mod p = g^{x \cdot y} \mod p$ per parlare con Bob
+    \end{itemize}
+    \item Alice calcola $K_A = E^x \mod p$ per parlare con Bob, ma in realtà parlerà con Eve
+    \item Bob calcola $K_B = E^y \mod p$ per parlare con Alice, ma in realtà parlerà con Eve
+\end{itemize}
+
+Qualsiasi cosa che Alice mandi a Bob, Eve può decifrarlo, criptare con la chiave di Bob e re-iviarlo.
+Viceversa per i messaggi di Bob verso Alice.
+Eve può quindi leggere tutti i messaggi da ambo le parti.
+
+Per risolvere questo problema si possono usare le \emph{Certification of Authority}, cioè dei certificati digitali con il quale si firmano i valori $A$ e/o $B$.

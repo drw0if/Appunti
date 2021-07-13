@@ -1,0 +1,160 @@
+\section{Introduzione}
+La crittografia (scrittura nascosta) è lo studio \emph{delle tecniche matematiche per mascherare i messaggi} a differenza della \emph{crittoanalisi} che tenta di svelarli.
+Esiste un termine più generico che li comprende: \emph{crittologia}.
+Il tipico scenario in cui ci poniamo è quello in cui Alice e Bob vogliono comunicare un messaggio \emph{m} su un canale insicuro in cui è possibile intercettare i messaggi. Decidono quindi di adottare un metodo di cifratura che trasforma m in \emph{c}, detto \emph{crittogramma} che deve essere:
+
+\begin{itemize}
+    \item \emph{incomprensibile} al crittoanalista (Eve - Eavesdropper d'ora in poi)
+    \item \emph{facilmente decifrabile} da Bob
+\end{itemize}
+
+\subsection{Cifratura}
+L'operazione con la quale si trasforma m in c è di fatto una funzione:
+$$
+    C: msg \longrightarrow critto
+$$
+
+\subsection{Decifratura}
+L'operazione inversa:
+$$
+    D: critto \longrightarrow msg
+$$
+
+\subsection{Schema di comunicazione}
+$$
+    Alice: m \xrightarrow{C} c \xrightarrow[\text{canale insicuro}]{c} c \xrightarrow{D} m :Bob
+$$
+Si noti che per funzionare \emph{C} e \emph{D} devono essere in tempo polinomiale mentre per il crittoanalista, noto \emph{c}, deve essere esponenziale il tempo utile per riottenere \emph{m}.
+NB: \emph{C} e \emph{D} devono essere l'una l'inversa dell'altra:
+$$
+    D(c) = D(C(m)) = m
+$$
+quindi \emph{C} è iniettiva: m diversi vanno in c diversi.
+
+\subsection{Esempi antichi}
+Erodoto in "Storie" (V secolo a.C.) scrive:
+si prende un servitore, si rasano i suoi capelli e si scrive il messaggio sulla sua testa, si aspetta che la ricrescita lo copra e poi si spedisce il servitore verso Bob che dovrà solamente rasarlo nuovamente.
+
+Gli spartani (V secolo a.C.) usavano lo scitale che è un'asta cilindrica costruita in due esemplari identici posseduti dai due corrispondenti. Su un pezzo di pelle viene scritto il messaggio dopo averlo avvolto attorno al cilindro seguendo le linee di esso. La fettuccia viene poi fatta indossare da un'uomo che la porta al ricevente.
+
+Enea Tattico (Grecia, IV Secolo a.C.) dedica un intero capitolo ai metodi militari usati per scambiarsi i messaggi:
+\begin{itemize}
+    \item inviare un libro con alcune lettere sottolineate a formare il messaggio in chiaro
+    \item sostituire le vocali con altri simboli
+\end{itemize}
+
+Cifrario di Cesare: è il più antico cifrario di concezione moderna. \emph{c} è ottenuto da \emph{m} sostituendo ogni lettera con quella a 3 posizioni più avanti:
+$$ A \longrightarrow D $$
+$$ B \longrightarrow E $$
+$$ C \longrightarrow F $$
+$$ D \longrightarrow G $$
+$$ .. \longrightarrow .. $$
+La segretezza in questo caso dipende dalla conoscenza del metodo quindi era destinato ai soli utilizzi ristretti.
+
+\subsection{Livello di segretezza}
+I metodi crittografici si classificano in:
+\begin{itemize}
+    \item \emph{per uso ristretto}: in cui la parte segreta del meccaniscmo è ampia (C e D sono tenute segrete)
+    \item \emph{per uso generale}: in cui la parte segreta è molto limitata (si restringe alla sola \emph{chiave}, nota solo ai due endpoint della comunicazione)
+\end{itemize}
+NB: per i cifrari di massa quindi le regole sono pubblcihe, solo le chiavi sono segrete. Occorre sempre pensare che il nemico conosca il sistema.
+
+Ridefiniamo quindi:
+$$ c = C(m, k) $$
+$$ m = D(c, k) $$
+con \emph{k} chiave segreta diversa per ogni coppia di utenti.
+Se non si conosce \emph{k} la conoscenza dell'algoritmo non deve permettere l'estrazione di informazioni dal crittogramma. Se una chiave viene divulgata basta generarne un'altra lasciando inalterati \emph{C} e \emph{D}.
+Ovviamente l'insieme delle chiavi deve esere così grande da non essere rompibile tramite brute-force e deve essere scelta in modo casuale.
+
+NB: brute-force $\equiv$ \emph{attacco esauriente}
+
+Es: se |key| = $10^{20}$ ed un calcolatore impiegasse $10^{-6}$ secondi per calcolare $D(c, k)$ e verificarne la significatività occorrerebbero comunque milioni di anni per provarle tutte.
+NB: solo la grandezza dello spazio delle chiavi non è un buon indice per l'affidabilità di un cifrario, potrebbe sempre essere rotto matematicamente.
+
+\subsection{Crittoanalisi}
+\begin{itemize}
+    \item comportamento \emph{passivo}: ci si limita ad ascoltare il canale
+    \item comportamento \emph{attivo}: si disturbano le comunicazioni o si modifica il contenuto dei messaggi
+\end{itemize}
+Gli attacchi dipendono dalle informazioni in possesso del crittoanalista:
+\begin{itemize}
+    \item \emph{cipher text attack}: si hanno una seria di testi cifrati: $ c_{1}, \_ , c_{r} $
+    \item \emph{known plain-text attack}: il crittoanalista ha delle coppie
+    $$(m_{1}, c_{1}), \_ , (m_{r}, c_{r})$$
+    \item \emph{chosen plain-text attack}: ci si procura una serie di coppie
+    $$(m_{1}, c_{1}), \_ , (m_{r}, c_{r})$$
+    relative a messaggi in chiaro scelti.
+\end{itemize}
+
+\subsection{Attacchi man-in-the-middle}
+Il crittoanalista si installa sul canale ed interrompe le comunicazioni dirette tra i due, le sostituisce con messaggi propri e convince ogni utente che quei messaggi provengono legittimamente dall'altro.
+
+\subsection{Situazione attuale}
+Si conoscono alcuni \emph{cifrari perfetti} ma richiedono operazioni estremamente complesse, quindi sono utilizzati in condizioni estreme. La definizione di cifrario inattaccabile si deve a \emph{Claude Shannon} ('45 ma pubblicato nel '49). Il messaggio in chiaro ed il crittogramma sono completamente scorrelati tra loro. un esempio è il \emph{one-time pad} che richiede:
+\begin{itemize}
+    \item una chiave diversa per ogni messaggio
+    \item perfettametne casuale
+    \item lunga quanto il messaggio
+\end{itemize}
+Come vanno generate? Come vanno scambiate?
+I cifrari utilizzati oggigiorno non sono perfetti ma sono comunque \emph{dichiarati sicuri} perché inviolati e per violarli è necessario risolvere problemi matematici estremamente difficili (abbiamo solo algoritmo esponenziali) quindi è richiesto tanto tempo o calcolatori molto grandi, nella pratica impossibile.
+
+NB: non sempre è noto se l'algoritmo esponenziale è l'unico metodo o ce ne sono altri ancora non scoperti.
+
+Uno dei cifrari di oggi è l'\emph{AES} (Advanced Encryption Standard): è lo standard per le comunicazioni non classificate, pubblicamente noto ed implementabile. Usa chiavi brevi a 128 o 256 bit. E' un cifrario simmetrico a blocchi, la stessa chiave quindi si usa sia per cifrare che per decifrare.
+
+NB: la chiave non è scelta dai partecipanti ma dai compter che usano.
+Come trasmette le chiavi in maniera sicura ed evitare che venga intercettata?
+
+\subsection{Distribuzione delle chiavi}
+Nel 1976 è stato proposto un protocollo di creazione e scambio di chiavi su un canale insicuro scenza la necessità che le due parti debbano essersi scambiate altre informazioni. Questo algoritmo è detto \emph{protocollo Diffie-Hellman} acora osa usato largamente.
+
+NB: inventato da Merkle e poi da Diffie ed Hellman
+
+Questi stessi hanno anche creato il concetto di crittografia a chiave pubblica senza tuttavia averne già una implementazione.
+
+\subsection{Cifrari simmetrici ed asimmetrici}
+Nei cifrari simmetrici la chiave è unica ed usata sia per criptare che per decriptare ed è nota solo ai due partner che devono averla concordata su un canale sicuro.
+Nei cifrari asimmetrici invece si usano una coppia di chiavi:
+\begin{itemize}
+    \item \emph{$K_{pub}$}: si usa per cifrare, è pubblica e nota a tutti
+    \item \emph{$K_{priv}$}: è privata e nota solo a chi riceve.
+\end{itemize}
+Bisogna quindi creare delle coppie di chiavi per ogni persona che vuole comunicare. Più precisamente:
+$$ c = C(m, K_{pub}) $$
+$$ m = D(c, K_{priv}) $$
+I sistemi simmetrici si dicono anche a chiave privata, mentre quelli asimmetrici si dicono a chiave pubblica.
+Per usare un meccanismo come crittografia asimmetrica è necessario l'uso di funzioni \emph{one-way trapdoor} cioè passare da \emph{m} a \emph{c} è facile ma decifrare \emph{c} (senza conoscere la chiave) è difficile.
+
+\subsection{RSA}
+Nel 1977 Rivest-Shamir-Adleman inventao un sistema a chiave pubblica basato sulla difficoltà di fattorizzare grandi numeri in fattori primi.
+Usando un sistema a chiave pubblica si ha una comunicazione molti a uno in quanto tutti hanno $K_{pub}$ e possono quindi cifrare i messaggi, ma solo il destinatario può leggerli conoscendo $K_{priv}$. Altri vantaggi sono:
+\begin{itemize}
+    \item tra n persone le chiavi sono $2n$, con un cifrario simmetrico invece sarebbero $\frac{n(n-1)}{2}$
+    \item non è necessario lo scambio segreto di chiavi
+\end{itemize}
+
+Tuttavia sono molto più lenti e le chiavi sono molto lunghe. Sono soggetti ad attacchi di tipo testo in chiaro scelto.
+
+\subsection{Cifrari ibridi}
+Si usa un cifrario a chiave segreta per al comunicazione di massa ma la chiave viene scambiata tramite cifrari asimmetrici. Si hanno quindi:
+\begin{itemize}
+    \item chiavi piccole
+    \item chiave simmetrica randomica impossibile da prevedere tramite attacco di tipo testo in chiaro scelto
+\end{itemize}
+
+\subsection{Applicazioni moderne}
+Attualmente i protocolli crittografici sono usati anche per:
+\begin{itemize}
+    \item \emph{identificazione dell'utente}: si accerta l'identità
+    \item \emph{autenticazione dell'utente}: si accerta che il messaggio venga dalla persona che dice di averlo mandato
+    \item \emph{firma digitale}: permette di evitare che un utente che ha inviato un messaggio neghi di averlo fatto e si dimostra l'identità del mittente agli occhi del ricevente
+\end{itemize}
+
+\subsection{Svolte future}
+\begin{itemize}
+    \item trasmissione protetta sulla rete (OpenSSL)
+    \item moneta elettronica (protocollo Bitcoin)
+    \item protocolli zero-knowledge
+    \item protocolli di cifratura quantistici
+\end{itemize}

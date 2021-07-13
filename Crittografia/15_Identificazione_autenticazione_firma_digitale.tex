@@ -1,0 +1,341 @@
+\section{Identificazione, autenticazione e firma digitale}
+
+L' \emph{identificazione} prevede che un sistema isolato o in rete debba essere in grado di accertare l'identità di un utente che richiede di accedere ai suoi servizi.
+
+L' \emph{autenticazione} prevede che il destinatario di un messaggio possa essere in grado di accertare:
+\begin{itemize}
+    \item l'identità del mittente
+    \item l'integrità del crittogramma ricevuto (che non sia stato modificato, che non sia stato sostituito)
+\end{itemize}
+
+NB: identificazione $\subset$ autenticazione
+
+La \emph{firma digitale} ci permette invece:
+\begin{itemize}
+    \item il mittente non può negare di aver inviato il messaggio $m$: \emph{non ripudiabilità}
+    \item il destinatario deve essere in grado di autenticate il messaggio: \emph{autenticazione}
+    \item il destinatario non deve poter sostenere che $m' \neq m$ è il messaggio inviato dal mittente
+\end{itemize}
+In fine tutto questo deve essere verificabile da terzi!
+
+Non sono modalità indipendenti, ciascuna estende le precedenti!
+Sono funzionalità utilizzate per contrastare gli attacchi attivi.
+
+Ci sono realizzazioni sia su cifrari simmetrici che asimmetrici, noi vedremo queste ultime versioni.
+
+\subsection{Funzioni hash}
+Una funzione hash: $f: X \xrightarrow{} Y$ è una funzione tale che:
+$$ n = \mid X \mid >> m = \mid Y \mid $$
+
+Essendo non iniettiva: $ \exists X_1, X_2, \_, X_m \subseteq X$ disgiunti tali che: 
+$$ X = X_1 \cup X_2 \cup \_ \cup \_ X_m $$
+$$ \forall i, x : x \in X_i : f(x) = y $$
+ogni insieme $X_i$ è l'insieme di collisioni e si vuole che le dimensioni dei vari $X_i$ sia più omogenea possibile.
+Quindi due elementi estratti a caso da $X$ hanno probabilità circa $\frac{1}{m}$ di avere la stessa immagine $y$.
+
+Inoltre si vuole che immagini \emph{simili} tra loro appartengano a sottoinsiemi diversi.
+Bisogna gestire le collisioni.
+Queste sono le richieste per una buona funzione di hash
+
+\subsection{Funzioni hash one-way}
+Per le applicazioni crittografiche si devono avere le seguenti proprietà:
+\begin{itemize}
+    \item $\forall x \in X$ è computazionalmente facile calcolare $y = f(x)$
+    \item one-way: per la maggior parte degli $y \in Y$ è computazionalmente difficile determinare $x \in X$ tale che: $f(x) = y$
+    \item \emph{claw-free}: è computazionalmente difficile determinare $<x_1, x_2>$ in $X$ tale che: $f(x_1)=f(x_2)$ 
+\end{itemize}
+
+\subsubsection{MD5 (Message Digest v5)}
+Si tratta di una famiglia di algoritmi.
+Sono stati pubblicati MD2, MD4, MD5.
+Nei primi due furono trovate falle e Rivest propose MD5 nel 1992.
+
+Riceve in input un sequenza $S$ di 512 bit e produce un'immagine di 128 bit.
+Si \emph{digerisce} la sequenza rudicendone la lunghezza ad $\frac{1}{4}$.
+
+Non resiste alle collisioni e nel 2004 è uscito di scena con debolezze varie.
+
+Si considera severamente compromesso (anche dallo stesso Rivest).
+
+Si usa ancora in altri contesti non crittografici.
+
+\subsubsection{RIPEMD-160}
+E' la versione matura dell'MD*. Nata nel 1995 produce immagini di 160 bit e non presenta i difetti di MD5.
+
+\subsubsection{SHA (Secure Hash Algorithm)}
+Progettata dal NIST ed NSA nel 1993.
+Opera su sequenze lunghe fino a $2^{64}$ bit e produce immagini di 160 bit.
+E' crittograficamente sicura.
+La prima versione: SHA-0 conteneva debolezze e fu quindi rivista portando allo SHA-1.
+
+Sono poi stati creati SHA-2: altri 4 algoritmi caratterizzati da digest più lunghi.
+
+Nel 2007 a causa dei problemi di MD5 e SHA-0 il NIST ha richiesto nuovi standard e nel 2012 è stato selezionato un algoritmo che è diventano SHA-3, pubblicato ufficialmente nel 2015.
+
+\subsubsection{SHA-1}
+Opera su sequenze fino a $2^{64}-1$ bit e produce immagini di 160 bit.
+E' largamente usata nei protocolli crittografici anche se non è più certificata come standard.
+
+Opera su blocchi di 160 bit contenuti in un buffer di 5 registri da 32 bit ciascuno in cui sono caricati inizialmente dei valori pubblici.
+Il messaggio $m$ viene poi concatenato con una sequenza di padding che ne rende la lunghezza multipla di 512 bit.
+
+Il contenuto dei registri varia nel corso dei cicli successivi in cui questi valori ci combinano tra loro e con blocchi di 21 bit provenientei da $m$.
+Alla fine i registri contengono SHA-1($m$).
+
+\subsection{Identificazione su canali sicuri}
+Supponiamo di avere un utente che vuole accedere alle risorse su un calcolatore.
+Per identificarsi usa username e password.
+Supponiamo che viaggiare su un canale sicuro, le uniche fonti di attacco sono quindi sul calcolatore remoto.
+Per evitare problemi sul server remoto non si memorizzano le password in chiaro ma un loro hash.
+In particolare sui sistemi UNIX quando un utente $U$ fornisce per la prima volta una password $P$ il sistema associa ad $U$ due sequenze binarie:
+\begin{itemize}
+    \item $S$: seme prodotto da un generatore pseudocasuale
+    \item $Q = h(PS)$: hash della concatenazione di $P$ ed $S$
+\end{itemize}
+
+Ad ogni successiva connessione il sistema prende la password, la concatena ad $S$, ne esegue l'hash e controlla che sia uguale all'hash memorizzato.
+
+In questa maniera un accesso al file delle password non rivela informazioni importanti.
+
+\subsection{Protezione del canale}
+Se il canale è insicuro la password può essere intercettata durante la sua trasmissione in chiaro.
+Vediamo quindi un sistema di \emph{identificazione} basato su chiave pubblica e privata.
+
+Per esempio siano $<e,n>$, $<d,n>$ le chiavi pubblica e privata di un utente $U$ che richiede l'accesso ai servizi offerti dal sistema $S$.
+\begin{itemize}
+    \item $S$ genera un numero casuale $r < n$ e lo invia in chiaro a $U$
+    \item $U$ calcola:
+    $$ f = r^d \mod n $$
+    \emph{firma di $U$ su $r$}
+    \item $S$ verifica la correttezza del valore ricevuto calcolando:
+    $$ f^e \mod n $$
+    e verificando l'uguaglianza. Se avviene l'identificazione ha successo
+\end{itemize}
+
+Se $S$ non è trusted potrebbe inviare un $r$ particolare, anziché randomico, per cercare di carpire informazioni sulla chiave privata!
+
+Si tratta di invertire le operazioni di crittazione e decifrazione rispetto all' RSA, ciò è possibile poiché è commutativo:
+$$ (x^e \mod n)^d \mod n = (x^d \mod n)^e \mod n = x $$
+
+Inoltre $f$ può essere generata solo da $U$ che possiede $<d, n>$.
+
+Per eseguire l'autenticazione invece si usa il MAC: \emph{message authentication code}.
+\begin{itemize}
+    \item mittente e destinatario concordano una chiave segreta $k$
+    \item il mittente allega al messaggio un MAC:
+    $$ A(m,k) $$
+    allo scopo di garantire la provenienza e l'integrità del messaggio.
+    Spedisce quindi $<m, A(m,k)>$ in chiaro oppure spedisce $<C(m,k'),A(m,k)>$ frutto di una cifratura
+    \item il destinatario entra in possesso di $m$, essendo a conoscenza di $A$ e $k$ ricalcola $A(m,k)$ e ne confronta il valore con quello inviato dal mittente. Se i MAC corrispondono allora ha successo
+\end{itemize}
+
+\subsection{MAC}
+Deve essere una immagine breve del messaggio che si può ottenere solo se si è a conoscenza del valore comune $k$.
+Ci sono varie implementazioni basat su cifrari asimmetrici, simmetrici e funzioni hash one-way.
+In particolare la versione one-way prevede:
+$$ A(m,k) = h(mk) $$
+con $h$ una funzione hash one-way.
+
+E' sicuro in quanto $k$ viaggia nel MAC ed anche se venisse scoperto non è invertibile in maniera semplice.
+Non può nemmeno sostituire tutto in quanto dovrebbe corredare il messaggio di un nuovo MAC che però non può calcolare essendo allo scuro del valore di $k$.
+
+NB: se si usa un cifrario a blocchi in modalità CBC si può usare l'ultimo blocco come MAC in quanto è funzione dell'intero messaggio.
+
+\subsection{Firma manuale}
+\begin{itemize}
+    \item E' autentica e non falsabile: prova che chi la ha prodotta è chi ha sottoscritto il documento
+    \item Non è riutilizzabile: è legata al documento su cui è stata apposta
+    \item il documento non è alterabile: chi ha prodotto la firma è sicuro che questa si riferirà solo al documento sottoscritto nella sua forma originale
+    \item non può essere ripudiata da chi l'ha apposta costituendo prova legale di un accordo o dichiarazione
+\end{itemize}
+
+\subsection{Firma digitale}
+Non può banalmente essere la digitalizzazione di un documento originale firmato manualmente (si potrebbe banalmente tagliare ed incollare su un altro documento).
+Deve quindi avere una forma che dipenda dal documento per essere inscindibile.
+Ci sono protocolli che si basano sia su cifrari simmetrici che asimmetrici
+
+\subsection{Protocollo 1: messaggio in chiaro e firmato (DH)}
+L'utente $U$ dispone di una $K_{upriv}$ e $K_{upub}$. $C$ e $D$ sono funzioni di cifratura e decifratura di un cifrario asimmetrico.
+La firma funziona:
+\begin{itemize}
+    \item $U$ genera la firma 
+    $$f = D(m, k_{upriv})$$
+    \item spedisce all'utente $<U,m,f>$
+    \item l'utente riceve $<U,m,f>$ e calcola 
+    $$C(f, K_{upub}) = m$$
+    e verifica che il risultato sia proprio $m$
+\end{itemize}
+
+L'indicazione del mittente $U$ consente a $V$ di selezionare la $K_{upub}$ da utilizzare.
+Per far funzionare questo meccanismo è importante che $C$ e $D$ siano commutative.
+
+Questo protocollo soddisfa i requisiti della forma digitale:
+\begin{itemize}
+    \item è autentica e non falsabile in quanto $K_{upriv}$  è nota solo al destinatario, per falsificare la firma bisogna conoscere $K_{upriv}$ ma è difficile
+    \item il documento non può essere alterato in quanto $m$ e $f$ sarebbero inconsistenti
+    \item $U$ non può ripudiare la firma perché può averla prodotta solo lui
+    \item la firma non è riutilizzabile in quanto $f$ è immagine di $m$
+\end{itemize}
+
+La verifica la possono fare tutti, tuttavia non ha nessuna cifratura del messaggio in quanto pur cifrando il messaggio posso ricavarlo dalla firma.
+
+\subsection{Protocollo 2: messaggio cifrato e firmato}
+\begin{itemize}
+    \item $U$ genera la firma:
+    $$ f = D(m, K_{upriv}) $$
+    per $m$
+    \item si calcola il crittogramma firmato:
+    $$ c = C(f, K_{vpub}) $$
+    con la chiave del destinatario
+    \item invio $<U, c>$
+    \item $V$ riceve la coppia $U, c$ e la decifra:
+    $$ D(c, K_{vpriv}) = f $$
+    \item verificando la firma si ottiene anche il messaggio:
+    $$ C(f, K_{upub}) = C(D(m, K_{upriv}), K_{upub}) = m $$
+\end{itemize}
+
+Ci servono quindi:
+$$ <d_u, n_u>, <e_u, n_u> \textbf{ chiavi di U} $$
+$$ <d_v, n_v>, <e_v, n_v> \textbf{ chiavi di V} $$
+
+L'utente U:
+\begin{itemize}
+    \item firma il messaggio: $f = m^{d_u} \mod n_u$
+    \item cifra il messaggio: $c = f^{e_v} \mod n_v$
+    \item spedisce la coppia: $<U, c>$
+\end{itemize}
+
+L'utente V:
+\begin{itemize}
+    \item riceve e decifra: $f = c^{d_v} \mod n_v$
+    \item decifra $f$ con $k_{upub}$: $f^{e_u} \mod n_u = m$
+\end{itemize}
+
+Se $m$ è significativo concludo che è autentico.
+
+Per la correttezza del procedimento èp necessario che $n_u \leq n_v$ affinché sia vero che $f < n_v$ e quindi $f$ possa essere cifrato correttamente.
+In questo modo tuttavia $V$ non può rispondere in quanto dovrebbero avere $n_u = n_v$ ma è poco sicuro e probabile.
+
+Possiamo ovviare quindi dando ad ogni utente due chiavi distinte: una per la firma $< H$ ed una per la cifratura $> H$ con $H$ pubblico e molto grande.
+
+NB: si può attaccare se ci si procura la firma di un utente su un messaggio apparentemente privo di senso
+
+\subsubsection{Attacco 1}
+Supponiamo che un utente $U$ invii una risposta automatica (ack) al mittente ogni volta che riceve un messaggio $m$, e che questo messaggio sia il crittogramma della firma di $U$ su $m$.
+Un crittoanalista attivo $X$ può decifrare i messaggi inviati a U:
+\begin{itemize}
+    \item $X$ intercetta $c$ firmato e crittografato inviato da $V$ a $U$, lo rimuove dal canale e lo rispedisce a $U$ con identificativo $X$. (cancella $<V,c>$ ed invia $<X,c>$)
+    \item $U$ spedisce un ack ad $X$ in risposta
+    \item $X$ usa l'ack per risalire al messaggio $m$ applicando le funzioni del cifrario con le chiavi pubbliche di $V$ e di $U$.
+\end{itemize}
+
+In particolare succede:
+\begin{itemize}
+    \item $V$ invia $c$ a $U$:
+        \begin{equation}
+            \begin{cases}
+                c = C(f, K_{upub})
+                f = D(m, K_{vpriv}        
+            \end{cases}
+            \implies <V,c>
+        \end{equation}
+    \item $X$ intercetta $c$, lo rimuove e rispedisce $<X,c>$
+    \item $U$ decifra $c$:
+    $$ f = D(c, K_{upriv}) $$
+    e verifica la firma con la chiave pubblica di X ottenendo:
+    $$ m' = C(f, K_{xpub}) $$
+    \item $m' \neq m$ è privo di senso ma manda automaticamente l'ack $c'$ ad $X$:
+    $$ f' = D(m', K_{upriv}) $$
+    $$ c' = C(f', K_{xpub}) $$
+    \item $X$ usa $c'$ per risalire ad $m$: decifra $c': D(c', K_{xpriv}) = f'$ e verifica $f': C(f', K_{upub}) = m'$. Da $m'$ ricava $f: D(m', K_{xpriv})=f$, verifica $f: C(f, K_{vpub}) = m$
+\end{itemize}
+
+Per evitare l'attacco si deve evitare l'ack automatico inviandolo solo se il messaggio ha senso.
+
+\subsection{Protocollo resistente agli attacchi}
+Si evita di firmare il messaggio!
+Si crea un hash del messaggio (SHA) con una funzione hash one-way e vi si appone la firma sopra.
+La firma non è quindi più soggetta a giochi algebrici.
+\begin{itemize}
+    \item il mittente $U$ calcola $h(m)$ e genera:
+    $$ f = D(h(m), K_{upriv})$$
+    \item calcola separatamente:
+    $$ c = C(m, K_{vpriv}) $$
+    \item spedisce a $V$ la tripla: $<U, c, f>$
+\end{itemize}
+
+La decifrazione e verifica invece:
+\begin{itemize}
+    \item $V$ riceve e verifica $<U, c, f>$
+    \item decifra il crittogramma $c: m = D(c, K_{upriv})$
+    \item calcola $h(m)$ e $C(f, K_{upub})$ e ne controlla l'uguaglianza, se sono uguali il messaggio è autentico
+\end{itemize}
+La firma si calcola più velocemente.
+
+\subsection{Attacchi man-in-the-middle}
+Le chiavi di cifratura sono pubbliche e non richiedono un incontro diretto per il loro scambio.
+Un crittoanalista attivo può quindi intromettersi nella fase iniziale comportandosi come $V$ agli occhi di $U$ e come $U$ agli occhi di $V$.
+\begin{itemize}
+    \item $U$ richiede a $V$ la sua chiave pubblica
+    \item $X$ intercetta la risposta contenente $K_{vpub}$ e la sostituisce con la sua chiave pubblica $K_{xpub}$
+    \item $X$ si pone in ascolto in attesa dei crittogrammi spediti da $U$ a $V$ cifrati mediante $K_{xpub}$
+    \item $X$ rimuove dal canale ciascuno dei crittogrammi, li decripta e li cifra con $K_{vpub}$ trafugata all'inizio, rispedendola a $V$
+    \item $U$ e $V$ non si accorgono di nulla se il tutto è fatto velocemente
+\end{itemize}
+
+\subsection{Certification of Authority - CA}
+Sono infrastrutture/enti che garantiscono la validità delle chiavi pubbliche e ne regolano l'uso gestendo la distribuzione delle chiavi a chi vuole comunicare.
+La CA autentica l'associazione <utente, chiave pubblica> emettendo un certificato digitale.
+Il certificato consiste della chiave pubblica e di una lista di informazioni relative al suo proprietario opportunamente firmate dalla CA.
+
+Mantiene quindi un archivio accessibile a tutti ma protetto da scritture non autorizzate.
+La chiave della CA è nota agli utenti che la mantengono protetta e la utilizzano per verificare la firma della stessa CA.
+
+\subsection{Certificato digitale}
+Si compone principalmente di:
+\begin{itemize}
+    \item indicazione del formato (numero di versione)
+    \item nome della CA che lo ha rilasciato
+    \item numero seriale che lo individua univocamente nella CA emittente
+    \item specifica dell'algoritmo usato dalla CA per creare la firma digitale
+    \item periodo di validità
+    \item nome ed altre informazioni dell'utente a cui si riferisce il certificato
+    \item nome dell'algoritmo, parametri e chiave pubblica usati dall'utente per cifratura e firma
+    \item firma della CA su tutto quanto
+\end{itemize}
+
+Se $U$ vuole comunicare con $V$ può richiedere $K_{vpub}$ alla CA oppure direttamente a $V$ e poi lo convalida tramite la CA.
+
+Dato che $U$ conosce $K_{CA-pub}$ può controllarne l'autenticità e la validità.
+Se tutto va a buon fine la comunicazione parte.
+
+Ci si può mettere nel mezzo solo falsificando la certificazione ma si assume che la CA sia fidata.
+
+Esistono varia CA organizzate ad albero, la verifica quindi è più complicata in quanto si cerca il primo antenato comune tra le CA di $U$ e di $V$. Ogni utente poi mantiene in cache una copia dei certificati richiesti ed una copia di $K_{CA-pub}$ per non doverla richiedere.
+
+\subsection{Protocollo 4: messaggio cifrato, firmato in hash e certificato}
+Il mittente $U$:
+\begin{itemize}
+    \item si procura $cert$ di V
+
+    \item calcola $h(m)$ e firma:
+    $$ f = D(h(m),K_{upriv} $$
+
+    \item calcola $c$:
+    $$ c = C(m, K_{vpub}) $$
+
+    \item spedisce <$cert_U$, c, f> ($cert_U$ contiene $K_{upub}$)
+\end{itemize}
+
+Il destinatario $V$:
+\begin{itemize}
+    \item riceve <$cert_U$, c, f> e verifica l'autenticità di $cert_U$ (e di $K_{upub}$) tramite la CA.
+
+    \item decifra il crittogramma:
+    $$ m=D(c, K_{vpriv}) $$
+
+    \item verifica l'autenticità della firma:
+    $$ c(f, K_{upub}) = h(m) $$
+\end{itemize}
+
+La catena ha un punto debole: i certificati non più validi, è quindi cruciale controllare periodicamente con la CA i certificati scaduti.

@@ -1,0 +1,112 @@
+\section{Zero Knowledge}
+
+\subsection{Idea Generale}
+Un protoccolo \emph{zero knowledge} è un protocollo che permette ad un \emph{Prover} di dimostrare di avere una certa conoscenza ad un \emph{Verifier} senza inviare alcuna informazione se non l'evidenza di avere questa conoscenza.
+
+Facciamo un esempio concreto: supponiamo che Peggy dica di poter sapere di quanti granelli di sabbia si compone una spiaggia semplicemente osservandola e che Victor voglia controllare la veridicità di questa affermazione senza arrivare alla totale certezza ma avvicinandosi tramite una probabilità prossima ad 1. Supponiamo inoltre che Peggy risponda:
+
+\begin{itemize}
+    \item 1 se il numero è dispari
+    \item 0 se il numero è pari
+\end{itemize}
+
+Immaginiamo il seguente algoritmo:
+
+\begin{verbatim}
+    for i = 1 to k{
+        P si volta
+        V sceglie e in {0, 1} casualmente
+        if (e == 0)
+            V rimuove un granello di sabbia
+        V chiede a P il nuovo b[i] // numero di granelli
+        if ((e == 0 && b[i] != b[i-1]) || 
+            (e == 1 && b[i] == b[i-1]))
+            vado alla prossima iterazione
+        else
+            P è un impostore -> STOP
+    }
+\end{verbatim}
+
+la probabilità, al passo k, che Peggy sia un impostore è pari a:
+$$
+    \frac{1}{2^k}
+$$
+altresì la probabilità che Peggy dica il vero è:
+$$
+    1 - \frac{1}{2^k}
+$$
+
+Se il Prover è onesto non ha problemi a rispondere a tutte le iterazioni in maniera corretta, se non lo è può solo provare ad indovinare, quindi la probabilità di vincere imbrogliando è pari a quella di indovinare una sequenza di k bit casuali. 
+
+
+\subsection{Proprietà generali}
+\subsubsection{Completezza}
+Se ciò che dice P è vero ed il verificatore è onesto il verificatore deve sempre accettare la dimostrazione.
+\subsubsection{Correttezza}
+Se il prover dice il falso, il verificatore può essere ingannato con probabilità $\leq \frac{1}{2^k}$ con $k$ scelto da V.
+\subsubsection{Conoscenza-zero}
+Se l'affermazione di P è vera V (anche se disonesto) non può acquisire alcuna informazione se non il fatto che P ha la conoscenza che dice di avere.
+
+\subsection{Protocollo di Fiat-Shamir}
+E' un protocollo di autenticazione nel quale P dimostra a V la sua identità senza svelare altre informazioni. Si basa sulla difficoltà di calcolo di $\sqrt{x} \mod n$ con $n$ composto. 
+
+\subsubsection{Generazione delle chiavi}
+\begin{itemize}
+    \item P genera $p$ e $q$ numeri primi (grandi)
+    \item calcola $n = p \cdot q$
+    \item sceglie $s$ numero casuale tc $s < n$
+    \item calcola $t = s^2 \mod n$
+\end{itemize}
+La coppia $<t,n>$ costituisce la chiave pubblica da distribuire mentre la terna $<p, q, s>$ costituisce la chiave privata.
+
+\subsubsection{Autenticazione}
+L'algoritmo di autenticazione prevede $k$ iterazioni con $k$ scelto da V:
+\begin{itemize}
+    \item V chiede a P di iniziare una iterazione
+    \item P genera un intero $r < n$, calcola $u = r^s \mod n$ e comunica $u$ a Victor
+    \item V sceglie casualmente $e \in \{1, 0\}$ e lo comunica a P
+    \item P calcola $z = r \cdot s^e \mod n$ e lo comunica a V
+    \begin{itemize}
+        \item $e = 0 \implies z = r$
+        \item $e = 1 \implies z = r \cdot s \mod n$
+    \end{itemize}
+    \item V calcola $x = z^2 \mod n$ e controlla se $x == (u \cdot t^e \mod n)$
+    \begin{itemize}
+        \item se sono uguali si passa alla prossima iterazione
+        \item se sono diversi P è un impostore
+    \end{itemize}
+\end{itemize}
+
+Si noti che se tutto è corretto:
+$$
+    x = z^2 = (r \cdot s^e)^2 = r^2 \cdot s^{2 \cdot e} = u \cdot t^{e} \mod n
+$$
+
+\subsubsection{Completezza}
+La completezza si ottiene, si noti infatti che:
+$$ e = 0 \implies x = u \mod n $$
+$$ e = 1 \implies x = u \cdot t \mod n $$
+quindi se P è onesto passa tutte le prove e V accetta la dimostrazione
+
+\subsubsection{Correttezza}
+La correttezza si ottiene: supponiamo che P preveda correttamente il prossimo valore di $e$ scelto dal verificatore:
+\begin{itemize}
+    \item se prevede $e = 1$: sceglie $r$ casualmente ma invia $u = \frac{r^2}{t} \mod n$, successivamente manderà $z = r \mod n$. V andrà quindi a verificare: $x = z^2 = r^2$, $u \cdot t = \frac{r^2}{t} \cdot t = r^2 \implies x = u \cdot t \mod n$
+    \item se prevede $e = 0$: esegue l'algoritmo corretto infatti $x = z^2 = r^2$, $u \cdot t^e = u = r^2 \implies x = u \mod n$
+\end{itemize}
+questo però è subordinato al poter prevedere il corretto valore di $e$ che per $k$ scelto equivale a $\frac{1}{k^2}$.
+
+\subsubsection{Zero Knowledge}
+Sì ma la dimostrazione non la vediamo
+
+\subsection{Perché?}
+Questo protocollo di autenticazione è un protoccollo sicuro da entrambi i lati, sia per chi si deve far riconoscere che per chi autentica le richieste. Pensiamo ad una generica autenticazione tramite crittografia asimmetrica:
+\begin{itemize}
+    \item il client si vuole autenticare presso un server
+    \item il server dispone della chiave pubblica del client, chiede quindi al client di firmare un messagio $r$ casuale
+    \item il client riceve $r$, lo firma e lo restituisce al server
+    \item il server verifica la firma e se è corretta l'autenticazione è avvenuta
+\end{itemize}
+In questo scenario ci si deve fidare del server in quanto si prende un messaggio arbitrario e lo si firma con la propria chiave privata, questo tuttavia potrebbe essere problematico in quanto possono esistere degli input malevoli che permettono di ottenere informazioni circa la chiave privata del client. Un protocollo a zero knowledge invece pone entrambi i lati della comunicazione sullo stesso piano di diffidenza.
+
+\clearpage

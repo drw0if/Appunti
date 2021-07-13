@@ -1,0 +1,251 @@
+\section{RSA}
+\subsection{Generazione delle chiavi}
+Partiamo dalla creazione della coppia di chiavi, spetta al destinatario:
+\begin{itemize}
+    \item Si scelgono due primi $p$, $q$ molto grandi ($\approx$1000 bit) (adesso si consiglia che $p \cdot q \approx 2048$ bit). Vanno generati in tempo polinomiale.
+    \item Si calcolano $n = p \cdot q$ e $\phi(n) = (p-1) \cdot (q-1)$. Anche qui operazioni in tempo polinomiale nella grandezza dell'input.
+    \item Si sceglie $e < \phi(n)$ tale che: $MCD(e, \phi(n))=1$
+    \item Si calcola $d = e^{-1} \mod \phi(n)$. Anche questo si può calcolare in tempo polinomiale usando Euclide Esteso.
+    
+    NB: essendo $MCD(e, \phi(n))=1$ esiste unico $e^{-1}$.
+\end{itemize}
+
+Alla fine si hanno quindi le due chiavi:
+$$ K_{pub} = (e,n) $$
+$$ K_{priv} = (d,n) $$
+
+Naturalmente va tenuto segreto anche il resto delle informazioni: $p$, $q$, $\phi(n)$.
+
+\subsection{Cifratura e decifratura}
+I messaggi sono sequenze binarie trattate come un intero! Lo indicheremo con $m$ e deve verificare $m < n$ perché non sarebbe decifrabile altrimenti.
+Se $m \geq n$ lo dividiamo in blocchi di $b = \lfloor \log_2n \rfloor$ bit e si aggiunge una dipendenza tra un blocco e l'altro.
+Solitamente si fissa un limite comune per la dimensione dei blocchi, prevenendo così l'uso di cifrari poco sicuri $m < 2^b < n$.
+
+La cifratura è quindi eseguita:
+$$ c = C(m, K_{pub}) = m^{e} \mod n$$
+
+La decifratura è invece eseguita:
+$$ m = D(c, K_{priv}) = c^{d} \mod n$$
+
+Si possono eseguire in tempo polinomiale tramite la fast-exp.
+
+\subsection{Dimostrazione della correttezza}
+Si vuole dimostrare:
+$$ D(C(m, K_{pub}), K_{priv}) = m $$
+
+Possiamo analizzare 3 casi distinti:
+
+\subsubsection{Caso 1}
+Se $p$ e $q$ non dividono $m$, cioè se $m$ ed $n$ sono co-primi. In questo caso vale $MCD(m,n)=1$.
+
+Se componiamo le formule per criptare e decriptare otteniamo:
+$$ (m^e \mod n)^d \mod n = m^{e \cdot d} \mod n $$
+ricordando che $ed \equiv 1 \mod \phi(n)$ applicando la definizione di congruenza in modulo possiamo scrivere: $ed = 1 + r \cdot \phi(n)$ per qualche $r \in \mathbb{N}$.
+Possiamo quindi scrivere:
+
+$$ m^{ed} \mod n = m^{1 + r \cdot \phi(n)} \mod n = m \cdot (m^{\phi(n)})^{r} \mod n$$
+
+Essendo $m$ ed $n$ coprimi vale il Teorema di Eulero: $m^{\phi(n)} = 1 \mod n$ quindi:
+$$ m \cdot 1^r \mod n = m \mod n = m $$
+
+\subsubsection{Caso 2}
+Supponiamo che $m$ sia divisibile per $p$ e non per $q$. Allora sarà vero che:
+$$ m^{ed} = m^{ed} - m \equiv 0 \mod p $$
+
+Ricaviamo una relazione simile anche per $q$ applicando la definizione di riduzione in modulo:
+$$ m^{ed} \mod q = m^{\phi(n) \cdot r + 1} \mod q $$
+
+Ora ricordiamo la definizione $\phi(n) = (p-1)\cdot(q-1)$ e possiamo riscrivere come:
+$$ m^{ed} \mod q = m^{(p-1)\cdot(q-1)\cdot{r} + 1} \mod q = (m^{q-1})^{(p-1)\cdot{r}}\cdot{m} \mod q $$
+
+Applicando il teorema di Eulero anche qui otteniamo:
+$$ 1^{(p-1)\cdot{r}}\cdot{m} \mod q = m \mod q$$
+
+Possiamo quindi scrivere:
+$$ m^{ed} \equiv m \mod q \implies m^{ed} - m \equiv 0 \mod q $$
+Abbiamo quindi ottenuto:
+\begin{equation}
+    \begin{cases}
+    $$ m^{ed} - m \equiv 0 \mod q $$ \\ 
+    $$ m^{ed} - m \equiv 0 \mod p $$
+    \end{cases}
+\end{equation}
+che significa che $ m^{ed} -m $ è divisibile sia per $p$ che per $q$ quindi lo sarà anche per $n = p \cdot q$, possiamo quindi dire:
+$$ m^{ed} -m \equiv 0 \mod n => m^{ed} \equiv m \mod n = m $$
+
+\subsubsection{Caso 3}
+Avere $m$ divisibile sia per $p$ che per $q$ significa che è divisibile per $n$, il che è impossibile in quanto un messaggio, per essere corretto, deve soddisfare $m < n$.
+
+\subsection{Sicurezza ed attacchi}
+La sicurezza è legata alla fattorizzazione, se fattorizzo $n$ ho $p$ e $q$ e da li posso trovare $\phi(n)$. Non sappiamo però se è necessaria la fattorizzazione o si potrebbe forzare in altri modi.
+
+Potrebbe essere necessaria perché il problema è quello di calcolare $m = \sqrt[e]{c} \mod n$ ed è difficile quanto fattorizzare $n$.
+Calcolare $\phi(n)$ direttamente da $n$ equivale a fattorizzare $n$.
+In particolare il calcolo di $\phi(n)$ o la fattorizzazione di $n$ si trasformano l'uno nell'altro in tempo polinomiale: sono computazionalmente equivalenti:
+
+Fattorizzato $n = p \cdot q \xrightarrow{} \phi(n) = (p-1) \cdot (q-1)$
+
+Calcolato $\phi(n) \xrightarrow{} $
+$$ \phi(n) = (p-1) \cdot (q-1) $$
+$$ = p \cdot q - (p+q) + 1 = n - (p+q) + 1 $$
+
+calcolo quindi $ x_1 = p+q = n - \phi(n) + 1 $
+
+poi $ (p-q)^2 = (p+q)^2 - 4 \cdot n = (x_1)^2 - 4 \cdot n $
+
+quindi $ x_2 = p - q = \sqrt{x_1^{2} - 4 \cdot n}$
+
+dato che conosco
+\begin{equation}
+    \begin{cases}
+    x_1 = p + q \\ 
+    x_2 = p - q
+    \end{cases}
+\end{equation}
+
+posso quindi trovare:
+\begin{equation}
+    \begin{cases}
+    p = \frac{x_1 + x_2}{2} \\
+    q = \frac{x_1 - x_2}{2}
+    \end{cases}
+\end{equation}
+
+Un altro attacco che posso fare è cercare di brutare $d$ partendo da $(n,e)$ ma anche questo sembra costoso quanto fattorizzare $n$.
+
+NB: fattorizzare non è $NP-hard$ quindi non si esclude che esista un algoritmo efficiente. Sulla macchina quantistica infatti esiste l'algoritmo di \emph{Schorr}.
+
+\clearpage
+
+\subsection{Fattorizzazione di n}
+La fattorizzazione è difficile ma sempre un po' meno:
+\begin{itemize}
+    \item l'hardware migliora e gli algoritmi si affinano
+    \item esistono algoritmi di complessità sub-esponenziale come il \emph{General Number Field Sieve} (GNFS) che richiede O($2^{\sqrt{b \cdot log b}}$) con $b$ la dimensione di $n$. Un attacco brute-force è O($2^b$)
+    \item con la potenza di calcolo attuale usando GNFS si fattorizza fino a 768 bit
+    \item per interi con una certa struttura esistono algoritmi di fattorizzazione efficienti
+    \item fattorizzazione e logaritmo discreto non sono $NP-hard$ quindi sui computer quantistici performano bene
+\end{itemize}
+
+\subsection{Scelta ottimale dei parametri}
+Per avere una sicurezza come quella che si ottiene con AES a 128 bit si dovrebbe ricorrere a $n$ con circa 3072 bit, si sale addirittura a 15360 bit di modulo se lo si compara con AES256.
+$p$ e $q$ vanno quindi scelti \emph{molto} grandi, \emph{entrambi} (attorno ai 1700 bit).
+
+Sia $p-1$ che $q-1$ devono contenere fattori grandi (altrimenti $n$ si fattorizza velocemente).
+
+$gcd(p-1, q-1)$ deve essere piccolo! Conviene scegliere $p$ e $q$ tali che $\frac{p-1}{2}$ e $\frac{q-1}{2}$ siano coprimi.
+
+Mai riutilizzare uno dei primi per altri moduli:
+\begin{equation}
+    \begin{cases}
+    n_1 = p \cdot q_1 \\
+    n_2 = p \cdot q_2
+    \end{cases}
+    \implies gcd(n_1, n_2) = p
+\end{equation}
+
+Scegliere $p$ e $q$ distanti tra loro! Se $p \approx q$ allora $n \approx q^2 \approx p^2$, quindi $p \approx \sqrt{n}$ e si cerca nei dintorni. Valgono infatti:
+$$ (\frac{p+q}{2})^2 -n = (\frac{p-q}{2})^2 $$
+
+Mi dice che $\frac{p+q}{2} > \sqrt{n}$ perché a dx è sempre $> 0$ se $p \neq q$.
+
+Inoltre $\frac{(p+q)^2}{4}-n$ è un quadrato perfetto: $(\frac{p-q}{2})^2$.
+
+Posso quindi cercare tra gli interi maggiori di $\sqrt{n}$ fino a trovare $z$ tale che $z^2 - n = w^2$.
+
+Supponiamo dunque di averli trovati:
+\begin{equation}
+    \begin{cases}
+    z = \frac{p+q}{2} \\
+    w = \frac{p-q}{2}
+    \end{cases}
+\end{equation}
+
+concludiamo quindi:
+\begin{equation}
+    \begin{cases}
+    p = z+w \\
+    q = z-w
+    \end{cases}
+\end{equation}
+
+
+\subsection{Attacchi con esponenti bassi}
+Valori di $e$ e $d$ bassi portano ad accelerare nell'algoritmo, tuttavia se $d$ è piccolo posso brutarli.
+Inoltre se $m$ è piccolo ed anche $e$ lo è, può succedere che $m^e < n$ quindi non ci sia la riduzione in modulo. In tal caso decripto semplicemente calcolando $\sqrt[e]{m}$.
+
+\subsection{Attacchi a tempo}
+Si basano sul tempo di esecuzione dell'algoritmo di decifrazione.
+Si può quindi determinare $d$ analizzando il tempo impiegato per decifrare.
+Nell'algoritmo delle quadrature successive infatti si esegue una moltiplicazione ad ogni iterazione più una ulteriore moltiplicazione modulare per ciascun bit uguale ad 1 in $d$.
+Guardando il tempo quindi si può stimare il numero di bit ad 1 in $d$.
+Si può risolvere aggiungendo un ritardo casuale alla fine.
+Ne soffre sia RSA che DH.
+
+\subsection{Attacchi sulla scelta di $e$}
+Alcune scelte non portano modifiche nel messaggio:
+$$ e \neq \frac{\phi(n) + 2}{2} $$
+dato che 2 divide sia $(p-1)$ che $(q-1)$ si ha che: $ m^e \mod n = m $
+quindi non si ha una vera cifratura.
+
+Vale inoltre:
+$$ e \neq \frac{\phi(n) + k}{k} $$
+per qualsiasi $k$ che divide $(p-1)$ e $(q-1)$ con $m$ ed $n$ coprimi.
+Anche in questo caso infatti $ m^e \mod n = m $.
+
+Un altro attacco possibile se $e$ è troppo piccolo:
+\begin{itemize}
+    \item supponiamo che ci siano $e$ utenti che hanno scelto lo stesso valore piccolo di $e$
+    \item gli $e$ utenti ricevono lo stesso messaggio $m$
+\end{itemize}
+si hanno dunque:
+\begin{equation}
+    \begin{cases}
+    c_1 = m^e \mod n_1 \\
+    c_2 = m^e \mod n_2 \\
+    ... \\
+    c_e = m^e \mod n_e \\
+    \end{cases}
+\end{equation}
+sarà quindi vero che $m < n_i \forall i: 1 \leq i \leq e$.
+Ipotiziamo che $n_1$, $n_2$, $\_$, $n_e$ siano coprimi tra loro (se non lo fossero si potrebbe fattorizzarne qualcuno usando il $gcd$).
+Per il teorema cinese del resto esiste e si può calcolare un unico $m'$ tale che:
+\begin{equation}
+    \begin{cases}
+    m' < n = n_1 \cdot n_2 \cdot ... \cdot n_e \\
+    m' \equiv m^e \mod n
+    \end{cases}
+\end{equation}
+
+Dato che $m < n_i$ so che $m \cdot m \cdot ... \cdot m = m^e < n_1 \cdot n_2 \cdot ... \cdot n_e = n$.
+Quindi la riduzione in modulo non avviene e posso calcolare $m = \sqrt[e]{m'}$.
+Se voglio continuare ad usare $e$ piccolo posso aggiungere un padding a caso ad ogni utente in modo che i messaggi non siano più tutti uguali.
+
+\subsection{Attacco con lo stesso valore di n}
+Supponiamo che due utenti abbiano generato una chiave pubblica con lo stesso $n$ ma diversi $e$:
+$$ <e_1,n>, <e_2,n> $$
+Supponiamo inoltre che $mcd(e_1, e_2) = 1$ allora $\exists r,s \in \mathbb{Z}$ tale che $e_1 \cdot r + e_2 \cdot s = 1$ e li possiamo trovare utilizzando Euclide Esteso in quanto sono nella forma $ax +by = mcd(a,b)$.
+Saranno allora $r<0, s>0$.
+
+Si intercetta $c_i = m^{e_i} \mod n$ e si voglia trovare $m$:
+$$ m = m^1 = m^{r \cdot e_1 + s \cdot e_2 } = (m^{e_1} \mod n)^{r} \cdot (m^{e_2} \mod n)^{s} = $$
+$$ = (c_1^r \cdot c_2^s) \mod n = ((c_1^{-1})^{-r} \cdot c_2^s) \mod n $$
+
+Si calcola quindi $c_1^{-1} \mod n$ che esiste se $c_1$ ed $n$ sono coprimi (se non lo fossero potremmo fattorizzare $n$). Si calcola quindi $m = (c_1^{-1})^{-r} \cdot (c_2)^{s} \mod n$ il tutto fattibile in tempo polinomiale.
+
+\subsection{Cifrari ibridi}
+Il principale utilizzo della crittografia a chiave pubblica non è quello di criptare la comunicazione ma quello di scambiare le chiavi! Alice e Bob vogliono parlare tra di loro in maniera sicura:
+\begin{itemize}
+    \item Alice: 
+    \begin{itemize}
+        \item sceglie una chiave AES (detta \emph{chiave di sessione}
+        \item la cifra con la chiave pubblica di Bob
+    \end{itemize}
+    \item Bob: decifra il crittogramma in quanto in possesso della chiave privata
+\end{itemize}
+Ora la comunicazione può avvenire tramite AES sempre in sicurezza ma soprattutto in velocità
+
+NB: al termine della sessione tuttavia la chiave AES va cancellata e ne va creata una nuova ad ogni sessione di comunicazione
+
+Un problema di questo approccio è che l'onere di creare la chiave di sessione sta ad Alice. Bob non può essere sicuro che la chiave sia stata generata in modo corretto!
+In genere sarebbe preferibile porre ambo le parti sullo stesso livello.

@@ -1,0 +1,117 @@
+\section{Protocollo SSL}
+SSL (Secure Socket Layer) è alla base dei protocolli più diffusi nelle comunicazioni sicure.
+Garantisce \emph{confidenzialità} e \emph{affidabilità} delle comunicazioni su internet proteggendole da intrusioni, modifiche e falsificazioni.
+Sviluppato inizialmente da Netscape per mettere in sicurezza HTTP è progettato in modo da permettere la comunicazione tra computer che non conoscono le reciproche funzionalità.
+Oggi è sostituito dal TLS (Transport Layer Security) che è una variante con qualche modifica.
+
+Garantisce la confidenzialità tramite l'uso di un sistema ibrido: cifrario asimmetrico per lo scambio delle chiavi ed uno simmetrico per la cifratura delle comunicazioni.
+
+Garantisce l'autenticazione dei messaggi accertando l'identità dei due partner attraverso sia un cifrario asimmetrico che tramite certificati digitali con un MAC.
+
+Si trova tra il TCP (trasporto) e HTTP (applicazione) ma è totalmente indipendente dal protocollo applicativo sovrastante (HTTPS = HTTP su SSL).
+
+SSL è organizzato in:
+\begin{itemize}
+    \item \emph{SSL record}: è il livello più basso, connesso direttamente al protocollo di trasporto ed ha l'obiettivo di incapsulare i dati spediti dai livelli superiori assicurando confidenzialità ed integrità.
+    \item \emph{SSL handshake}: instaura e mantiene i parametri poi usati da SSL record. Permette quindi di autenticarsi, negoziare gli algoritmi di cifratura e firma, stabilire le chiavi dei singoli algoritmi crittografici e per il MAC.
+\end{itemize}
+
+C'è uno scambio di messaggi preliminare per la creazione del canale sicuro, nel frattempo client e server si identificano a vicenda e cooperano per costruire le chiavi simmetriche. Vediamo singolarmente le fasi.
+
+\subsubsection{client hello}
+$U$ manda ad $S$ un messaggio con il quale si richiede la connessione SSL, si specificano i cifrari e meccanismi che $U$ supporta e le prestazioni di sicurezza richieste.
+Si aggiungono in fine dei byte casuali. Tutto questo è mandato in chiaro!
+
+Es: SSL\_RSA\_WITH\_AES\_CBC\_SHA1:
+\begin{itemize}
+    \item RSA: per lo scambio delle chiavi di sessione
+    \item AES: come cifratura simmetrica
+    \item CBC: come composizione dei blocchi
+    \item SHA1: come funziona hash per il MAC
+\end{itemize}
+Questo è un esempio di \emph{cipher suite}
+
+\subsubsection{server hello}
+Riceve il messaggio dell'utente, seleziona una cipher suite che anche lui supporta ed invia al client un messaggio che specifica la sua scelta. Appena de byte casuali alla risposta. Anche questo è mandato in chiaro!
+
+NB: Se $U$ non riceve il server hello interrompe la comunicazione
+
+\subsubsection{Autenticazione}
+$S$ si autentica con $U$ inviandogli il proprio certificato digitale (e gli eventuali altri certificati fino al primo nodo comune nella catena delle CA).
+
+NB: se i servizi offerti da $S$ devono essere protetti negli accessi anche $S$ può richiedere a $U$ di autenticarsi inviando il suo certificato digitale. Avviene raramente in quanto la maggior parte degli utenti non ha un proprio certificato ee in genere ci si accerta dell'identità di un utente in un secondo modo (autenticazione sul sito web ad esempio)
+
+\subsubsection{server hello done}
+Messaggio con il quale il server sancisce la fine degli accordi sulla cipher suite ed i parametri crittografici associati.
+
+\subsubsection{Controllo da parte del client}
+$U$ accerta l'autenticità del certificato ricevuto da $S$ tramite la data, tramite la CA che lo ha firmato, ecc. Estrae la chiave pubblica dal certificato. Costruisce il \emph{pre-master secret} costituito da una nuova sequenza casuale di byte. Lo cifra con la chiave pubblica estratta dal certificato. Spedisce il crittogramma ad $S$.
+
+\subsubsection{Costruzione del master secret}
+Sempre il client costruisce il \emph{master secret} partendo dal pre-master secret, altre stringhe note ed i byte casuali di client hello e server hello.
+Applica a tutte queste sequenze delle funzioni hash one-way secondo una combinazione opportuna.
+Questa sarà il master secret.
+
+\subsubsection{Ricostruzione del master secret}
+Anche il sistema si calcola localmente il master secret dopo aver ottenuto il pre-master secret decriptandolo con la sua chiave privata.
+Ora entrambi gli utenti hanno il master secret!
+
+\subsubsection{Autenticazione dell'utente}
+Se all'utente $U$ è richiesto un certificato ed egli non lo possiede il sistema interrompe l'esecuzione del protocollo.
+Altrimenti $U$ invia il proprio certificato allegando master secret e la SSL-history (tutti i messaggi scambiati fino a quel momento) firmate con la sua chiave privata.
+$S$ controlla certificato ed history.
+
+\subsubsection{finished}
+E' il primo messaggio protetto da master secret e cipher suite accordati. Il messaggio è costruito da $U$ ed inviato ad $S$ e poi costruito da $S$ ed inviato a $U$. Il messaggio ha la stessa strutura ma cambiano i dati (la history).
+La costruzione avviene:
+\begin{itemize}
+    \item master secret, messaggi di handshake, identità del mittente ($U$ o $S$)
+    \item si hasha la stringa ottenuta sia con SHA-1 che con MD5, le due stringhe ottenute sono il messaggio \emph{finished}.
+\end{itemize}
+Il messaggio è diverso in quanto $S$ aggiunge anche la finished ricevuta da $U$ in quanto ora fa parte della history.
+Non sono ovviamente invertibili perché costruiti tramite hash.
+
+Il master secret viene usato per creare le chiavi:
+\begin{itemize}
+    \item chiave segreta per il cifrario simmetrico
+    \item chiave per l'autenticazione del messaggio (MAC)
+    \item initialization vector per il CBC
+\end{itemize}
+
+Le terne di chiavi di $U$ ed $S$ sono diverse tra loro ma note ad entrambi, ciascuno usa la propria, quindi aumenta la sicurezza.
+
+Successivamente i parametri vengono passati al SSL Record che si occupa del vero e proprio dialogo dei dati suddividendo i dati in blocchi, aggiungendo un MAC ad ogni blocco, cifrato con il protocollo simmetrico scelto e trasmesso al protocollo di trasporto sottostante.
+
+Il destinatario esegue il contrario.
+
+\subsection{Sicurezza di SSL}
+Nei passi di hello i due partner creano i si inviano sequenze casuali per costruire la master secret, questo risulta in chiavi diverse ogni volta.
+Un crittoanalista non può riutilizzare i messaggi catturati sul canale per sostituirli a S successivamente.
+
+L'SSL record successivamente numera ogni blocco in mainera incrementale e lo autentica tramite MAC.
+Un blocco non può essere modificato in quanto il MAC è hash di:
+\begin{itemize}
+    \item contenuto
+    \item numero sequenziale del blocco
+    \item chiave del MAC
+    \item altre stringhe note e fissate a priori
+\end{itemize}
+
+MAC e messaggio sono cifrati quindi prima di poterli alterare va forzato il cifrario.
+
+Non si possono eseguire man-in-the-middle in quanto si usano i certificati.
+
+Il pre-master secret è inviato cifrato con chiave pubblica quindi è sicuro.
+
+Quindi solo $S$, proprietario della chiave privata associata al certificato può recuperare la pre-master key e quindi entrare in comunicazione con $U$.
+
+Anche $U$ può essere autenticato se necessario.
+Se è richiesto ma non avviene la comunicazione salta.
+L'opzionalità di questa autenticazione ha reso usato questo protocollo in quanto può essere autenticato in altri modi, magari lato applicazione.
+
+Le sequenze sono generate a partire da byte casuali quindi una sua predicibilità metterebbe a rischio tutto.
+
+Il messaggio fnished contiene tutta la history e quidi permettono un ulteriore controllo finale.
+
+E' sicuro almeno quanto il cifrario più debole della cipher suite, ma non ci sono cifrari deboli lasciati dentro.
+

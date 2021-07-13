@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"    "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
+	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
+	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+	<!ENTITY st0 "fill:none;stroke:#000000;">
+	<!ENTITY st1 "font-family:'TimesNewRomanPSMT';">
+	<!ENTITY st2 "font-size:60;">
+]>
+<svg width="555.99" height="555.59" viewBox="0 0 555.99 555.59" style="overflow:visible;enable-background:new 0 0 555.99 555.59"
+	 xml:space="preserve">
+	<g id="Layer_1">
+		<path style="&st0;" d="M555.49,277.79c0,153.15-124.24,277.3-277.5,277.3c-153.26,0-277.5-124.15-277.5-277.3
+			C0.5,124.65,124.74,0.5,278,0.5C431.25,0.5,555.49,124.65,555.49,277.79z"/>
+		<path style="&st0;" d="M374.5,329.74c0,99.9-75.16,180.88-167.88,180.88c-92.72,0-167.88-80.98-167.88-180.88
+			c0-99.9,75.16-180.88,167.88-180.88C299.33,148.86,374.5,229.84,374.5,329.74z"/>
+		<path style="&st0;" d="M525.1,328.04c0,99.9-73.75,180.88-164.73,180.88c-90.98,0-164.73-80.98-164.73-180.88
+			c0-99.9,73.75-180.89,164.73-180.89C451.35,147.15,525.1,228.14,525.1,328.04z"/>
+		<path style="&st0;" d="M352.94,385.2c0,44.77-30.36,81.06-67.8,81.06c-37.45,0-67.8-36.29-67.8-81.06
+			c0-44.77,30.36-81.06,67.8-81.06C322.58,304.15,352.94,340.44,352.94,385.2z"/>
+		<text transform="matrix(0.9423 0 0 1 265.5859 410.0664)"><tspan x="0" y="0" style="&st1; &st2;">P</tspan></text>
+		<text transform="matrix(0.9423 0 0 1 87.5947 347.5693)"><tspan x="0" y="0" style="&st1; &st2;">NP</tspan></text>
+		<text transform="matrix(0.9423 0 0 1 384.5806 347.0693)"><tspan x="0" y="0" style="&st1; &st2;">coNP</tspan></text>
+		<text transform="matrix(0.9423 0 0 1 173.5898 113.0815)"><tspan x="0" y="0" style="&st1; &st2;">PSPACE</tspan></text>
+	</g>
+</svg>

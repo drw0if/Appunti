@@ -1,0 +1,204 @@
+\section{Crittografia a chiave pubblica}
+Ricorcdando il one-time-pad il suo più grande problema risulta essere la lunga chiave, che va scambiata e ricreata ogni volta.
+Anche AES necessita di scambio di chiavi.
+\emph{Come si può scambiare una chiave in maniera sicura?}
+Nel 1976 Diffie ed Hellman con il loro articolo \emph{New Directions in Cryptography} hanno rivoluzionato la crittografia.
+Il protocollo \emph{DH} permette la negoziazione di una chiave di sessione senza che le due parti si siano scambiate informazioni in precedenza.
+In parallelo sempre gli stessi Diffie ed Hellman propongonono lo schema di crittografia a chiave pubblica, senza tuttavia averne una valida implementazione.
+In questo nuovo schema si hanno due chiavi:
+\begin{itemize}
+    \item una \emph{pubblica} nota a tutti ed utilizzata per cifrare
+    \item una \emph{privata} nota solo al ricevente usata per decifrare
+\end{itemize}
+Ogni utente avrà quindi una coppia
+$$ <K_{priv}, K_{pub}> $$
+
+NB: su $n$ utenti ci saranno quindi $n$ coppie di chiavi contro le $n^2$ chiavi nel caso di algoritmi simmetrici
+
+La cifratura ha la forma:
+$$ c = C(m, K_{pub}) $$
+mentre la decifrazione ha la forma:
+$$ m = D(c, K_{priv})$$
+
+NB: si dice asimmetrica perché le due parti fanno cose diverse, non c'è una simmetria.
+
+Questi cifrari devono avere alcune caratteristice:
+\begin{itemize}
+    \item $D(C(m, K_{pub}), K_{priv}) = m$
+    \item efficienza e sicurezza: le chiavi devono essere \emph{facili} da generare e praticamente deve essere impossibile generare la stessa coppia.
+    Ciò che è legale deve essere fatto in tempo polinomiale, mentre deve essere difficile ottenere il messaggio conoscendo $c$ e $K_{pub}$
+\end{itemize}
+
+Questi requisiti si hanno se si usano le \emph{funzioni one-way trap-door}, funzioni facili da calcolare ma difficili da invertire senza avere maggiori informazioni.
+
+Nel 1977 Rivest, Shamir ed Adleman scoprono una funzione di questo tipo basata sui numeri primi.
+L'algoritmo RSA si basa sul fatto che dati $p$ e $q$ primi, calcolare $n = p \cdot q$ è facile, dato $n$ invece è difficile trovate $p$ e $q$.
+Inoltre lavora in algebra modulare!
+
+\subsection{Algebra modulare}
+E' fondamentale in crittografia in quanto:
+\begin{itemize}
+    \item riduce lo spazio dei numeri sui quali si opera e rende più veloci i calcoli
+    \item rende difficili alcuni problemi computazionalmente semplici (o banali) nell'algebra standard
+\end{itemize}
+
+Nell'algebra modulare ad esempio le funzioni tendono ad essere imprevedibili:
+\begin{table}[ht!]
+    \centering
+    \small
+    \begin{tabular}{c|c c c c c c c c c c c c}
+        $x$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12  \\
+        \hline
+        $2^{x}$ & 2 & 4 & 8 & 16 & 32 & 64 & 128 & 256 & 512 & 1024 & 2048 & 4096  \\
+        $2^{x} \mod 13$ & 2 & 4 & 8 & 3 & 6 & 12 & 11 & 9 & 5 & 10 & 7 & 1  \\
+    \end{tabular}
+\end{table}
+
+Mentre nell'algebra normale la funzione esponenziale è monotòna, nell' algebra modulare la funzione è imprevedibile.
+
+Dato $n \in \mathbb{N}$ allora:
+$$ Z_{n} = \{ 0, 1, 2, \_, n-1 \} $$
+$$ Z_{n}^{*} \subseteq Z_{n} = \{\text{elementi di $Z_{n}$ coprimi con $n$}\} $$
+
+
+NB: Se $n$ è primo: $Z_{n}^* = \{1, 2, 3, \_, n-1\}$
+
+Dati $a, b \geq 0$ interi e $n > 0$ diremo \emph{a è congruo a b modulo n}:
+$$ a \equiv b \mod n $$
+se e solo se $\exists k$ intero per cui:
+$$ a = b + k \cdot n $$
+
+NB: $a \mod n = b \mod n$, nella relazione di congruenza mod n si riferisce all'intera relazione, nelle relazioni di uguaglianza invece si riferisce solo al membro dove appare:
+$$ 5 \neq 8 \mod 3 $$
+$$ 2 = 8 \mod 3 $$
+
+\subsubsection{Altre proprietà}
+$$ (a+b) \mod m = (a \mod m + b \mod m) \mod m $$
+$$ (a-b) \mod m = (a \mod m - b \mod m) \mod m $$
+$$ (a \cdot b) \mod m = (a \mod m \cdot b \mod m) \mod m $$
+$$ a^{r \times s} \mod m = (a^r \mod m)^{s} \mod m $$
+
+\subsection{Funzione di Eulero}
+$$ \phi(n) = \mid Z_{n}^{*} \mid $$
+indica il numero di interi minori di $n$ e coprimi con esso.
+
+NB: $n$ primo $\implies$ $\phi(n) = n-1$
+
+Se $n$ è composto
+$$ \phi(n) = n \cdot (1 - \frac{1}{p_1}) \cdot \_ \cdot (1 - \frac{1}{p_k})$$
+con $p_1$, \_, $p_k$ i fattori primi di n presi senza molteplicità
+
+Se $n = p \cdot q$ con $p$ e $q$ primi (quindi $n$ semiprimo):
+$$ phi(n) = (p-1) \cdot (q-1) $$
+
+\subsection{Teorema di Eulero}
+$\forall n>1$, $\forall a \in Z_{n}^*$:
+$$ a^{\phi(n)} \equiv 1 \mod n $$
+
+\subsection{Piccolo teorema di Fermat}
+$\forall n$ primo e $\forall a \in Z_{n}^*$:
+$$ a^{n-1} \equiv 1 \mod n $$
+
+NB: $ a^{\phi(n)} \equiv 1 \mod n $ ma essendo $n$ primo $\phi(n) = n-1 \implies  a^{n-1} \equiv 1 \mod n $
+
+\subsection{Conseguenze}
+$\forall a \in Z_{n}^*$
+$$ a^{\phi(n)} = a \cdot a^{\phi(n)-1} \implies a \cdot a^{\phi(n)-1} \equiv 1 \mod n $$
+$$ a \cdot a^{-1} \equiv 1 \mod n $$
+$$ a^{-1} = a^{\phi(n)-1} \mod n $$
+Quindi $a^{-1} \mod n$ si può calcolare se si conosce $\phi(n)$, quindi se si conoscono $p, q, \_$ primi fattori di $n$.
+
+NB: in generale nell'algebra modulare l'esistenza dell'inverso non è garantita perché $a^{-1}$ deve essere intero.
+
+\subsection{Teorema sull'inverso}
+L'equazione $a \cdot x \equiv b \mod n$ ammette soluzioni se e solo se $mcd(a,n)$ divide $b$.
+In questo caso si hanno esattamente $mcd(a,n)$ soluzioni distinte.
+
+NB: se $mcd(a,n)=1$ ($a$,$n$ coprimi) $a \cdot x = b \mod n$ ammette una unica soluzione. E quindi esiste $a^{-1}$
+
+
+\subsection{Algoritmo di Euclide esteso}
+Nasce per risolvere l'equazione $a \cdot x + b \cdot y = mcd(a,b)$.
+\begin{verbatim}
+    Euclide_esteso(a,b):
+        se b == 0:
+            return (a,1,0)
+        _d, _x, _y = Euclide_esteso(b, a mod b)
+        d, x, y = _d, _y, _x - (a//b) * _y
+        return (d, x, y)
+\end{verbatim}
+Ha complessità logaritmica nel valore di $a$ e $b$ quindi polinomiale nella dimensione dell'input.
+
+Possiamo usare quest'algoritmo per il calcolo dell'inverso:
+$$ ax \equiv 1 \mod n $$
+$$ ax = nz + 1 \text{ per un certo valore di z} $$
+$$ ax + ny = mcd(a,b) \text{ con y = -z, n = b, 1 = mcd(a,b)} $$
+usando l'algoritmo si ottengono $<d, x, y>$, $x$ è proprio il nostro inverso.
+
+\subsection{Generatori}
+$a \in Z_{n}^*$ è un \emph{generatore di $Z_{n}^*$} se la funzione:
+
+$$ a^k \mod n \text{ , } 1 \leq k \leq \phi(n) $$
+
+genera \emph{tutti e soli} gli elementi di $Z_{n}^*$.
+
+Un generatore quindi genera $Z_{n}^*$ ma in un ordine difficile da prevedere.
+
+NB: l'unica cosa prevedibile è che $1$ si ottiene solo per $x = \phi(n)$ poiché sappiamo $a^{\phi(n)} = 1 \mod n$ per Eulero. Quindi $\forall g$ $g^k \neq 1 \mod n$, $ 1 \leq k < \phi(n)$
+
+Non tutti gli $n$ forniscono generatori per $Z_{n}^*$.
+
+\subsection{Teorema sui generatori}
+Se $n$ è primo allora $Z_{n}^*$ ha almeno un generatore.
+
+Per $n$ primo non tutti gli elementi di $Z_n^*$ sono suoi generatori (1 non lo è mai).
+
+Per $n$ primo i generatori di $Z_n^*$ sono $\phi(n)$.
+
+\subsection{Problemi sui generatori}
+Determinare un generatore di $Z_n^*$ con $n$ primo è difficile, si possono provare tuttu i numeri in $[2, n-1]$ ma è esponenziale nella dimensione di $n$.
+Esistono tuttavia algoritmi randomizzati che risolvono il problema efficientemente.
+
+\subsection{Logaritmo discreto}
+Consiste nel trovare $x$ che risolve:
+$$ a^x \equiv b \mod n, \text{n primo} $$
+L'equazione ammette soluzioni $\forall b$ se e solo se $a$ è un generatore di $Z_n^*$.
+Tuttavia non possiamo sapere in che ordine sono generati i valori di $Z_n^*$ quindi per trovare $x$ giusto dobbiamo iterare tutti i valori (esponenziale nella dimensione dell'input).
+
+NB: su questa complessità si basa DH.
+
+\subsection{Funzioni one-way trap-door}
+$$ n = p \cdot q \text{ p, q primi} $$
+è facile.
+
+Dato $n$ trovare $p$ e $q$ richiede tempo (sub)esponenziale. Dato $p$ o $q$ invece si fattorizza velocemente: $q = \frac{n}{p}$, ma anche conoscendo $\phi(n)$ si fattorizza velocemente. E' il problema della \emph{fattorizzazione}
+
+$$ y = x^z \mod s \text{ con x, z, s interi} $$
+è facile, si può infatti fare in O($\log_2z$).
+
+Se $s$ non è primo calcolare $x = y^{\frac{1}{z}} \mod s$ richiede tempo esponenziale.
+L'estrazione di radice con $s$ non primo è quindi difficile! E' il problema della \emph{radice}
+
+$$y = x^z \mod s $$
+è facile.
+
+Trovare $z$ tale che $y = x^z mod s$ dati $x, y, s$ è difficile (ha infatti la stessa complessità della fattorizzazione). E' il problema del \emph{logaritmo discreto}.
+
+\subsection{Vantaggi e svantaggi}
+Pro:
+\begin{itemize}
+    \item meno chiavi
+    \item non richiedono lo scambio di chiavi
+\end{itemize}
+Con:
+\begin{itemize}
+    \item più lenti della cifratura simmetrica
+    \item esposizione ad attacchi chosen plain-text
+\end{itemize}
+
+Si può infatti criptare un tot di messaggi $m_1, \_, m_h$ e vedere se sul canale passa uno dei vari $c_1, \_, c_h$. Se compare allora sappiamo il messaggio, se non compare allora sappiamo quale messaggio sicuramente non è.
+
+\subsection{Cifrari ibridi}
+Si usa un cifrario a chiave pubblica per scambiare le chiavi AES e successivamente si comunica tramite AES che è veloce. L'attacco chosen plain-text è risolto con chiavi random difficilmente prevedibili.
+
+NB: la chiave pubblica va estratta da un certificato digitale per evitare attacchi man-in-the-middle in cui terzi si spacciano per il destinatario.

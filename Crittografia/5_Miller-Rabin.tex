@@ -1,0 +1,102 @@
+\section{Algoritmo di Miller Rabin}
+\subsection{Algoritmi randomizzati}
+Ci sono algoritmi alimentati oltre che dai dati in ingresso anche da valori casuali che ne determinano l'evoluzione. Li classifichiamo in due tipi:
+\begin{itemize}
+    \item Las Vegas: algoritmi che ci danno ul risultato sicuramente corretto in un tempo probabilmente breve (Quicksort)
+    \item Monte Carlo: algoritmi che ci danno un risultato probabilmente corretto in un tempo sicuramente breve (test di primalità di Miller-Rabin). Questi algoritmi offrono tuttavia la possibilità di scegliere l'errore con il quale si ottiene il risultato
+\end{itemize}
+
+\subsection{Idea principale}
+Dato $N$ un numero intero di cui si vuole testare la primalità, sia esso su $n$ bit. Essendo $N$ dispari $N-1$ sarà necessariamente pari quindi possiamo esprimerlo nella forma seguente:
+$$
+    N-1 = 2^{\omega}z
+$$
+con $z$ dispari e $\omega$ la potenza di $2$ più grande che divide $N-1$.
+
+$$ N = 17 \implies N-1 = 16 = 2^{4} \cdot 1 $$
+$$ N = 21 \implies N-1 = 20 = 2^{2} \cdot 5 $$
+
+Si noti che entrambi i valori possono essere trovati in tempo polinomiale in quanto posso dividere un numero per $2$ al massimo $log_2N$ volte quindi abbiamo un algoritmo polinomiale nel numero di cifre di $N$ ($n = log_2N$)
+
+Supponendo che $N$ sia primo: si prenda $y$ un intero casuale arbitrario tale che $ 2 \leq y \leq N-1 $ (che prende il nome di \emph{testimone}) allora per N valgono le seguenti proposizioni:
+$$ P1: MCD(N, y) = 1 $$
+$$ P2: y^z \mod N = 1 \text{ OR } \exists i: 0 \leq i \leq \omega - 1 \text{ t.c. } y^{2^i \cdot z} \mod N = -1 $$
+
+Possiamo quindi usare la veridicità di questi predicati come condizione necessaria per il nostro test di primalità, tuttavia non è sufficiente in quanto ci sono dei numeri composti che li verificano entrambi, ma sono pochi!
+
+\subsection{Lemma di Miller-Rabin}
+Se $N$ è composto il numero di testimoni $y$ tc $2 \leq y \leq N-1$ che soddisfano $P1$ e $P2$ è $ < \frac{N}{4} $.
+$$
+    \text{P(scegliere $y$ tc $P1 \text{ AND } P2 = 1$)} < \frac{\frac{N}{4}}{N-2} < \frac{1}{4}
+$$
+
+Immaginiamo il seguente algoritmo:
+\begin{verbatim}
+    dato N scelgo a caso y in [2, N-1]
+    allora:
+    se uno dei due predicati è falso:
+        N è certamente composto
+    se entrambi i predicati sono veri:
+        N è composto con probabilità < 1/4
+        N è primo con probabilità > 3/4
+\end{verbatim}
+
+Per ridurre la probabilità posso re-iterare il processo di selezione di $y$ e scendere ad una probabilità
+$ < \frac{1}{4^k} $ che $N$ sia composto.
+
+\subsection{Algoritmo completo}
+Scriviamo l'algoritmo completo in pseudo-codice:
+\begin{verbatim}
+    VERIFICA(N, y){
+        if (P1 == false OR P2 == false)
+            return 1
+        return 0
+    }
+    
+    TESTMR(N, K){
+        for(i = i; i < k; i++){
+            y <- numero a caso in [2, N-1]
+            if(verifica(N, y) == 1)
+                return 0    // N sicuramente non è primo
+        }
+        return 1            // N è primo con probabilità < 1/4^k
+    }
+\end{verbatim}
+
+\subsection{Costo computazionale}
+Il costo di $TESTMR$ è $k \cdot VERIFICA$ in quanto si itera la verifica sul singolo testimone per k volte. La verifica di $P1$ è il calcolo del $MCD$ quindi si ha costo polinomiale nella dimensione di $N$ tramite l'algoritmo noto. La verifica di $P2$ richiede prima di tutto il calcolo di $y^z \mod N$ che non può ovviamente richiedere $z$ moltiplicazioni, useremo infatti l'esponenziazione veloce, per secondo è richiesto il calcolo di tutti i vari $y^{2^i \cdot z} \mod N$ con $0 \leq i \leq \omega - 1$. $i$ massimo si ha per $\omega - 1$ quindi si calcola al massimo $y^{2^{(\omega-1)} \cdot z} = y^{\frac{N-1}{2}} \mod N$. Eseguirò quindi:
+$$ y^{z} \mod N $$
+$$ y^{z} \cdot y^{z} = y^{2 \cdot z} \mod N $$
+$$ y^{2 \cdot z} \cdot y^{2 \cdot z} = y^{2^{2} \cdot z} \mod N $$
+$$ ... $$
+$$ y^{2^{(\omega - 2)} \cdot z} \cdot y^{2^{(\omega - 2)} \cdot z} = y^{2^{(\omega - 1)} \cdot z}  = y^{\frac{N-1}{2}}\mod N $$
+Eseguo quindi un numero logaritmico di prodotti che rapportati alla dimensione dell'input ci forniscono un costo polinomiale.
+
+L'algoritmo di Miller-Rabin ha quindi un costo polinomiale nella dimensione di $N$
+
+
+\subsection{Generazione di numeri primi}
+Non abbiamo algoritmi propri per la generazione di numeri primi però possiamo seguire il seguente approccio:
+\begin{itemize}
+    \item generare un numero casuale
+    \item si testa la sua primalità
+    \item se questo numero casuale non è \emph{dichiarato} primo si aumenta di due e si ripete dal secondo passaggio
+\end{itemize}
+
+Questo approccio conviene perché per un lemma di Gauss sappiamo che:
+$$ \text{numero di numeri primi minori di N:} \xrightarrow[N \to \infty]{} \frac{N}{log_eN} $$
+quindi preso un $N$ abbastanza grande sappiamo con la quasi certezza che esisterà un primo in un intorno circolare di ampiezza $log_eN$.
+
+Scriviamo quindi un algoritmo in pseudocodice:
+\begin{verbatim}
+    PRIMO(n): // n : numero di bit desiderati per il numero primo
+        S = sequenza casuale di n-2 bit
+        N = 1 S 1 // concatenamento dei bit
+        while(TESTMR(N) == 0)
+            N += 2
+        return N
+\end{verbatim}
+Abbiamo un algoritmo polinomiale nella dimensione di n in quanto $TESTMR$ lo è e viene ripetuto O(n) volte.
+
+NB: i problemi come il test di primalità appartengono alla classe \\ $RANDOM-P$ cioè problemi che hanno algoritmi randomizzati in tempo polinomiale.
+Si indica anche con $RP$ e vale: $P \subseteq RP \subseteq NP $.

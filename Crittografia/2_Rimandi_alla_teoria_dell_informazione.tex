@@ -1,0 +1,423 @@
+\section{Rimandi alla teoria dell'informazione}
+\subsection{Rappresentazione matematica di oggetti}
+Un \emph{alfabeto} è un insieme finito di caratteri detti simboli. Un oggetto è rappresentato da una sequenza ordinata di caratteri dell'alfabeto. A oggetti diversi corrispondono sequenze diverse ed il numero di oggetti rappresentabili è infinito (fissata una lunghezza qualsiasi posso sempre creare sequenze più lunghe). 
+Fissato un alfabeto $\Gamma$ tale che $|\Gamma| = s$ e fissati \emph{N} oggetti da rappresentare:
+\begin{itemize}
+    \item $d(s, N)$: è la lunghezza della sequenza più lungha di un oggetto dell'insieme
+    \item $d_{min}(s, N)$: valore minimo di $d(s, N)$ tra tutte le rappresentazioni possibili
+\end{itemize}
+
+NB: un metodo di rappresentazione è tanto migliore tanto più $d(s, N)$ si avvicina a $d_{min}(s, N)$.
+
+Es: s = 1, $\Gamma = \{0\}$: per creare oggetti diversi vario la lunghezza della sequenza: 0, 00, ecc. Per N oggetti quindi $d_{min}(s, N) = N$
+
+Es: s = 2, $\Gamma = \{0, 1\}$: $\forall k \geq 1$ si hanno $2^{k}$ sequenze di lunghezza $k$ quindi il numero totale di sequenze lunghe da 1 a k è:
+$$
+    \sum^{k}_{i=1} 2^{i} = 2^{k+1} - 2
+$$
+per N oggetti da rappresentare quindi:
+$$
+    2^{k+1} - 2 \geq N \implies K \geq log_{2}(N+2) - 1
+$$
+quindi
+$$ d_{min}(2, N) = \lceil log_{2}(N+2) - 1 \rceil $$
+$$ \lceil log_{2}N \rceil - 1 \leq d_{min}(2, N) \leq \lceil log_{2}N \rceil $$
+
+Es: $N = 7$, $\lceil log_{2}7 \rceil = 3$ quindi \{0, 1, 00, 01, 10, 11, 000\}
+
+NB: posso costruire $N$ sequenze differenti tutte di $ \lceil log_{2}N \rceil $ caratteri: {000, 001, 010, 011, 100, 101, 110}. Questo vale per tutti gli $s$ quindi:
+\begin{itemize}
+    \item posso costruire N sequenze differenti con $ \lceil log_{2}N \rceil $ caratteri
+    \item posso costruire N sequenze differenti tutte di $ \lceil log_{2}N \rceil $ caratteri
+\end{itemize}
+
+Es: $\Gamma = \{0, \_, 9 \}$ $\implies$ $\lceil log_{10}1000 = 3 \rceil$ cioè i numero da 000 a 999
+
+Usare sequenze tutte della stessa lunghezza è vantaggioso perché posso concatenare più oggetti senza usare un separatore. Si dice \emph{rappresentazione efficiente} una rappresentazione che usa un numero massimo di caratteri di ordine logaritmico nella cardinalità dell'insieme da rappresentare (N) quindi bisogna avere almeno 2 caratteri.
+
+\subsection{Rappresentazione di interi}
+La notazione posizionale per gli interi è efficiente indipendentemente dalla base $s \geq 2$ scelta perché un intero N di d cifre soddisfa : $\lceil log_{2}N \rceil \leq d \leq \lceil log_{2}N \rceil + 1$
+
+\subsection{Teoria della calcolabilità}
+Si occupa delle questioni circa la potenza e le limitazioni dei sistemi di calcolo. Si parte dalla prima metà del XX secolo con l'esplorazione della computazione, degli algoritmi, dei problemi risolvibili per via algoritmica e si dimostra anche l'esistenza di problemi che non ammettono un algoritmo di risoluzione: \emph{i problemi non decidibili}.
+
+\subsubsection{Problemi computazionali}
+Sono problemi formulati matematicamente di cui cerchiamo una soluzione algoritmica. Vengono classificati in:
+\begin{itemize}
+    \item \emph{problemi non decidibili}
+    \item \emph{problemi decidibili}: tutti i problemi risolvibili con un algoritmo indipendentemente dal tempo. Di questo si occupa la teoria della complessità dividendoli in:
+    \begin{itemize}
+        \item \emph{trattabili} (costo polinomiale)
+        \item \emph{non trattabili} (costo esponenziale)
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Esistenza di problemi non decidibili}
+Due insiemi $A$ e $B$ hanno la stessa cardinalità \emph{se e solo se} si può stabilire una corrispondenza biunivoca tra i loro elementi (una mappa).
+Un insieme è \emph{numerabile} (ha una infinità numerabile di elementi) \emph{se e solo se} i suoi elementi si possono mettere in corrispondenza biunivoca con i numeri naturali.
+
+NB: un insieme numerabile può essere elencato: $a_1, a_2, \_, a_n, \_ $
+NB: sono numerabili anche le stringhe di lunghezza finita di simboli di un alfabeto finito
+
+Si vogliono elencare le sequenze in un ordine ragionevole, non possiamo quindi usare l'ordine lessicografico perché non si può completare l'elenco. Per trovare un elenco che soddisfi la numerabilità dobbiamo:
+\begin{itemize}
+    \item raggiungere qualsiasi sequenze $\sigma$ scelta in un numero \emph{finito} di passi
+    \item $\sigma$ deve quindi trovarsi a distanza \emph{finita} dall'inizio dell'elenco
+\end{itemize}
+
+Useremo quindi l'\emph{ordinamento canonico}:
+\begin{itemize}
+    \item si ordinano le sequenze per lunghezza crescente
+    \item le sequenze di pari lunghezza si ordinano alfabeticamente (supponendo di avere creato una regola di ordine tra i caratteri)
+\end{itemize}
+
+Quindi una sequenza $s$ si trova tra quelle $|s|$.
+
+Es: $\Gamma = \{ a, b, c, \_, z \} \implies a, b, \_, z, aa, ab, \_, zz, aaa, \_ $
+
+Seguendo questo metodo ogni sequenza corrisponde ad un numero $\in \mathbb{N}$ ed ogni naturale ha una sequenza associata.
+
+NB: questo si può fare perché abbiamo preso sequenze di lunghezza finita, per sequenze di lunghezza infinita non esiste una enumerazione.
+
+Alcuni esempi di insiemei non numerabili sono:
+\begin{itemize}
+    \item $\mathbb{R}$
+    \item $\mathbb{R}$ ristretto a $(0, 1)$ o $[0, 1]$
+    \item insieme delle funzioni in una o più variabili
+\end{itemize}
+
+Dimostriamo l'appartenenza di quest'ultimo: un problema computazionale può essere visto come una funzione matematica che associa ad ogni insieme di dati su $k$ numeri interi il risultato su $j$ numeri interi:
+$$ f :  \mathbb{N}^{k} \longrightarrow \mathbb{N}^{j} $$
+
+Dimostriamolo su un sott'insieme $F = \{f | f: \mathbb{N} \longrightarrow \{0, 1\}\}$. Ogni $f \in F$ può essere rappresentata da una sequenza infinita:
+\begin{table}[!h]
+    \centering
+    \begin{tabular}{c|c|c|c|c|c|c|c}
+         $x$ & 0 & 1 & 2 & 3 & \_ & n & \_  \\
+         \hline
+         $f(x)$ & 0 & 1 & 0 & 1 & \_ & 0 & \_
+    \end{tabular}
+\end{table}
+
+oppure da una regola finita di costruzione:
+
+\begin{equation}
+    f(x) =
+    \begin{cases}
+        $0 \text{se x è pari}$ \\
+        $1 \text{se x è dispari}$
+    \end{cases}
+\end{equation}
+
+Supponiamo per assurdo che $F$ sia numerabile, quindi è possibile trovare una enumerazione per $f \in F$:
+\begin{table}[!h]
+    \centering
+    \begin{tabular}{c|c c c c}
+        $x$ & 0 & 1 & 2 & \_  \\
+        \hline
+        $f_0(x)$ & 1 & 0 & 1 & \_ \\ 
+        $f_1(x)$ & 0 & 0 & 1 & \_ \\ 
+        $f_2(x)$ & 1 & 1 & 0 & \_ \\ 
+    \end{tabular}
+\end{table}
+
+Consideriamo dunque la seguente funzione:
+
+\begin{equation}
+    g(x) = 
+    \begin{cases}
+        $0 \text{ se }$ f_x(x) = 1 \\
+        $1 \text{ se }$ f_x(x) = 0 \\
+    \end{cases}
+\end{equation}
+
+$g \in F$ perché è una funzione dai naturali a \{0, 1\} ma non può corrispondere a nessuna delle funzioni nella tabella precedente.
+\begin{itemize}
+    \item non può essere $f_0$ in quanto differisce in $x = 0$
+    \item non può essere $f_1$ in quanto differisce in $x = 1$
+    \item e così via $\forall n$
+\end{itemize}
+La nostra tabella, e quindi $F$ ha almeno una funzione mancante. Supponiamo ancora per assurdo che $\exists j \text{ tc } g(x) = f_{j}(x)$ quindi:
+\begin{itemize}
+    \item $g(x) = 1$ se $f_j(x) = 0$ ma $g(x)=f_j(x)$ 
+    \item $g(x) = 0$ se $f_j(x) = 1$ ma $g(x)=f_j(x)$ 
+\end{itemize}
+siamo ad un assurdo $\implies$ l'insieme delle funzioni $f: \mathbb{N} \longrightarrow \{0, 1\}$ è non numerabile, quindi lo è anche l'insieme che le comprende $f:\mathbb{N}^{k} \longrightarrow \mathbb{N}^{j}$.
+
+\emph{L'insieme dei problemi computazionali non è numerabile}.
+
+\subsubsection{Il problema della rappresentazione}
+L'informatica rappresenta tutte le sue entità in forma digitale come sequenze finite di simboli finiti. Possiamo dire quindi che la conoscenza umana è numerabile.
+
+\subsubsection{Algoritmo}
+E' una sequenza finita di operazioni, completamente e univocamente determinate. La formulazione di un algoritmo dipende dal modello di calcolo utilizzat: se uso la macchina di Turing ho una codifica, se uso il C ne ho un'altra, ecc. Qualsiasi codifica si scelga però gli algoritmi devono essere sempre descritti da una sequenza finita di caratteri di un alfabeto finito.
+
+\emph{Gli algoritmi sono infiniti ma numerabili, i problemi sono infiniti ma non numerabili quindi esistono problemi privi di un corrispondente algoritmo di calcolo}.
+
+\subsubsection{Problema dell'arresto (Halt problem)}
+Alan Turing nel 1930 scopre il problema dell'arresto e dimostra essere non decidibile. E' un problema decisionale, cioè:
+$$ HLT:\{Istanze\} \longrightarrow \{0, 1\} $$
+quindi la calcolabilità p chiamata \emph{decidibilità}.
+
+\emph{Presi arbitrariamente un algoritmo A ed i suoi dati di input D, decidere in tempo finito se la computazione di A su D termina o no}.
+
+Si cerca quindi un algoritmo che indaghi le proprietà di un altro algoritmo usato come input. (Si può fare perché algoritmi e dati sono rappresentati come sequenze di caratteri dello stesso alfabeto). Un test di primalità termina, un algoritmo che cerca un numero che fallisce alla congettura di Goldbach (ogni numero intero pari $\geq 4$ può essere espresso come somma di due primi) non sappiamo se termina o meno in quanto no sappiamo se al congettura sia vera o meno:
+$$ \text{congettura falsa} \longrightarrow \text{l'algoritmo termina} $$
+$$ \text{congettura vera} \longrightarrow \text{l'algoritmo non termina} $$
+
+\subsubsection{Indecidibilità del problema dell'arresto}
+Supponiamo per assurdo che il problema sia decidibile, quindi esiste un algoritmo $ARRESTO$ che presi A e D determini in tempo finito la risposta.
+Questo algoritmo non può essere una mera simulazione di A su D in quanto se A termina il risultato è positivo, se A non termina l'algoritmo non può dire in tempo finito che A non termina. $ARRESTO$ deve quindi osservare A dall'esterno. Scegliamo quindi $D=A$ e consideriamo $A(A)$:
+$$ A(A) = 1 \Longleftrightarrow A(A) termina $$
+costruiamo allora un secondo algoritmo:
+\begin{verbatim}
+    PARADOSSO(A){
+        while(ARRESTO(A, A));
+    }
+\end{verbatim}
+quindi $PARADOSSO(A)$ termina se e solo se $A(A)$ non termina.
+Calcoliamo quindi $PARADOSSO(PARADOSSO)$, cosa succede?
+
+Termina se e solo se $ARRESTO(PARADOSSO) = 0$ cioè se e solo se $PARADOSSO(PARADOSSO)$ non termina.
+Abbiamo una contraddizione quindi se ne ottiene che non può esistere l'algoritmo $ARRESTO$ e dunque il problema dell'arresto è indecidibile.
+
+\subsubsection{Altri problemi indecidibili}
+E' indecidibile stabilire l'equivalente tra due programmi (stesso input $\implies$ stesso output).
+In genere non esistono algoritmi che decidono il comportamento di altri algoritmi senza passare dalla loro simulazione. E' indecidibile il problema della ricerca di soluzione di equazioni diofantee di grado arbitrario.
+
+\subsubsection{Modelli di Calcolo}
+La teoria della calcolabilità dipende dal modello di calcolo? Oppure è una proprietà del problema? I linguaggi di programmazione sono tutti equivalenti? Ce ne sono di più potenti o semplici di altri? Ci sono algoritmi scrivibili in un linguaggio ma non in un altro? In futuro alcuni problemi indecidibili diventeranno decidibili con nuovi paradigmi o nuovi calcolatori? Non lo sappiamo. La tesi di \emph{Church-Turing} ci dice che \emph{tutti i modelli di calcolo risolvono esattamente la stessa classe di problemi}, quindi si equivalgono pur operando con diversa efficienza e la decidibilità è una proprietà del problema. Tuttavia non è dimostrato per ora.
+
+\subsubsection{Trattabilità}
+Dopo i problemi indecidibili ci sono i problemi \emph{intrattabili} cioè quei problemi che hanno come limite inferiore per i tempi di risoluzione un esponenziale nella dimensione dell'istanza. Successivamente vi sono i problemi \emph{trattabili} cioè problemi con costo polinomiale. In fine c'è una famiglia di cui non si conosce lo stato, il costo. Abbiamo algoritmi esponenziali ma non sappiamo i limiti inferiori di questi problemi. Li chiamiamo \emph{presumibilmente intrattabili}.
+
+Studiamo la dimensione dei dati trattabili in funzione dell'incremento della potenza dei calcolatori. Sia dato $C_{1}$ con una velocità e $C_{2}$ con $k$ volte la velocità di $C_{1}$. Su un tempo di calcolo $t$:
+$$ n_{1} = \text{dati trattabili su $C_{1}$ in tempo $t$} $$
+$$ n_{2} = \text{dati trattabili su $C_{2}$ in tempo $t$} $$
+quindi usare $C_{2}$ per t equivale ad usare $C_{1}$ per $k \cdot t$.
+Sia dato un algoritmo polinomiale che si risolve in $c \cdot n^{s}$ secondi (con c, s costanti) si hanno:
+$$ c_{1}: c \cdot n_{1}^{s} = t \longrightarrow n_{1} = \left( \frac{t}{c} \right)^{\frac{1}{s}} $$
+$$ c_{2}: c \cdot n_{2}^{s} = k \cdot t \longrightarrow n_{2} = \left(\frac{k \cdot t}{c}\right)^{\frac{1}{s}} = k^{\frac{1}{s}} \cdot \left( \frac{t}{c} \right) ^{\frac{1}{s}} = k^{\frac{1}{s}} \cdot n_{1} $$
+il miglioramento è di un fattore moltiplicativo di $k^{\frac{1}{s}}$.
+
+Sia ora dato un algoritmo esponenziale che si risolve in $c \cdot 2^n$ (con c costante)
+$$ c_{1}: c \cdot 2^{n_{1}} = t \longrightarrow 2^{n_1} = \frac{t}{c} $$
+$$ c_{2}: c \cdot 2^{n_{2}} = k \cdot t \longrightarrow 2^{n_2} = k \cdot \frac{t}{c} = k \cdot 2^{n_1} \implies n_2 = n_1 + log_{2}k $$
+Il miglioramento è di un fattore additivo logaritmico!
+
+NB: se prima si trattavano problemi di istanza 1000 dopo essere passati ad una macchina più potente con $k = 10^9$ si potranno trattare istanze $1000 + log_2{10^9} \approx 1030$. Questo è il motivo per il quale si distingue tra trattabili ed intrattabili!
+
+\subsubsection{Problemi}
+Dato un numero $\Pi$ indichiamo con:
+\begin{itemize}
+    \item $I$: insieme delle \emph{istanze} di ingresso
+    \item $S$: insieme delle \emph{soluzioni}
+\end{itemize}
+Alcune tipologie di problemi sono:
+\begin{itemize}
+    \item \emph{problemi decisionali} se $S = \{0, 1\}$ (un numero è primo? un grafo è connesso?). Chiamiamo istanze positive o accettabili quelle tale che $x \in I : \Pi(x) = 1$ ed istanze negative quelle tali che: $x \in I \Pi(x) = 0$
+    \item \emph{problemi di ricerca} se dato $x \in I$ ci fornisce una soluzione $s$ (trovare un cammino tra due vertici, ecc)
+    \item \emph{problemi di ottimizzazione} se dato $x \in I$ si vuole trovare la migliore soluzione $s$ tra tutte quelle ammissibili (cammino minimo, ecc)
+\end{itemize}
+La teoria della complessità fa riferimento alla sola classe decisionale in quanto:
+\begin{itemize}
+    \item essendo $s = \{0, 1\}$ non ci si deve preoccupare del tempo per restituire la soluzione
+    \item la difficoltà è già presente nella sua versione decisionale
+    \item ogni problema di ottimizzazione può essere espresso in forma decisionale chiedendo l'esistenza di una soluzione che soddisfi una certa proprietà
+    
+    Es: \emph{trovare la clique più grande in G} (ottimizzazione) diventa \emph{esiste una clique in G di almeno k vertici?} (decisionale).
+    
+    La seconda in particolare non può essere più difficile della prima, se lo fosse potremmo usare la prima per cercare una soluzione e controlliamo rispetto alla dimensione k, ergo dal primo al secondo è immediato!
+    Il problema di ottimizzazione è tanto difficile quanto la sua versione decisionale, studiando il secondo posso quindi fornire un limite inferiore alla versione di ottimizzazione.
+\end{itemize}
+
+\subsubsection{Classi di complessità}
+Dato $\Pi$ decisionale ed A algoritmo diciamo che A risolve $\Pi$ se, dato l'input $x$:
+$$ A(x) = 1 \Longleftrightarrow \Pi(x) = 1 $$
+Diciamo poi che A risolve $\Pi$ in tempo $t(n)$ ed in spazio $s(n)$ se il tempo di esecuzione e l'occupazione di memoria di A sono $t(n)$ e $s(n)$. Dato $f(n)$ diremo:
+\begin{itemize}
+    \item $Time(f(n))$ è l'insieme dei problemi decisionali che possono essere risolti in tempo $O(f(n))$
+    \item $Space(f(n))$ è l'insieme dei problemi decisionali che possono essere risolti in spazio $O(f(n))$
+\end{itemize}
+
+\subsubsection{Classe P}
+E' la classe di problemi che possono essere risolti in tempo polinomiale nella dimensione dell'istanza di input.
+
+NB: un algoritmo è polinomiale se $\exists c, n_0 > 0 $ tale che il numero di passi elementari è al più $n^c$ per ogni input di dimensione $n \forall n > n_0$.
+
+Esiste l'analogo nello spazio e lo indichiamo con $PSPACE$
+
+\subsubsection{Classe EXP-TIME}
+La classe Exp(time) è la classe dei problemi risolvibili in tempo esponenziale nella dimensione $n$ dell'istanza di input.
+
+NB: $P \subseteq Exp-Time$
+
+NB: $P \subseteq PSpace$ perché un algoritmo polinomiale può accedere al più ad un numero polinomiale di locazioni di memoria (altrimenti dovrebbe essere esponenziale).
+
+NB: $PSpace \subseteq Exp-Time$
+
+Ad oggi non sappiamo se sono inclusioni proprie, l'unica separazione netta è $P \subset Exp-Time$ poiché abbiamo problemi risolti in $Exp$ e non in $P$ (ad esempio Hanoi)
+
+\subsubsection{SAT}
+Sia dato un insieme V di variabili logiche, definiamo:
+\begin{itemize}
+    \item letterale: una variabile o una sua negazione
+    \item clausola: disgiunzione (OR) di letterali
+    \item espressione booleana in forma normale congiuntiva (FNC): è una espressione logica formata da clausole unite da congiunzioni (AND di OR di variabili dirette o negate)
+    
+    Es: dati $ V = \{x, y, z, w\}$ una possibile FNC potrebbe essere: 
+    $$(x \lor \bar{y} \lor z) \land (\bar{x} \lor w) \land y$$
+\end{itemize}
+
+SAT si occupa di cercare dei valori di verità per rendere vera l'espressione.
+
+Es: è soddisfatta per $x=1, y=1, z=0, w=1$
+
+NB: il problema c'è solo se l'espressione è FNC e passare ad un'altra forma richiede tempo esponenziale.
+
+Per risolvere iteriamo sulle $2^n$ possibili combinazioni e controlliamo la soddisfattibilità.
+
+$$ SAT \in Exp-Time$$
+quindi per risolvere questo ed altri problemi (clique, cammino hamiltoniano) è necessario iterare tra tutte le possibili combinazioni di ingresso? \emph{Non lo sappiamo}. Da qui parte la questione $P$ vs $NP$.
+
+\subsubsection{Certificati}
+In un problema decisionale siamo interessati a verificare se un'istanza del problema soddisfa una certa proprietà. Per alcuni problemi, per le istanze accettabili è possibile fornire un certificato che ci convinca della sua accettabilità.
+
+Es: certificato per clique: sottoinsieme di k vertici che forma la clique. Certificato per cammino hamiltoniano: la permutazione degli n vertici che definisce il cammino.
+
+Quando ho un certificato posso controllarlo in tempo polinomiale ed accertarmi che sia vero.
+
+E' di fatto un attestato \emph{breve} di esistenza di una soluzione. Si definisce solo per le istanze accettabili perché in genere non è facile costruire certificati di non esistenza.
+
+Es: $UNSAT$: è vero che nessun assegnamento rende vera l'espressione? Per questo problema non basta fornire un assegnazione accettabile, non sarebbe breve!
+
+\subsubsection{Teoria della verifica}
+Utiliziamo il costo della verifica di un certificato per una istanza positiva per caratterizzare al complessità del problema stesso. Un problema $\Pi$ è \emph{verificabile in tempo polinomiale} se 
+\begin{itemize}
+    \item ogni istanza accettabile $x$ di $\Pi$ di lunghezza $n$ ammette un certificato $y$ di lunghezza polinomiale in $n$
+    \item esiste un algoritmo di verifica polinomiale in $n$ ed applicabile ad ogni coppia $<x$, $y>$ che attesta se $x$ è accettabile.
+\end{itemize}
+
+
+\subsubsection{Classe NP}
+NP è la classe dei problemi decisionali verificabili in tempo polinomiale.
+
+NB: NP sta per \emph{polinomiale su macchine non deterministiche}
+
+Abbiamo quindi che se si ha una soluzione essa è facile da verificare ma se non si ha una soluzione la si cerca in tempo esponenziale.
+
+\subsubsection{P vs NP}
+$P \subseteq NP$ certamente perché qualsiasi problema in P può essere risolto in tempo polinomiale. Non sappiamo però se $P \subset NP$ o $P = NP$
+
+
+\subsubsection{Problemi NP-completi}
+Sono i problemi più difficili dentro NP: se esistesse un algoritmo polinomiale per risolvere uno solo di questi allora tutti i problemi in NP sarebbero risolti in tempo polinomiale $\implies$ P = NP. Quindi tutti gli NP-completi si risolvono tutti in tempo polinomiale oppure nessuno lo è.
+
+\subsubsection{Riduzioni polinomiali}
+Presi $\Pi_{1}$ e $\Pi_{2}$ problemi decisionali, $I_{1}$ e $I_{2}$ insiemi degli input di $\Pi_{1}$ e di $\Pi_{2}$ diremo che $\Pi_{1}$ si riduce in tempo polinomiale a $\Pi_{2}$:
+$$ \Pi_{1} \leq_{p} \Pi_{2} $$
+se esiste una funzione $f:I_{1} \longrightarrow I_{2}$ calcolabile in tempo polinomiale tale che mi trasforma una istanza del primo problema in una istanza del secondo e $\forall x \in \Pi$:
+$$ x \text{ è accettabile per } \Pi_{1} \Longleftrightarrow f(x) \text{ è accettabile per } \Pi_{2} $$
+
+E' utile perché supponendo di risolvere $\Pi_{2}$ in tempo polinomiale allora $\Pi_{1}$ viene tradotto in tempo polinomiale in $\Pi_{2}$ e quindi anche $\Pi_{1}$ è polinomiale:
+$$ \Pi_{1} \leq_{p} \Pi_{2} \text{ e } \Pi_{2} \in P \Longrightarrow \Pi_{1} \in P $$
+
+\subsubsection{Np arduo}
+Un problema $\Pi$ si dice NP-arduo se:
+$$ \forall \Pi' \in NP \text{  } \Pi_{1}' \leq_{p} \Pi $$
+
+NB: $\Pi$ non per forza decisionale
+
+\subsubsection{NP-completo}
+Un problema decisionale $\Pi$ si dice NP-completo se:
+$$ \Pi \in NP $$
+$$ \forall \Pi' \in NP \text{  } \Pi' \leq_{p} \Pi $$
+Dimostriamo che se trovo $\Pi$ NP-completo ma $\Pi \in P$ allora P=NP: per ogni $\Pi' \in NP$ $\Pi' \leq \Pi$ quindi trasformo $I_{\Pi'}$ in $I_{\Pi}$, $I_{\Pi}$ so risolverlo in tempo polinomiale quindi qualunque $\Pi' \in NP$ è risolto in tempo polinomiale.
+
+Dimostrate che $\Pi$ appartiene a NP è facile: si deve esibire un certificato polinomiale. Non è semplice invece dimostrare che un problema è NP-arduo o NP-completo perché:
+\begin{itemize}
+    \item devo dimostrare che tutti i problemi NP si riducono a $\Pi$
+    \item ma la prima definizione di NP-completo aggira il problema: il \emph{Teorema di Cook}
+\end{itemize}
+
+\subsubsection{Teorema di Cook}
+Dati un qualunque problema NP ed una qualunque istanza $x$ si può dimostrare che una espressione booleana in forma normale congiuntiva che descrive \\ l'algoritmo del problema si può sempre costruire.
+
+Quindi \emph{qualsiasi problema NP si riduce a $SAT$}.
+Per dimostrarle quindi che un problema è NP-completo ci basta prenderne uno che lo è e provare a ridurlo al problema in studio.
+
+Es: per dimostrare che clique è NP-completo cerchiamo un algoritmo polinomiale tc:
+$$ SAT \leq_{p} CLIQUE $$
+se lo troviamo allora $CLIQUE$ è NP-completo. $SAT$ e $CLIQUE$ sono NP equivalenti: \emph{tutti i problemi NP completi sono tra di loro NP equivalenti}.
+
+
+\subsubsection{Ottimizzazione di problemi NP-hard}
+Se la soluzione ottima è troppo difficile da ottenere si opta per una quasi ottima. In particolare ci si accontenta di:
+\begin{itemize}
+    \item soluzioni che non si discostino troppo da quella ottima
+    \item soluzioni che si calcolano in tempo polinomiale
+\end{itemize}
+
+\subsubsection{Classi co-P e co-NP}
+C'è una profonda differenza tra certificare l'esistenza e certificare la non esistenza.
+
+Es: per certificare un ciclo hamiltoniano basta fornire la sequenza dei vertici, per certificare che non esiste è difficile trovare un algoritmo polinomiale
+
+Definiamo quindi $co\Pi$ come il problema complementare di $\Pi$ (accetta tutte e sole le istanze rifiutate da $\Pi$).
+
+Definiamo $co\text{-}P$ la classe dei problemi decisionali $\Pi$ per cui $co\Pi \in P \implies P=co\text{-}P$ perché mi basta risolvere e complementare il risultato.
+
+Definiamo $co\text{-}NP$ la classe dei problemi decisionali $\Pi$ per cui $co\Pi \in NP$. Non sappiamo tuttavia se $co\text{-}NP = NP$, si congettura che siano diverse, se la congettura fosse vera sarebbe una dimostrazione che P $\neq$ NP perché se $co\text{-}NP \neq NP$ implica che alcuni $co\text{-}NP$ siano in $P$ e quindi $P \neq NP$.
+
+\begin{figure}[H]
+  \centering
+  \includesvg[width = 250pt]{complexity_classes.svg}
+  \caption{Breve gerarchia delle classi di complessità}
+\end{figure}
+
+\subsubsection{Esempi di algoritmi numerici}
+Euclide: $a, b \in \mathbb{Z}, a \geq b, a > 0, b \geq 0 $
+\begin{verbatim}
+    MCD(a,b){
+        if(b == 0) return a
+        return MCD(b, a mod b)
+    }
+\end{verbatim}
+$$ I: \left( a, b \right)  $$
+$$ n = |I| = \Theta\left( \log a + \log b \right) = \Theta\left( \log a \right)$$
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{c|c}
+        Chiamata & input \\
+        \hline
+        Prima & $a, b$ \\
+        Seconda & $b, a \mod b$ \\
+        Terza & $a \mod b, b \mod (a \mod b)$ \\
+    \end{tabular}
+\end{table}
+osserviamo che $a = q \cdot b + a \mod b \geq b + a \mod b$, ricordando che $b > a \mod b : a > a \mod b + a \mod b \implies a > 2 \cdot a \mod b \implies a \mod b < \frac{a}{2}$
+
+quindi ogni due passi l'input si dimezza quindi il numeor di chiamate è $O\left( \log a \right)$. Il costo totale è $numero chiamate \cdot costo singola chiamata$: il costo del calcolo del modulo è pari a $O\left( \log a \cdot \log b\right ) = O\left( \log^{2}a \right)$. Complessivamente:
+$$ T\left(n\right) = O\left(log^{3}a\right) = O\left( n^{3} \right) $$
+$$ n = |I| \text{ : polinomiale nella dimensione dell'istanza dei dati (n di cifre)} $$
+$$ n = \log a \text{ : polilogaritmico nel valore dei dati} $$
+
+Es: Test di primalità (versione inefficiente):
+\begin{verbatim}
+    for(i = 2, i <= sqrt(n); i++)
+        if(n mod i == 0) return false
+    return true
+\end{verbatim}
+sfrutto la proprietà: \emph{se n non è primo n possiede almeno un divisore $\leq \sqrt{N}$}
+
+$$ I = N $$
+$$ \text{  } |I|=\Theta\left( \log N \right) = n $$
+
+\# iterazioni: $\sqrt{N}$
+
+costo corpo: $\Theta\left( \log^{2}N \right)$
+
+$$ T\left(n\right) = O\left(\sqrt{N} \cdot \log^{2}N \right) = O\left(2^{\frac{n}{2}} \cdot n^{2}\right) $$
+
+E' un algoritmo pseudopolinomiale rispetto al valore dell'input ed esponenziale nella dimensione. E' così inefficiente perché stiamo generando tutte le sequenze binarie di $\frac{n}{2}$ bit.

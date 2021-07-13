@@ -1,0 +1,30 @@
+\section{Cifrario di El Gamal}
+Bob mette a disposizione la sua chiave pubblica, la costruisce:
+\begin{itemize}
+    \item sceglie $p$ molto grande, primo e sceglie $g$ generatore di $Z_p^*$
+    \item sceglie $x$ tale che $1 < x < p-1$. Sarà la chiave privata
+    \item calcola $y = g^x \mod p$
+    \item pubblica $<p, g, y>$ che sarà la chiave pubblica
+\end{itemize}
+
+Alice vuole inviare un messaggio $m$ a Bob.
+Il messaggio è trattato come un numero tale che: $0 \leq m < p$.
+\begin{itemize}
+    \item si procura $<p, g, y>$ di Bob
+    \item sceglie a caso $1 < r < p-1$ (da tenere segreto)
+    \item calcola $c = g^r \mod p$ (apparterrà dunque a $Z_p^*$)
+    \item calcola $d = m \cdot y^r \mod p$
+    \item invia a Bob la coppia $<c,d>$
+\end{itemize}
+
+Bob deve quindi decifrare il messaggio:
+$$ m = \frac{d}{c^x} \mod p = d \cdot c^{-x} \mod p $$
+
+\subsection{Dimostrazione di correttezza}
+$$ \frac{d}{c^x} \mod p = \frac{y^r \cdot m}{c^x} \mod p = \frac{\cancel{(g^x)^r} \cdot m}{\cancel{(g^r)^x}} \mod p = m $$
+
+E' sicuro perché Eve conosce $p$, $g$, $y$, $c$, $d$ (tutto tranne $r$ ed $x$).
+Se si conoscesse $x$ si potrebbe calcolare $m = \frac{d}{c^x} \mod p$.
+Se si conoscesse $r$ si potrebbe calcolare $m = \frac{d}{y^r} = \frac{\cancel{y^r} \cdot m}{\cancel{y^r}} \mod p$
+
+NB: è importante mantenere $r$ segreto ed usarlo solo una volta!
