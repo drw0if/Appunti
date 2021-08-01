@@ -38,8 +38,12 @@ Supponiamo
     \item $n$ : lunghezza della sequenza ottenuta
 \end{itemize}
 avremo necessariamente che:
-
-$$ \text{possibili sequenze diverse : } 2^{S} << 2^{n} \text{ : numero totale di sequenze lunghe n}$$
+$$ 2^{S} << 2^{n} $$
+con:
+\begin{itemize}
+    \item $2^{S}$: tutte le possibili sequenze diverse
+    \item $2^{n}$: numero totale di sequenze diverse di lunghezza n
+\end{itemize}
 
 questi processi sono deterministici in quanto dato un seme la sequenza generata è sempre la stessa, quindi il vero numero di sequenze possibili da generare è $2^{S}$.
 
@@ -63,7 +67,7 @@ $$ \implies 3, 1, 5, 6, 4, 8, ... , 3 $$
 NB: posso ottenere un generatore di sequenze binarie facendo $\frac{x_i}{m}$ e prendendo la parità della prima cifra decimale.
 
 \subsection{Valutazione statistica}
-Per studiare un generatore di sequenze pseudo-casuali possiamo effettuare dei testi statistici valutando se la sequenza presenta le proprietà tipiche di una sequenza casuale:
+Per studiare un generatore di sequenze pseudo-casuali possiamo effettuare dei test statistici valutando se la sequenza presenta le proprietà tipiche di una sequenza casuale:
 \begin{itemize}
     \item \emph{test di frequenza}
     \item \emph{poker test}: sottosequenza di lunghezza fissa siano equamente distribuite
@@ -76,7 +80,7 @@ Per le applicazioni crittografiche si richiede anche il \emph{test di prossimo b
 
 Un generatore binario supera il test di prossimo bit se $ \nexists $ un algoritmo polinomiale in grado di prevedere il bit $(i+1)$esimo della sequenza a partire dalla conoscenza degli $i$ bit precedentemente generati, con probabilità $> \frac{1}{2}$. Questi generatori si chiamano \emph{crittograficamente sicuri}.
 
-\subsection{}{Generatore polinomiale}
+\subsection{Generatore polinomiale}
 E' un altro generatore non crittograficamente sicuro ma che passa i test statistici. E' nella forma:
 $$ x_{i} = \left( a_{1}x_{i-1}^{t} + a_{2}x_{i-1}^{t-1} + ... + a_{t}x_{i-1} + a_{t+1} \right) \mod n $$
 

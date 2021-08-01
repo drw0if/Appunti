@@ -112,7 +112,7 @@ $$ \mid S_A' \mid = \mid S_B' \mid = \frac{\mid S_A \mid}{2} $$
 Le basi concordi sono 1, 2, 3, 7 che portano alla sequenza:
 $$ S_A' = S_B' = 1010 $$
 
-Se c'è un crittoanalista esso si troverò nella stessa situazione di Bob, quindi deve scegliere le sue basi.
+Se c'è un crittoanalista esso si troverà nella stessa situazione di Bob, quindi deve scegliere le sue basi.
 Le basi che sceglierà saranno indipendenti da quelle di Alice e Bob quindi se la sua base coincide con quella di Alice non cambia nulla, invece se non coincide altera irreparabilmente il fotone!
 Alice e Bob fanno quindi una verifica: sacrificano un pezzo si $S_A'$ e $S_B'$:
 si scambiano una porzione delle chiavi comuni in posizioni prestabilite comunicandole sul canale standard.
@@ -152,7 +152,7 @@ La verifica dell'intrusione è quindi importantissima, permette di sapere di eve
 
 Ci sono comunque degli errori generici in fase di trasmissione dei fotoni, delle letture, ecc.
 Si stabilisce quindi un \emph{quantum bit error rate} - QBER: una percentuale prevedibile di bit errati (dovuti a errori dell'apparato sperimentale).
-Se quindi nel confronto tra $S_A''$ e $S_B''$ il numero di errore è > QBER allora c'è stata una intromissione, altrimenti sono solo errori sperimentali e si correggono tramite correttori di errori.
+Se quindi nel confronto tra $S_A''$ e $S_B''$ il numero di errore è $>$ QBER allora c'è stata una intromissione, altrimenti sono solo errori sperimentali e si correggono tramite correttori di errori.
 
 NB: Eve potrebbe intercettare pochi fotoni e quindi farsi passare per errori dell'apparato pur conoscendo alcuni bit della chiave.
 Proprio per questo motivo anziché usare la sequenza scambiata si usa farne l'hash ed usare quello come chiave, in quato modo se cambiano anche solo pochi bit l'hash cambia enormemente.

@@ -53,7 +53,7 @@ Supponiamo per assurdo che $N_k < N_m$, presi quindi gli spazi si ha questa situ
 
 Per i crittogrammi $c : P(C=c) > 0$ possono corrispondere $s$ messaggi, cioè tutti i messaggi che ottengo decriptando $c$ con tutte le chiavi possibili. Si ha necessariamente che $S \leq N_k$ supponendo che chiavi diverse vadano in messaggi diversi si ottiene $S = N_k$ ma magari più chiavi decifrano il messaggio allo stesso modo quindi $S < N_k$. In generale sarà vero che $S \leq N_k$ quindi unendo:
 $$ S \leq N_k < N_m \xrightarrow{} S < N_m $$
-quindi il numero dei messaggi che possono corrispondere a c è < dei messaggi possibili, quindi deve esistere un $m \in MSG$, $P(M=m) > 0$ tale che:
+quindi il numero dei messaggi che possono corrispondere a c è $<$ dei messaggi possibili, quindi deve esistere un $m \in MSG$, $P(M=m) > 0$ tale che:
 $$ P(M=m \mid C=c) = 0 $$
 (decifrando $c$ esisterà un $m$ che sicuramente non è il messaggio) inferisco della conoscenza, quindi contraddico il cifrario perfetto.
 
@@ -116,7 +116,7 @@ Proviamo quindi a ridurre la grandezza della chiave:
 $N_m = \alpha^n$ dato che $N_k \geq N_m = \alpha^n$.
 
 La chiave sarà una sequenza di $t$ bit tale che:
-$$ t: 2^t \geq \alpha^n \xrightarrow t \geq log_2\alpha^n = n \cdot log_2\alpha \xrightarrow t \geq 0.12 \cdot n$$
+$$ t: 2^t \geq \alpha^n \xrightarrow{} t \geq log_2\alpha^n = n \cdot log_2\alpha \xrightarrow{} t \geq 0.12 \cdot n$$
 Posso quindi usare chiavi molto più corte: $\approx 10\%$ di $n$.
 
 Come fare? Genero i $t$ bit randomicamente e li estendo in maniera deterministica su $n$ bit.

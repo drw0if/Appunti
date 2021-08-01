@@ -51,7 +51,7 @@ Sono stati pubblicati MD2, MD4, MD5.
 Nei primi due furono trovate falle e Rivest propose MD5 nel 1992.
 
 Riceve in input un sequenza $S$ di 512 bit e produce un'immagine di 128 bit.
-Si \emph{digerisce} la sequenza rudicendone la lunghezza ad $\frac{1}{4}$.
+Si \emph{digerisce} la sequenza riducendone la lunghezza ad $\frac{1}{4}$.
 
 Non resiste alle collisioni e nel 2004 è uscito di scena con debolezze varie.
 
@@ -131,13 +131,13 @@ Per eseguire l'autenticazione invece si usa il MAC: \emph{message authentication
 
 \subsection{MAC}
 Deve essere una immagine breve del messaggio che si può ottenere solo se si è a conoscenza del valore comune $k$.
-Ci sono varie implementazioni basat su cifrari asimmetrici, simmetrici e funzioni hash one-way.
+Ci sono varie implementazioni basate su cifrari asimmetrici, simmetrici e funzioni hash one-way.
 In particolare la versione one-way prevede:
 $$ A(m,k) = h(mk) $$
 con $h$ una funzione hash one-way.
 
 E' sicuro in quanto $k$ viaggia nel MAC ed anche se venisse scoperto non è invertibile in maniera semplice.
-Non può nemmeno sostituire tutto in quanto dovrebbe corredare il messaggio di un nuovo MAC che però non può calcolare essendo allo scuro del valore di $k$.
+Non può nemmeno sostituire tutto in quanto dovrebbe corredare il messaggio di un nuovo MAC che però non può calcolare essendo all' oscuro del valore di $k$.
 
 NB: se si usa un cifrario a blocchi in modalità CBC si può usare l'ultimo blocco come MAC in quanto è funzione dell'intero messaggio.
 
@@ -213,7 +213,7 @@ L'utente V:
 
 Se $m$ è significativo concludo che è autentico.
 
-Per la correttezza del procedimento èp necessario che $n_u \leq n_v$ affinché sia vero che $f < n_v$ e quindi $f$ possa essere cifrato correttamente.
+Per la correttezza del procedimento è necessario che $n_u \leq n_v$ affinché sia vero che $f < n_v$ e quindi $f$ possa essere cifrato correttamente.
 In questo modo tuttavia $V$ non può rispondere in quanto dovrebbero avere $n_u = n_v$ ma è poco sicuro e probabile.
 
 Possiamo ovviare quindi dando ad ogni utente due chiavi distinte: una per la firma $< H$ ed una per la cifratura $> H$ con $H$ pubblico e molto grande.
@@ -226,7 +226,7 @@ Un crittoanalista attivo $X$ può decifrare i messaggi inviati a U:
 \begin{itemize}
     \item $X$ intercetta $c$ firmato e crittografato inviato da $V$ a $U$, lo rimuove dal canale e lo rispedisce a $U$ con identificativo $X$. (cancella $<V,c>$ ed invia $<X,c>$)
     \item $U$ spedisce un ack ad $X$ in risposta
-    \item $X$ usa l'ack per risalire al messaggio $m$ applicando le funzioni del cifrario con le chiavi pubbliche di $V$ e di $U$.
+    \item $X$ usa l' ack per risalire al messaggio $m$ applicando le funzioni del cifrario con le chiavi pubbliche di $V$ e di $U$.
 \end{itemize}
 
 In particolare succede:
@@ -234,8 +234,8 @@ In particolare succede:
     \item $V$ invia $c$ a $U$:
         \begin{equation}
             \begin{cases}
-                c = C(f, K_{upub})
-                f = D(m, K_{vpriv}        
+                c = C(f, K_{upub}) \\
+                f = D(m, K_{vpriv})
             \end{cases}
             \implies <V,c>
         \end{equation}
@@ -285,7 +285,7 @@ Un crittoanalista attivo può quindi intromettersi nella fase iniziale comportan
 
 \subsection{Certification of Authority - CA}
 Sono infrastrutture/enti che garantiscono la validità delle chiavi pubbliche e ne regolano l'uso gestendo la distribuzione delle chiavi a chi vuole comunicare.
-La CA autentica l'associazione <utente, chiave pubblica> emettendo un certificato digitale.
+La CA autentica l'associazione $<$utente, chiave pubblica$>$ emettendo un certificato digitale.
 Il certificato consiste della chiave pubblica e di una lista di informazioni relative al suo proprietario opportunamente firmate dalla CA.
 
 Mantiene quindi un archivio accessibile a tutti ma protetto da scritture non autorizzate.
@@ -311,7 +311,7 @@ Se tutto va a buon fine la comunicazione parte.
 
 Ci si può mettere nel mezzo solo falsificando la certificazione ma si assume che la CA sia fidata.
 
-Esistono varia CA organizzate ad albero, la verifica quindi è più complicata in quanto si cerca il primo antenato comune tra le CA di $U$ e di $V$. Ogni utente poi mantiene in cache una copia dei certificati richiesti ed una copia di $K_{CA-pub}$ per non doverla richiedere.
+Esistono varie CA organizzate ad albero, la verifica quindi è più complicata in quanto si cerca il primo antenato comune tra le CA di $U$ e di $V$. Ogni utente poi mantiene in cache una copia dei certificati richiesti ed una copia di $K_{CA-pub}$ per non doverla richiedere.
 
 \subsection{Protocollo 4: messaggio cifrato, firmato in hash e certificato}
 Il mittente $U$:
@@ -319,17 +319,17 @@ Il mittente $U$:
     \item si procura $cert$ di V
 
     \item calcola $h(m)$ e firma:
-    $$ f = D(h(m),K_{upriv} $$
+    $$ f = D(h(m),K_{upriv}) $$
 
     \item calcola $c$:
     $$ c = C(m, K_{vpub}) $$
 
-    \item spedisce <$cert_U$, c, f> ($cert_U$ contiene $K_{upub}$)
+    \item spedisce $<cert_U$, c, f$>$ ($cert_U$ contiene $K_{upub}$)
 \end{itemize}
 
 Il destinatario $V$:
 \begin{itemize}
-    \item riceve <$cert_U$, c, f> e verifica l'autenticità di $cert_U$ (e di $K_{upub}$) tramite la CA.
+    \item riceve $<cert_U$, c, f$>$ e verifica l'autenticità di $cert_U$ (e di $K_{upub}$) tramite la CA.
 
     \item decifra il crittogramma:
     $$ m=D(c, K_{vpriv}) $$
@@ -338,4 +338,4 @@ Il destinatario $V$:
     $$ c(f, K_{upub}) = h(m) $$
 \end{itemize}
 
-La catena ha un punto debole: i certificati non più validi, è quindi cruciale controllare periodicamente con la CA i certificati scaduti.
+La catena ha un punto debole: i certificati non più validi; è quindi cruciale controllare periodicamente con la CA i certificati scaduti.

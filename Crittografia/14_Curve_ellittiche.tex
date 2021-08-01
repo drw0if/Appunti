@@ -63,7 +63,7 @@ Si hanno queste varianti in base alla cubica, si hanno infatti 3 radici che poss
 \end{itemize}
 
 Si noti che sono sempre simmetriche rispetto all'asse delle $x$.
-Se non imponessimo radici distinte avremmo curve con cuspidi o con nodi, in queste particolari curve la tangente non è detto che esiste unica.
+Se non imponessimo radici distinte avremmo curve con cuspidi o con nodi, in queste particolari curve la tangente non è detto che esista unica.
 
 La simmetria viene dal termine $y^2$, infatti:
 $$ P = (x,y) \in E(a,b) \implies y^2 = x^3 + ax + b $$
@@ -171,13 +171,15 @@ Dati $P = (x_P, y_P)$, $Q = (x_Q, y_Q)$, $S = (x_S, y_S) = P+Q$ abbiamo:
     la caratteristica di K è uguale a 2 quindi non si può usare la forma normale di Weierstrass
 \end{minipage}
 
+\vspace{0.25cm}
+
 Noi consideriamo solo le curve prime per le quali $4a^3 + 27b^2 \mod p \neq 0$ (CNS per gruppo Abeliano).
 
 Ridefiniamo quindi la curva:
 $$ E_p(a,b) = \{ (x,y) \in Z_p^2 \mid y^2 \mod p = x^3 + ax + b \mod p \} \cup \{0\} $$
 
 Si noti che essendo in modulo si lavora sempre nel primo quadrante: $x, y \geq 0$.
-La curva sarà ancora simmetrica ma non rispetto $y = 0$, bensì rispetto $y = \frac{p}{2}$ (parte intera inferior).
+La curva sarà ancora simmetrica ma non rispetto $y = 0$, bensì rispetto $y = \frac{p}{2}$ (parte intera inferiore).
 
 Inoltre tutti i valori saranno in $[0, p-1]$ per il modulo.
 
@@ -189,7 +191,7 @@ Le formule della somma sono dunque le stesse ma si lavora in modulo (le division
 
 \subsection{Ordine di una curva}
 L'ordine di una curva è il numero di punti che la curva possiede.
-Si hanno al massimo $p$ valori per $x$ quindi mi aspetto circa $2p + 1$ valori di $y soluzioni$.
+Si hanno al massimo $p$ valori per $x$ quindi mi aspetto circa $2p + 1$ valori di $y$ soluzioni.
 Ovviamente non tutti i valori nel campo hanno una radice quindi sono molti meno di $2p + 1$.
 In genere in $Z_p$ i residui quadratici che definiscono un punto sulla curva sono $\frac{p-1}{2}$.
 

@@ -37,7 +37,7 @@ I componenti sono:
     \item PI: permutazione iniziale (non c'è sempre)
     \item PF: permutazione finale (non c'è sempre)
 \end{itemize}
-Il messaggio si divide in due parti: S, D ed entrano assieme alla chiave nelle varia fasi, si esegue questo per 16 volte, alla fine si permuta se c'è bisogno e si ha ottenuto il blocco.
+Il messaggio si divide in due parti: S, D ed entrano assieme alla chiave nelle varia fasi, si esegue questo per 16 volte, alla fine si permuta se c'è bisogno e si è ottenuto il blocco.
 
 Per decifrare si esegue lo stesso procedimento ma con le chiavi al contrario. Per ogni $i=1, 2, \_, 16$ abbiamo:
 $$ S[i-1], D[i-1], K[i-1] $$
@@ -119,7 +119,7 @@ Nel 1998 ce ne vollero 39 di giorni esplorando 85\% delle chiavi.
 
 Qualche parola su questi attacchi: le chiavi possibili sono $2^{56}$, 64 di queste chiavi sono rimosse perché con regolarità. Ricordando che:
 $$ C(m, k) = c = \bar{c} = C(\bar{m}, \bar{k}) $$
-si possono dimezzare le chiavi passando a $2^{55}$ (55 bit di sicurezza). Questo è un tipo di attacco chosen plain-text in cui ci si procura delle coppie $<m, c_1>$, $<\bar{m}, c_2>$. So omozoa ad esplorare le chiavi e per ognuna si controlla:
+si possono dimezzare le chiavi passando a $2^{55}$ (55 bit di sicurezza). Questo è un tipo di attacco chosen plain-text in cui ci si procura delle coppie $<m, c_1>$, $<\bar{m}, c_2>$. Si inizia ad esplorare le chiavi e per ognuna si controlla:
 \begin{itemize}
     \item C(m, k) = $c_1$: k POTREBBE ESSERE la chiave
     \item C(m, k) = $c_2$: $\bar{k}$ POTREBBE essere la chiave
@@ -129,7 +129,7 @@ si possono dimezzare le chiavi passando a $2^{55}$ (55 bit di sicurezza). Questo
 \end{itemize}
 
 Nel 1990 sono stati scoperti attacchi di \emph{crittoanalisi differenziale} (da Bihan e Shamir). E' un attacco di tipo chosen plain-text in cui ci si procura $2^{47}$ coppie $<m,c>$.
-Si cerca tra i messaggi simili le similitudini nei crittogrammi e si sfruttino per trovare la chiave.
+Si cerca tra i messaggi simili le similitudini nei crittogrammi e si sfruttano per trovare la chiave.
 Si assegnano delle probabilità alle singole chiavi, ed emerge poi quella più probabile.
 Dato che le fasi sono 16 si ha un costo di questo attacco pari a $2^{55.1}$, poco più di una ricerca esaustiva.
 
@@ -144,7 +144,7 @@ Metodo più efficiente del forza bruta.
 \subsubsection{Scelta indipendente delle sottochiavi}
 Anziché generare le sottochiavi di fase a partire dalla chiave principale si scelgono manualmente.
 E' come passare da 56 bit a $16 \cdot 48 = 768$ bit di chiave.
-Tuttavia non porta effettivamente ad un aumento della sicurezza perché è sempre effettivamente ad un aumento della sicurezza perché è sempre vulnerabile ad attacchi differenziali portando a $2^{61}$ la complessità di un attacco.
+Tuttavia non porta effettivamente ad un aumento della sicurezza perché è sempre vulnerabile ad attacchi differenziali portando a $2^{61}$ la complessità di un attacco.
 
 \subsubsection{Cifratura multipla: 2DES}
 $$ \forall k_1, k_2, k_3: C_D(C_D(m, k_1), k_2) \neq C_D(m, k_3) $$
@@ -166,7 +166,7 @@ Presente in due modi:
 \begin{itemize}
     \item 2TDEA:
         $$ c = C(D(C(m, k_1), k_2), k_1) $$
-        $k_1$ e $k_2$ sono chiavi di 56 bit tra di lor indipendenti. Si sceglie questa modalità perché se pongo $k_1 = k_2$ ottengo il DES normale, quindi risulta essere retrocompatibile.
+        $k_1$ e $k_2$ sono chiavi di 56 bit tra di loro indipendenti. Si sceglie questa modalità perché se pongo $k_1 = k_2$ ottengo il DES normale, quindi risulta essere retrocompatibile.
         
         NB: CDC non è più robusto di CCC. Ha un livello di sicurezza di 128 bit.
     \item 3TDEA: triple data encryption algorithm

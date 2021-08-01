@@ -2,7 +2,7 @@
 \subsection{Algoritmi randomizzati}
 Ci sono algoritmi alimentati oltre che dai dati in ingresso anche da valori casuali che ne determinano l'evoluzione. Li classifichiamo in due tipi:
 \begin{itemize}
-    \item Las Vegas: algoritmi che ci danno ul risultato sicuramente corretto in un tempo probabilmente breve (Quicksort)
+    \item Las Vegas: algoritmi che ci danno un risultato sicuramente corretto in un tempo probabilmente breve (Quicksort)
     \item Monte Carlo: algoritmi che ci danno un risultato probabilmente corretto in un tempo sicuramente breve (test di primalità di Miller-Rabin). Questi algoritmi offrono tuttavia la possibilità di scegliere l'errore con il quale si ottiene il risultato
 \end{itemize}
 
@@ -55,7 +55,7 @@ Scriviamo l'algoritmo completo in pseudo-codice:
     
     TESTMR(N, K){
         for(i = i; i < k; i++){
-            y <- numero a caso in [2, N-1]
+            y = numero a caso in [2, N-1]
             if(verifica(N, y) == 1)
                 return 0    // N sicuramente non è primo
         }

@@ -32,14 +32,14 @@ Es: SSL\_RSA\_WITH\_AES\_CBC\_SHA1:
 Questo è un esempio di \emph{cipher suite}
 
 \subsubsection{server hello}
-Riceve il messaggio dell'utente, seleziona una cipher suite che anche lui supporta ed invia al client un messaggio che specifica la sua scelta. Appena de byte casuali alla risposta. Anche questo è mandato in chiaro!
+Riceve il messaggio dell'utente, seleziona una cipher suite che anche lui supporta ed invia al client un messaggio che specifica la sua scelta. Appende dei byte casuali alla risposta. Anche questo è mandato in chiaro!
 
 NB: Se $U$ non riceve il server hello interrompe la comunicazione
 
 \subsubsection{Autenticazione}
 $S$ si autentica con $U$ inviandogli il proprio certificato digitale (e gli eventuali altri certificati fino al primo nodo comune nella catena delle CA).
 
-NB: se i servizi offerti da $S$ devono essere protetti negli accessi anche $S$ può richiedere a $U$ di autenticarsi inviando il suo certificato digitale. Avviene raramente in quanto la maggior parte degli utenti non ha un proprio certificato ee in genere ci si accerta dell'identità di un utente in un secondo modo (autenticazione sul sito web ad esempio)
+NB: se i servizi offerti da $S$ devono essere protetti negli accessi anche $S$ può richiedere a $U$ di autenticarsi inviando il suo certificato digitale. Avviene raramente in quanto la maggior parte degli utenti non ha un proprio certificato e in genere ci si accerta dell'identità di un utente in un secondo modo (autenticazione sul sito web ad esempio).
 
 \subsubsection{server hello done}
 Messaggio con il quale il server sancisce la fine degli accordi sulla cipher suite ed i parametri crittografici associati.
@@ -85,10 +85,10 @@ Successivamente i parametri vengono passati al SSL Record che si occupa del vero
 Il destinatario esegue il contrario.
 
 \subsection{Sicurezza di SSL}
-Nei passi di hello i due partner creano i si inviano sequenze casuali per costruire la master secret, questo risulta in chiavi diverse ogni volta.
+Nei passi di hello i due partner creano e si inviano sequenze casuali per costruire la master secret, questo risulta in chiavi diverse ogni volta.
 Un crittoanalista non può riutilizzare i messaggi catturati sul canale per sostituirli a S successivamente.
 
-L'SSL record successivamente numera ogni blocco in mainera incrementale e lo autentica tramite MAC.
+L'SSL record successivamente numera ogni blocco in maniera incrementale e lo autentica tramite MAC.
 Un blocco non può essere modificato in quanto il MAC è hash di:
 \begin{itemize}
     \item contenuto
@@ -111,7 +111,7 @@ L'opzionalità di questa autenticazione ha reso usato questo protocollo in quant
 
 Le sequenze sono generate a partire da byte casuali quindi una sua predicibilità metterebbe a rischio tutto.
 
-Il messaggio fnished contiene tutta la history e quidi permettono un ulteriore controllo finale.
+Il messaggio finished contiene tutta la history e quidi permette un ulteriore controllo finale.
 
 E' sicuro almeno quanto il cifrario più debole della cipher suite, ma non ci sono cifrari deboli lasciati dentro.
 

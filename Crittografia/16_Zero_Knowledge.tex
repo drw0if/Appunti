@@ -63,7 +63,7 @@ La coppia $<t,n>$ costituisce la chiave pubblica da distribuire mentre la terna 
 L'algoritmo di autenticazione prevede $k$ iterazioni con $k$ scelto da V:
 \begin{itemize}
     \item V chiede a P di iniziare una iterazione
-    \item P genera un intero $r < n$, calcola $u = r^s \mod n$ e comunica $u$ a Victor
+    \item P genera un intero $r < n$, calcola $u = r^s \mod n$ e comunica $u$ a V
     \item V sceglie casualmente $e \in \{1, 0\}$ e lo comunica a P
     \item P calcola $z = r \cdot s^e \mod n$ e lo comunica a V
     \begin{itemize}

@@ -59,8 +59,8 @@ Può anche mettere assieme più indirizzi di input:
 \end{table}
 
 Si possono spendere solo output non spesi di precedenti transazioni che avevano noi come destinatario.
-La somma degli input deve sempre essere maggiore o uguale alla somma degli output, se è uguale pagamenti normali, se è maggiore quelli in più viene aggiunto al primo che convalida il blocco (perché può aggiungere questo movimento).
-Per incentivare questo conferma si usa quindi lasciare questa fee al miner.
+La somma degli input deve sempre essere maggiore o uguale alla somma degli output, se è uguale pagamenti normali, se è maggiore quelli in più vengono aggiunti al primo che convalida il blocco (perché può aggiungere questo movimento).
+Per incentivare questa conferma si usa quindi lasciare questa \emph{fee} al miner.
 
 \subsubsection{Validazione}
 Gli utenti ricevono dal broadcast queste transazioni, le controllano (cercano nel passato se la valuta è presente nel conto di chi invia) le mettono assieme a gruppi (100, 200 anche 1000) e poi provano ad aggiungerle alla blockchain.
@@ -89,7 +89,7 @@ Chi cerca di attaccare un nuovo blocco è detto \emph{miner} e sono i nodi che v
 
 Si parla di \emph{validazione tramite mining}.
 
-Cercare il nonce è difficile, verificarlo invece è semplice quindi chi trova il nonce lo diffone in broadcast a tutti i nodi, gli altri lo verificano, controllano la validità delle transazioni ed esprimono il loro consenso: prendono il nuovo nodo e cercheranno di attaccare nuovi nodi ad esso.
+Cercare il nonce è difficile, verificarlo invece è semplice quindi chi trova il nonce lo diffonde in broadcast a tutti i nodi, gli altri lo verificano, controllano la validità delle transazioni ed esprimono il loro consenso: prendono il nuovo nodo e cercheranno di attaccare nuovi nodi ad esso.
 
 Se la rete ad un certo punto ha delle biforcazioni si tende a privilegiare i rami con più transazioni perché è più probabile che siano accettati da tutta la rete.
 

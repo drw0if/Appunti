@@ -151,7 +151,7 @@ Si usa per eliminare qualsiasi struttura linguistica presente nel crittogramma:
     \item inserendone altre ignorate durante la decifrazione
 \end{itemize}
 
-Es: genero la chiave: preso un intero $h$ genero $\Pi$ come una permutazione degli ingeti $\{1,_,h\}$. Si suddivide il messaggio in blocchi lunghi $h$ e si permutano i singoli blocchi seguendo $\Pi$.
+Es: genero la chiave: preso un intero $h$ genero $\Pi$ come una permutazione degli interi $\{1,\_,h\}$. Si suddivide il messaggio in blocchi lunghi $h$ e si permutano i singoli blocchi seguendo $\Pi$.
 
 NB: se $|m|$ non è multiplo di $h$ si aggiungono dele lettere dette \emph{padding} ignorate nella decifrazione in quanto finiscono alla fine del messaggio.
 
@@ -190,7 +190,7 @@ Es: $q = 6$, $s = 6$, $m = $ L'ASSASSINO E' ARCHIMEDES TARRINGTON
 
 La griglia va costruita in modo che una cella già usata non ricapiti nuovamente. Se la lunghezza è maggiore di $4s$ si riempiono più tabelle. La decifrazione si ottiene applicando la maschera e leggendo. Le griglie possibili sono $G = 4^s = 4^{\frac{q^2}{4}}$. Per $q=6$ $G = 4^9 \approx 260'000$. Si arriva a questo numero perché:
 \begin{itemize}
-    \item immaginiamo di dover creare la maschera, scegliamo il primo foro e dobbiamo sceglierlo in modo che ruotandol la griglia non sia nuovamente scoperto, quindi altre 3 celle si rendono visibili, noi ne possiamo scegliere una sola tra queste 4.
+    \item immaginiamo di dover creare la maschera, scegliamo il primo foro e dobbiamo sceglierlo in modo che ruotando la griglia non sia nuovamente scoperto, quindi altre 3 celle si rendono visibili, noi ne possiamo scegliere una sola tra queste 4.
     \item si devono scegliere $s$ buchi, per ogni cella se ne deve scegliere una su 4 quindi $4^s$ chiavi possibili
 \end{itemize}
 
@@ -230,16 +230,17 @@ In genere l'istogramma delle frequenze è utile per discernere dal tipo di algor
 \end{itemize}
 
 \subsection{La macchina Enigma}
-Rappresenta l'ultimo esempio di cifrario storico, il primo che porta a dei sistemi automatizzati e gli sforzi fatti per rompere questo sistema sono stati umportanti per l'evoluzione storica dell'informatica. Nasce in Germania nel 1918 ed è una modifica automatizzata del cifrario dell'Alberti.
+Rappresenta l'ultimo esempio di cifrario storico, il primo che porta a dei sistemi automatizzati e gli sforzi fatti per rompere questo sistema sono stati importanti per l'evoluzione storica dell'informatica. Nasce in Germania nel 1918 ed è una modifica automatizzata del cifrario dell'Alberti.
 
-Si compone di una tastiera come una macchina da scrivere, più in alto un pannello di lettere che illuminate daranno il crittogramma. Premendo un tasto quindi si accende una luce, si segna la lettera e si costruisce il crittogramma da inviare. La macchina va preparata con un asstto iniziale che rende reversibile la cifratura: partendo dalla configurazione $A \xrightarrow{} F$ ma anche $F \xrightarrow{} A$ in modo da usarla sia per cifrare che per decifrare. La chiave è proprio l'assetto iniziale.
+Si compone di una tastiera come una macchina da scrivere, più in alto un pannello di lettere che illuminate daranno il crittogramma. Premendo un tasto quindi si accende una luce, si segna la lettera e si costruisce il crittogramma da inviare. La macchina va preparata con un assetto iniziale che rende reversibile la cifratura: partendo dalla configurazione $A \xrightarrow{} F$ ma anche $F \xrightarrow{} A$ in modo da usarla sia per cifrare che per decifrare. La chiave è proprio l'assetto iniziale.
 
 All'interno abbiamo un \emph{riflettore} e \emph{3 rotori}. Il riflettore è anch'esso un rotore modificato. Per aumentare lo spazio delle chiavi si aggiunge una \emph{plugboard} cioè una batteria di connettori che mette in corrispondenza diretta due lettere. I rotori rappresentano la permutazione di un alfabeto, all'interno di ognuno i fili connettono un elemento di una faccia ad un elemento dell'altra faccia. Questo cablaggio è fisso!
 Il funzionamento interno:
 
-\begin{verbatim}
-    TODO: DISEGNONE DA FARE
-\end{verbatim}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width = 350pt]{Enigma.png}
+\end{figure}
 
 Per costruzione una lettera non è mai cifrata con se stessa. Questa proprietà e quella di riflessione sono state utilissime nel rompere questo sistema.
 

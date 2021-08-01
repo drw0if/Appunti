@@ -22,7 +22,7 @@ $$ m = D(c, K_{priv})$$
 
 NB: si dice asimmetrica perché le due parti fanno cose diverse, non c'è una simmetria.
 
-Questi cifrari devono avere alcune caratteristice:
+Questi cifrari devono avere alcune caratteristiche:
 \begin{itemize}
     \item $D(C(m, K_{pub}), K_{priv}) = m$
     \item efficienza e sicurezza: le chiavi devono essere \emph{facili} da generare e praticamente deve essere impossibile generare la stessa coppia.
@@ -89,7 +89,7 @@ $$ \phi(n) = n \cdot (1 - \frac{1}{p_1}) \cdot \_ \cdot (1 - \frac{1}{p_k})$$
 con $p_1$, \_, $p_k$ i fattori primi di n presi senza molteplicità
 
 Se $n = p \cdot q$ con $p$ e $q$ primi (quindi $n$ semiprimo):
-$$ phi(n) = (p-1) \cdot (q-1) $$
+$$ \phi(n) = (p-1) \cdot (q-1) $$
 
 \subsection{Teorema di Eulero}
 $\forall n>1$, $\forall a \in Z_{n}^*$:
@@ -114,7 +114,7 @@ NB: in generale nell'algebra modulare l'esistenza dell'inverso non è garantita 
 L'equazione $a \cdot x \equiv b \mod n$ ammette soluzioni se e solo se $mcd(a,n)$ divide $b$.
 In questo caso si hanno esattamente $mcd(a,n)$ soluzioni distinte.
 
-NB: se $mcd(a,n)=1$ ($a$,$n$ coprimi) $a \cdot x = b \mod n$ ammette una unica soluzione. E quindi esiste $a^{-1}$
+NB: se $mcd(a,n)=1$ ($a$,$n$ coprimi) $a \cdot x \equiv b \mod n$ ammette una unica soluzione. E quindi esiste $a^{-1}$
 
 
 \subsection{Algoritmo di Euclide esteso}
@@ -156,7 +156,7 @@ Per $n$ primo non tutti gli elementi di $Z_n^*$ sono suoi generatori (1 non lo �
 Per $n$ primo i generatori di $Z_n^*$ sono $\phi(n)$.
 
 \subsection{Problemi sui generatori}
-Determinare un generatore di $Z_n^*$ con $n$ primo è difficile, si possono provare tuttu i numeri in $[2, n-1]$ ma è esponenziale nella dimensione di $n$.
+Determinare un generatore di $Z_n^*$ con $n$ primo è difficile, si possono provare tutti i numeri in $[2, n-1]$ ma è esponenziale nella dimensione di $n$.
 Esistono tuttavia algoritmi randomizzati che risolvono il problema efficientemente.
 
 \subsection{Logaritmo discreto}

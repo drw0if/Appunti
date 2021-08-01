@@ -93,18 +93,18 @@ Il crittoanalista si installa sul canale ed interrompe le comunicazioni dirette 
 Si conoscono alcuni \emph{cifrari perfetti} ma richiedono operazioni estremamente complesse, quindi sono utilizzati in condizioni estreme. La definizione di cifrario inattaccabile si deve a \emph{Claude Shannon} ('45 ma pubblicato nel '49). Il messaggio in chiaro ed il crittogramma sono completamente scorrelati tra loro. un esempio è il \emph{one-time pad} che richiede:
 \begin{itemize}
     \item una chiave diversa per ogni messaggio
-    \item perfettametne casuale
+    \item perfettamente casuale
     \item lunga quanto il messaggio
 \end{itemize}
 Come vanno generate? Come vanno scambiate?
-I cifrari utilizzati oggigiorno non sono perfetti ma sono comunque \emph{dichiarati sicuri} perché inviolati e per violarli è necessario risolvere problemi matematici estremamente difficili (abbiamo solo algoritmo esponenziali) quindi è richiesto tanto tempo o calcolatori molto grandi, nella pratica impossibile.
+I cifrari utilizzati oggigiorno non sono perfetti ma sono comunque \emph{dichiarati sicuri} perché inviolati e per violarli è necessario risolvere problemi matematici estremamente difficili (abbiamo solo algoritmi esponenziali) quindi è richiesto tanto tempo o calcolatori molto grandi, nella pratica impossibile.
 
 NB: non sempre è noto se l'algoritmo esponenziale è l'unico metodo o ce ne sono altri ancora non scoperti.
 
 Uno dei cifrari di oggi è l'\emph{AES} (Advanced Encryption Standard): è lo standard per le comunicazioni non classificate, pubblicamente noto ed implementabile. Usa chiavi brevi a 128 o 256 bit. E' un cifrario simmetrico a blocchi, la stessa chiave quindi si usa sia per cifrare che per decifrare.
 
 NB: la chiave non è scelta dai partecipanti ma dai compter che usano.
-Come trasmette le chiavi in maniera sicura ed evitare che venga intercettata?
+Come trasmettere le chiavi in maniera sicura ed evitare che venga intercettata?
 
 \subsection{Distribuzione delle chiavi}
 Nel 1976 è stato proposto un protocollo di creazione e scambio di chiavi su un canale insicuro scenza la necessità che le due parti debbano essersi scambiate altre informazioni. Questo algoritmo è detto \emph{protocollo Diffie-Hellman} acora osa usato largamente.
@@ -127,7 +127,7 @@ I sistemi simmetrici si dicono anche a chiave privata, mentre quelli asimmetrici
 Per usare un meccanismo come crittografia asimmetrica è necessario l'uso di funzioni \emph{one-way trapdoor} cioè passare da \emph{m} a \emph{c} è facile ma decifrare \emph{c} (senza conoscere la chiave) è difficile.
 
 \subsection{RSA}
-Nel 1977 Rivest-Shamir-Adleman inventao un sistema a chiave pubblica basato sulla difficoltà di fattorizzare grandi numeri in fattori primi.
+Nel 1977 Rivest-Shamir-Adleman inventano un sistema a chiave pubblica basato sulla difficoltà di fattorizzare grandi numeri in fattori primi.
 Usando un sistema a chiave pubblica si ha una comunicazione molti a uno in quanto tutti hanno $K_{pub}$ e possono quindi cifrare i messaggi, ma solo il destinatario può leggerli conoscendo $K_{priv}$. Altri vantaggi sono:
 \begin{itemize}
     \item tra n persone le chiavi sono $2n$, con un cifrario simmetrico invece sarebbero $\frac{n(n-1)}{2}$
@@ -137,7 +137,7 @@ Usando un sistema a chiave pubblica si ha una comunicazione molti a uno in quant
 Tuttavia sono molto più lenti e le chiavi sono molto lunghe. Sono soggetti ad attacchi di tipo testo in chiaro scelto.
 
 \subsection{Cifrari ibridi}
-Si usa un cifrario a chiave segreta per al comunicazione di massa ma la chiave viene scambiata tramite cifrari asimmetrici. Si hanno quindi:
+Si usa un cifrario a chiave segreta per la comunicazione di massa ma la chiave viene scambiata tramite cifrari asimmetrici. Si hanno quindi:
 \begin{itemize}
     \item chiavi piccole
     \item chiave simmetrica randomica impossibile da prevedere tramite attacco di tipo testo in chiaro scelto

@@ -79,7 +79,7 @@ Seguendo questo metodo ogni sequenza corrisponde ad un numero $\in \mathbb{N}$ e
 
 NB: questo si può fare perché abbiamo preso sequenze di lunghezza finita, per sequenze di lunghezza infinita non esiste una enumerazione.
 
-Alcuni esempi di insiemei non numerabili sono:
+Alcuni esempi di insiemi non numerabili sono:
 \begin{itemize}
     \item $\mathbb{R}$
     \item $\mathbb{R}$ ristretto a $(0, 1)$ o $[0, 1]$
@@ -150,7 +150,7 @@ siamo ad un assurdo $\implies$ l'insieme delle funzioni $f: \mathbb{N} \longrigh
 L'informatica rappresenta tutte le sue entità in forma digitale come sequenze finite di simboli finiti. Possiamo dire quindi che la conoscenza umana è numerabile.
 
 \subsubsection{Algoritmo}
-E' una sequenza finita di operazioni, completamente e univocamente determinate. La formulazione di un algoritmo dipende dal modello di calcolo utilizzat: se uso la macchina di Turing ho una codifica, se uso il C ne ho un'altra, ecc. Qualsiasi codifica si scelga però gli algoritmi devono essere sempre descritti da una sequenza finita di caratteri di un alfabeto finito.
+E' una sequenza finita di operazioni, completamente e univocamente determinate. La formulazione di un algoritmo dipende dal modello di calcolo utilizzato: se uso la macchina di Turing ho una codifica, se uso il C ne ho un'altra, ecc. Qualsiasi codifica si scelga però gli algoritmi devono essere sempre descritti da una sequenza finita di caratteri di un alfabeto finito.
 
 \emph{Gli algoritmi sono infiniti ma numerabili, i problemi sono infiniti ma non numerabili quindi esistono problemi privi di un corrispondente algoritmo di calcolo}.
 
@@ -161,7 +161,7 @@ quindi la calcolabilità p chiamata \emph{decidibilità}.
 
 \emph{Presi arbitrariamente un algoritmo A ed i suoi dati di input D, decidere in tempo finito se la computazione di A su D termina o no}.
 
-Si cerca quindi un algoritmo che indaghi le proprietà di un altro algoritmo usato come input. (Si può fare perché algoritmi e dati sono rappresentati come sequenze di caratteri dello stesso alfabeto). Un test di primalità termina, un algoritmo che cerca un numero che fallisce alla congettura di Goldbach (ogni numero intero pari $\geq 4$ può essere espresso come somma di due primi) non sappiamo se termina o meno in quanto no sappiamo se al congettura sia vera o meno:
+Si cerca quindi un algoritmo che indaghi le proprietà di un altro algoritmo usato come input. (Si può fare perché algoritmi e dati sono rappresentati come sequenze di caratteri dello stesso alfabeto). Un test di primalità termina, un algoritmo che cerca un numero che fallisce alla congettura di Goldbach (ogni numero intero pari $\geq 4$ può essere espresso come somma di due primi) non sappiamo se termina o meno in quanto non sappiamo se la congettura sia vera o meno:
 $$ \text{congettura falsa} \longrightarrow \text{l'algoritmo termina} $$
 $$ \text{congettura vera} \longrightarrow \text{l'algoritmo non termina} $$
 
@@ -208,14 +208,14 @@ Il miglioramento è di un fattore additivo logaritmico!
 NB: se prima si trattavano problemi di istanza 1000 dopo essere passati ad una macchina più potente con $k = 10^9$ si potranno trattare istanze $1000 + log_2{10^9} \approx 1030$. Questo è il motivo per il quale si distingue tra trattabili ed intrattabili!
 
 \subsubsection{Problemi}
-Dato un numero $\Pi$ indichiamo con:
+Dato un problema $\Pi$ indichiamo con:
 \begin{itemize}
     \item $I$: insieme delle \emph{istanze} di ingresso
     \item $S$: insieme delle \emph{soluzioni}
 \end{itemize}
 Alcune tipologie di problemi sono:
 \begin{itemize}
-    \item \emph{problemi decisionali} se $S = \{0, 1\}$ (un numero è primo? un grafo è connesso?). Chiamiamo istanze positive o accettabili quelle tale che $x \in I : \Pi(x) = 1$ ed istanze negative quelle tali che: $x \in I \Pi(x) = 0$
+    \item \emph{problemi decisionali} se $S = \{0, 1\}$ (un numero è primo? un grafo è connesso?). Chiamiamo $x \in I$ istanza positiva o accettabile se $\Pi(x) = 1$ ed istanza negativa se: $\Pi(x) = 0$
     \item \emph{problemi di ricerca} se dato $x \in I$ ci fornisce una soluzione $s$ (trovare un cammino tra due vertici, ecc)
     \item \emph{problemi di ottimizzazione} se dato $x \in I$ si vuole trovare la migliore soluzione $s$ tra tutte quelle ammissibili (cammino minimo, ecc)
 \end{itemize}
@@ -292,7 +292,7 @@ E' di fatto un attestato \emph{breve} di esistenza di una soluzione. Si definisc
 Es: $UNSAT$: è vero che nessun assegnamento rende vera l'espressione? Per questo problema non basta fornire un assegnazione accettabile, non sarebbe breve!
 
 \subsubsection{Teoria della verifica}
-Utiliziamo il costo della verifica di un certificato per una istanza positiva per caratterizzare al complessità del problema stesso. Un problema $\Pi$ è \emph{verificabile in tempo polinomiale} se 
+Utiliziamo il costo della verifica di un certificato per una istanza positiva per caratterizzare la complessità del problema stesso. Un problema $\Pi$ è \emph{verificabile in tempo polinomiale} se
 \begin{itemize}
     \item ogni istanza accettabile $x$ di $\Pi$ di lunghezza $n$ ammette un certificato $y$ di lunghezza polinomiale in $n$
     \item esiste un algoritmo di verifica polinomiale in $n$ ed applicabile ad ogni coppia $<x$, $y>$ che attesta se $x$ è accettabile.
@@ -311,7 +311,7 @@ $P \subseteq NP$ certamente perché qualsiasi problema in P può essere risolto 
 
 
 \subsubsection{Problemi NP-completi}
-Sono i problemi più difficili dentro NP: se esistesse un algoritmo polinomiale per risolvere uno solo di questi allora tutti i problemi in NP sarebbero risolti in tempo polinomiale $\implies$ P = NP. Quindi tutti gli NP-completi si risolvono tutti in tempo polinomiale oppure nessuno lo è.
+Sono i problemi più difficili dentro NP: se esistesse un algoritmo polinomiale per risolvere uno solo di questi allora tutti i problemi in NP sarebbero risolti in tempo polinomiale $\implies$ P = NP. Quindi o tutti i problemi NP-completi si risolvono in tempo polinomiale oppure nessuno lo è.
 
 \subsubsection{Riduzioni polinomiali}
 Presi $\Pi_{1}$ e $\Pi_{2}$ problemi decisionali, $I_{1}$ e $I_{2}$ insiemi degli input di $\Pi_{1}$ e di $\Pi_{2}$ diremo che $\Pi_{1}$ si riduce in tempo polinomiale a $\Pi_{2}$:
@@ -398,7 +398,7 @@ $$ n = |I| = \Theta\left( \log a + \log b \right) = \Theta\left( \log a \right)$
 \end{table}
 osserviamo che $a = q \cdot b + a \mod b \geq b + a \mod b$, ricordando che $b > a \mod b : a > a \mod b + a \mod b \implies a > 2 \cdot a \mod b \implies a \mod b < \frac{a}{2}$
 
-quindi ogni due passi l'input si dimezza quindi il numeor di chiamate è $O\left( \log a \right)$. Il costo totale è $numero chiamate \cdot costo singola chiamata$: il costo del calcolo del modulo è pari a $O\left( \log a \cdot \log b\right ) = O\left( \log^{2}a \right)$. Complessivamente:
+quindi ogni due passi l'input si dimezza quindi il numero di chiamate è $O\left( \log a \right)$. Il costo totale è $numero chiamate \cdot costo singola chiamata$: il costo del calcolo del modulo è pari a $O\left( \log a \cdot \log b\right ) = O\left( \log^{2}a \right)$. Complessivamente:
 $$ T\left(n\right) = O\left(log^{3}a\right) = O\left( n^{3} \right) $$
 $$ n = |I| \text{ : polinomiale nella dimensione dell'istanza dei dati (n di cifre)} $$
 $$ n = \log a \text{ : polilogaritmico nel valore dei dati} $$
