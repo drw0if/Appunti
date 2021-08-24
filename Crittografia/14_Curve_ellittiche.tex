@@ -225,9 +225,7 @@ O($t$) = O($\log_2 k)$ quindi lineare nella dimensione dell'input.
 vediamo l'inverso della moltiplicazione scalare: dati $P$ e $Q$, sulla curva $E_p(a,b)$, trovare il più piccolo $k$ tale che: $Q = kP$. Non si conoscono algoritmi polinomiali ne sub-esponenziali per risolvere il problema.
 
 \subsection{Protocollo DH su curve ellittiche}
-Alice e Bob scelgono una curva ellittica prima (che soddisfi la condizione di gruppo Abeliano) ed un punto $B$ della curva che abbia ordine molto grande (l' ordine di un punto è il più piccolo $n$ tale che $nB=0$).
-
-$B$ sarebbe il generatore di DH.
+Alice e Bob scelgono una curva ellittica prima (che soddisfi la condizione di gruppo Abeliano) ed un punto $B$ della curva che abbia ordine molto grande (l' ordine di un punto è il più piccolo $n$ tale che $nB=0$). $B$ sarebbe il generatore di DH.
 
 NB: i punti e le curve sono già consigliate da NIST, non si devono quindi creare da zero.
 Sono note e pubbliche.
@@ -235,9 +233,9 @@ Sono note e pubbliche.
 L'algoritmo prosegue così:
 \begin{itemize}
     \item Alice estrae $n_A < n$ casuale, calcola $P_A = n_AB$ e lo invia in chiaro a Bob
-    \item Bob riceve $P_A$. Estrae $n_B < n$ casuale, calcola $P_B = n_BA$ e lo invia in chiaro ad Alice
-    \item Alice riceve $P_B$ e calcola $S = n_AP_B = n_An_BP$
-    \item Bob riceve $P_A$ e calcola $S = n_BP_A = n_Bn_AP$
+    \item Bob riceve $P_A$. Estrae $n_B < n$ casuale, calcola $P_B = n_BB$ e lo invia in chiaro ad Alice
+    \item Alice riceve $P_B$ e calcola $S = n_AP_B = n_An_BB$
+    \item Bob riceve $P_A$ e calcola $S = n_BP_A = n_Bn_AB$
 \end{itemize}
 ambo le parti hanno generato lo stesso $S$ e possono quindi generare la stessa chiave di sessione in vari modi (ad esempio $K = x_S \mod 256$).
 

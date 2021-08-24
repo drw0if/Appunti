@@ -168,7 +168,7 @@ Presente in due modi:
         $$ c = C(D(C(m, k_1), k_2), k_1) $$
         $k_1$ e $k_2$ sono chiavi di 56 bit tra di loro indipendenti. Si sceglie questa modalità perché se pongo $k_1 = k_2$ ottengo il DES normale, quindi risulta essere retrocompatibile.
         
-        NB: CDC non è più robusto di CCC. Ha un livello di sicurezza di 128 bit.
+        NB: CDC non è più robusto di CCC. Ha un livello di sicurezza di 112 bit.
     \item 3TDEA: triple data encryption algorithm
         $$ c = C(D(C(m, k_1), k_2), k_3) $$
         $k_1$, $k_2$, $k_3$ chiavi a 56 bit. Si hanno quindi chiavi di $3 \cdot 56 = 168$ bit. E' vulnerabile a meet-in-the-middle quindi la sicurezza scende a 112 bit di sicurezza.

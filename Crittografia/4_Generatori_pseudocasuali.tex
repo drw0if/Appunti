@@ -72,7 +72,7 @@ Per studiare un generatore di sequenze pseudo-casuali possiamo effettuare dei te
     \item \emph{test di frequenza}
     \item \emph{poker test}: sottosequenza di lunghezza fissa siano equamente distribuite
     \item \emph{test di autocorrelazione}: verifica che non ci siano regolarità nella sequenza
-    \item \emph{run test}: verifica che le sottosequenze massimali (più lunghe possibili) abbiano una frequenza esponenziale negativa: più è lunga e meno è probabile trovarla con decrescita esponenziale
+    \item \emph{run test}: verifica che le sottosequenze massimali (più lunghe possibili) di bit uguali abbiano una frequenza esponenziale negativa: più è lunga e meno è probabile trovarla, con decrescita esponenziale (una sequenza di dieci bit 1 è meno probabile di una sequenza di tre bit 1)
 \end{itemize}
 
 \subsection{Test di prossimo bit}
@@ -120,8 +120,9 @@ Es:
 $$ x \xrightarrow{} f(x) = x^2 \mod n \text{ (n non primo)} $$
 è una funzione one-way
 $$ n = 77, x = 10, y = 10^{2} \mod 77 = 23 $$
-il contrario prevederebbe una enumerazione di tutti i valori da 0 a $n-1$!
-$$ b(x) = \text{x è dispari} \text{ è un predicato hard core} $$
+il contrario prevederebbe una enumerazione di tutti i valori da 0 a $n-1$.
+$$ b(x) = \text{"x è dispari"} $$
+è un predicato hard core.
 
 \subsection{Generatore BBS}
 Il generatore BBS (Blum-Blum-Shub), nato nel 1986 è un generatore crittograficamente sicuro! Si prendono $p$, $q$ primi (grandi) che verificano:
@@ -144,7 +145,7 @@ $$ x_{0} = y^{2} \mod n $$
 si calcola una successione di $ m \leq n $ interi con:
 
 $$ x_{i} = (x_{i-1})^{2} \mod n $$
-$$ b_{i} = 1 \Longleftrightarrow x_{n-1} \text{ è dispari} $$
+$$ b_{i} = 1 \Longleftrightarrow x_{n-i} \text{ è dispari} $$
 
 si hanno quindi:
 

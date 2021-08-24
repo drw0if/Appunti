@@ -60,7 +60,7 @@ $$ P(M=m \mid C=c) = 0 $$
 Ne deriva quindi che $N_m \leq N_k$. Per usare un cifrario perfetto mi serve quindi una chiave lunghissima!
 
 \subsection{One-Time Pad}
-E' un cifrario precedente Shannon, è simile ad un Vigenère con chiave lunga quanto il messaggio ma su un alfabeto binario. Nasce nel 1917 da Mauborge Vernam. Come alfabeto si usa \{0, 1\}, MSG, CRITTO, KEY sono sequenze binarie e l'algoritmo di cifratura è noto a tutti ed è lo XOR (somma modulo 2):
+E' un cifrario precedente Shannon, è simile ad un Vigenère con chiave lunga quanto il messaggio ma su un alfabeto binario. Nasce nel 1917 da Mauborge Vernam. Come alfabeto si usa \{0, 1\}, MSG, CRITTO, KEY sono spazi delle sequenze binarie e l'algoritmo di cifratura è noto a tutti ed è lo XOR (somma modulo 2):
 
 Supponiamo quindi $m, k \in \{0, 1\}^{n}, n > 0$:
 $$ c = C(m, k) = m \oplus k $$
@@ -92,7 +92,7 @@ $$ P(M=m \mid C=c) = P(M=m) $$
 Si ricordi che:
 $$ P(M=m \mid C=c) \triangleq \frac{P(M=m\text{ e }C=c)}{P(C=c)} $$
 stimiamo il numeratore: per le proprietà dello XOR fissato $m$ esiste una sola chiave che mi produce $c$ perché chiavi diverse producono crittogrammi diversi:
-$$ \nexists k \in KEY: m \oplus k = c $$
+$$ \exists! k \in KEY: m \oplus k = c $$
 quindi la probabilità di ottenere $c$ da $m$ è pari alla probabilità di scegliere casualmente $k$: $\frac{1}{2^n}$
 quindi $\forall c \in CRITTO$ $P(C=c)=\frac{1}{2^n}$
 nessuna dipendenza dal messaggio quindi sono eventi indipendenti: \{M=m\}, \{C=c\} indipendenti, quindi:

@@ -154,7 +154,10 @@ Il problema di ciò è che blocchi uguali vengono cifrati in blocchi uguali, que
 Per risolvere questo problema si cerca di inserire una dipendenza tra il blocco $i$-esimo e quelli che vengono prima.
 Nell'AES si prende $m$ e lo si divide in blocchi da 128 bit:
 $$ m = m_{1}m_{2}\_m_{i}\_m_{e} $$
-se $\mid m_e \mid < 128$ allora si aggiunge $10...0$ fino ad arrivare a 128, se invece $\mid m_e \mid = 128$ si inserisce un intero blocco $10...0$ in modo da avere sempre questo terminatore.
+\begin{itemize}
+    \item se $\mid m_e \mid < 128$ allora si aggiunge $10...0$ fino ad arrivare a 128
+    \item se invece $ \mid m_e \mid = 128 $ si inserisce un intero blocco $10...0$ in modo da avere sempre questo terminatore.
+\end{itemize}
 Successivamente si sceglie una $c_0$ random che può anche essere trasmessa in chiaro e si attua questo schema:
 \begin{figure}[H]
     \centering

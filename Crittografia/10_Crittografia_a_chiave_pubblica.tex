@@ -67,6 +67,8 @@ Dati $a, b \geq 0$ interi e $n > 0$ diremo \emph{a è congruo a b modulo n}:
 $$ a \equiv b \mod n $$
 se e solo se $\exists k$ intero per cui:
 $$ a = b + k \cdot n $$
+Quindi
+$$ a \equiv b \mod n \iff a \mod n = b \mod n $$
 
 NB: $a \mod n = b \mod n$, nella relazione di congruenza mod n si riferisce all'intera relazione, nelle relazioni di uguaglianza invece si riferisce solo al membro dove appare:
 $$ 5 \neq 8 \mod 3 $$
@@ -144,7 +146,7 @@ genera \emph{tutti e soli} gli elementi di $Z_{n}^*$.
 
 Un generatore quindi genera $Z_{n}^*$ ma in un ordine difficile da prevedere.
 
-NB: l'unica cosa prevedibile è che $1$ si ottiene solo per $x = \phi(n)$ poiché sappiamo $a^{\phi(n)} = 1 \mod n$ per Eulero. Quindi $\forall g$ $g^k \neq 1 \mod n$, $ 1 \leq k < \phi(n)$
+NB: l'unica cosa prevedibile è che $1$ si ottiene per $x = \phi(n)$ poiché sappiamo $a^{\phi(n)} \equiv 1 \mod n$ per Eulero. Quindi $\forall g$ $g^k \neq 1 \mod n$, $ 1 \leq k < \phi(n)$
 
 Non tutti gli $n$ forniscono generatori per $Z_{n}^*$.
 
@@ -165,7 +167,7 @@ $$ a^x \equiv b \mod n, \text{n primo} $$
 L'equazione ammette soluzioni $\forall b$ se e solo se $a$ è un generatore di $Z_n^*$.
 Tuttavia non possiamo sapere in che ordine sono generati i valori di $Z_n^*$ quindi per trovare $x$ giusto dobbiamo iterare tutti i valori (esponenziale nella dimensione dell'input).
 
-NB: su questa complessità si basa DH.
+NB: su questa complessità si baserà l'algoritmo Diffie-Hellman.
 
 \subsection{Funzioni one-way trap-door}
 $$ n = p \cdot q \text{ p, q primi} $$
