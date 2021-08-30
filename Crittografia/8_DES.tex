@@ -122,7 +122,7 @@ $$ C(m, k) = c = \bar{c} = C(\bar{m}, \bar{k}) $$
 si possono dimezzare le chiavi passando a $2^{55}$ (55 bit di sicurezza). Questo è un tipo di attacco chosen plain-text in cui ci si procura delle coppie $<m, c_1>$, $<\bar{m}, c_2>$. Si inizia ad esplorare le chiavi e per ognuna si controlla:
 \begin{itemize}
     \item C(m, k) = $c_1$: k POTREBBE ESSERE la chiave
-    \item C(m, k) = $c_2$: $\bar{k}$ POTREBBE essere la chiave
+    \item C(m, k) = $\bar{c_2}$: $\bar{k}$ POTREBBE essere la chiave
     
     NB: $C(m,k) = \bar{c_2} \iff C(\bar{m},\bar{k}) = \bar{\bar{c_2}} = c_2$ in quanto sappiamo che $C(m, k) = c$ e $C(\bar{m}, \bar{k})=\bar{c}$. Escludo quindi due chiavi alla volta.
     \item $\neq c_1, \bar{c_2}$: si prova un'altra chiave (k e $\bar{k}$ non lo sono)
