@@ -58,7 +58,7 @@ Es: $K = <13, 0>$: tutte le lettere in posizione pari verrebbero trasformate in 
 Proviamo a contare le possibili chiavi tale che $a$ e 26 sono coprimi:
 $$ 26 = 2 \cdot 13 $$
 $$ a \in \{ \text{dispari tra 1 e 25 tranne 13} \} \xrightarrow{} 12 \text{ valori possibili} $$
-$$ \text{b scelto a piacere tra 0 e 25} \xrightarrow{} 13 \text{ valori possibili } $$
+$$ \text{b scelto a piacere tra 0 e 25} \xrightarrow{} 26 \text{ valori possibili } $$
 abbiamo quindi in totale 312 chiavi (311 perché $<1,0>$ lascia inalterato il testo).
 
 Se la segretezza dipende unicamente dalla chiave allora il numero delle chiavi deve essere così grande da essere immune da tentativi di ricerca esaustiva e poi va scelto in maniera casuale.
@@ -248,7 +248,7 @@ I rotori non sono fissi, per ogni lettera battuta il primo fa uno scatto, dopo 2
 
 Le permutazioni sono 26 per il primo rotore rispetto al secondo, 26 del secondo rispetto al terzo, 26 del terzo rispetto al riflettore: $26 \cdot 26 \cdot 26 = 17'576$ chiavi se i rotori sono immutabili e noti a chiunque ne avesse una copia. Si aumentano quindi le chiavi scambiando l'ordine dei rotori, quindi si sale a $2^6 \cdot 3! > 10^5$.
 
-Aggiungendo le plugboard si possono scambiare 6 coppie di caratteri per ogni trasmissione, si arriva quindi ad una sequenza di 12 caratteri per descrivere il cablaggio: le combinazioni possibili sono $\binom{26}{12} \approx 10^7$. Scelte le lettere va scelta la loro ordinazione: $12!$, in realtà meno perché molte permutazioni lasciano lo stesso effetto: AB CD = CD AB, ma anche AB = BA, quindi le $6!$ disposizioni delle coppie sono uguali, si ottiene quindi $\binom{26}{12} \cdot \frac{12!}{6! \cdot 2^6} > 10^11$ (10 milioni di miliardi)
+Aggiungendo le plugboard si possono scambiare 6 coppie di caratteri per ogni trasmissione, si arriva quindi ad una sequenza di 12 caratteri per descrivere il cablaggio: le combinazioni possibili sono $\binom{26}{12} \approx 10^7$. Scelte le lettere va scelta la loro ordinazione: $12!$, in realtà meno perché molte permutazioni lasciano lo stesso effetto: AB CD = CD AB, ma anche AB = BA, quindi le $6!$ disposizioni delle coppie sono uguali, si ottiene quindi $\binom{26}{12} \cdot \frac{12!}{6! \cdot 2^6} > 10^{11}$ (10 milioni di miliardi)
 
 Un conteggio alternativo sarebbe: si scelgono 6 coppie di variabili in :
 $$ \binom{26}{2} \binom{24}{2} \binom{22}{2} \binom{20}{2} \binom{18}{2} \binom{16}{2} = \frac{26!}{2^6 \cdot 6!} = \binom{26}{12} \cdot \frac{12!}{2^6} $$

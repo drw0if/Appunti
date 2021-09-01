@@ -79,7 +79,7 @@ E' largamente usata nei protocolli crittografici anche se non è più certificat
 Opera su blocchi di 160 bit contenuti in un buffer di 5 registri da 32 bit ciascuno in cui sono caricati inizialmente dei valori pubblici.
 Il messaggio $m$ viene poi concatenato con una sequenza di padding che ne rende la lunghezza multipla di 512 bit.
 
-Il contenuto dei registri varia nel corso dei cicli successivi in cui questi valori ci combinano tra loro e con blocchi di 21 bit provenientei da $m$.
+Il contenuto dei registri varia nel corso dei cicli successivi in cui questi valori si combinano tra loro e con blocchi di 21 bit provenientei da $m$.
 Alla fine i registri contengono SHA-1($m$).
 
 \subsection{Identificazione su canali sicuri}
@@ -169,9 +169,9 @@ La firma funziona:
 L'indicazione del mittente $U$ consente a $V$ di selezionare la $K_{upub}$ da utilizzare.
 Per far funzionare questo meccanismo è importante che $C$ e $D$ siano commutative.
 
-Questo protocollo soddisfa i requisiti della forma digitale:
+Questo protocollo soddisfa i requisiti della firma digitale:
 \begin{itemize}
-    \item è autentica e non falsabile in quanto $K_{upriv}$  è nota solo al destinatario, per falsificare la firma bisogna conoscere $K_{upriv}$ ma è difficile
+    \item è autentica e non falsabile in quanto $K_{upriv}$  è nota solo al mittente, per falsificare la firma bisogna conoscere $K_{upriv}$ ma è difficile
     \item il documento non può essere alterato in quanto $m$ e $f$ sarebbero inconsistenti
     \item $U$ non può ripudiare la firma perché può averla prodotta solo lui
     \item la firma non è riutilizzabile in quanto $f$ è immagine di $m$
