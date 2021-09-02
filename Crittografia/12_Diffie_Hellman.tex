@@ -47,8 +47,8 @@ Diffie-Hellman è vulnerabile agli attacchi \emph{man-in-the-middle}. Abbiamo Ev
     \item Alice riceve $E$
     \item Eve calcola:
     \begin{itemize}
-        \item $K_A = A^z \mod p = g^{x \cdot y} \mod p$ per parlare con Alice
-        \item $K_B = B^z \mod p = g^{x \cdot y} \mod p$ per parlare con Bob
+        \item $K_A = A^z \mod p = g^{x \cdot z} \mod p$ per parlare con Alice
+        \item $K_B = B^z \mod p = g^{y \cdot z} \mod p$ per parlare con Bob
     \end{itemize}
     \item Alice calcola $K_A = E^x \mod p$ per parlare con Bob, ma in realtà parlerà con Eve
     \item Bob calcola $K_B = E^y \mod p$ per parlare con Alice, ma in realtà parlerà con Eve
