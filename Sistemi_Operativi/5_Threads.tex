@@ -1,0 +1,19 @@
+\section{Threads}
+\begin{itemize}
+    \item processo pesante - \emph{task}: elemento che possiede le risorse
+    \item processo leggero - \emph{thread}: elemento cui viene assegnata la CPU
+\end{itemize}
+Il descrittore di un thread ha pertanto solo il contesto e poco più, le altre risorse sono nel descrittore del processo pesante al quale il thread è associato.
+
+Posso avere più thread associati allo stesso processo e quindi implementare dei meccanismi di concorrenza tra di loro, in più avendo le risorse condivise possono accedere alla stessa memoria e colloquiare in questo modo.
+Inoltre dovendo salvare solo lo stato della CPU ho minore overhead nel cambio di contesto.
+Lo stack dei thread è diverso, ognuno ha il suo.
+
+Si possono implementare i thread in due modi:
+\begin{itemize}
+    \item a livello utente: ci sono delle librerie che implementano il multithreading a livello utente quindi senza passare per il kernel, il passaggio da un thread all' altro non richiede supporto dal sistema operativo, questo significa che diversi thread dello stesso processo non potranno mai essere eseguiti davvero in parallelo in quanto è al singolo processo che viene assegnata la CPU.
+    
+    \item a livello kernel: si chiede aiuto al kernel che gestisce i singoli thread come fossero dei veri processi.
+    In questo caso più thread possono essere eseguiti in maniera parallela dando un thread diverso ad ognuno dei processori/core di cui è dotata la macchina.
+\end{itemize}
+

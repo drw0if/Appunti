@@ -1,0 +1,241 @@
+\section{Protezione}
+Vogliamo creare un modello di gestione per l' accesso alle risorse che tenga conto dei permessi di utenti e gruppi.
+
+\subsection{Modelli, politiche e meccanismi}
+Suddividiamo concettualmente la protezione in 3 livelli concettuali.
+
+\subsubsection{Modelli}
+All' interno della protezione discerniamo:
+\begin{itemize}
+    \item il modello di protezione: definisce i soggetti e gli oggetti ai quali si ha accesso ed i diritti su di loro.
+    Abbiamo quindi le operazioni con le quali si può accedere agli oggetti.
+
+    \item i soggetti: sono la parte attiva di un sistema, cioè i processi che agiscono per conto degli utenti per accedere a determinati oggetti.
+    
+    \item gli oggetti: costituiscono la parte passiva, cioè le risorse alle quali gli utenti vogliono accedere.
+\end{itemize}
+Un soggetto può avere diritti di accesso sia per gli oggetti che per altri soggetti, si noti infatti che un processo può comandarne un altro.
+
+Un soggetto può essere considerato come una coppia $<$processo, dominio$>$ dove il dominio è l' ambiente di protezione nel quale il soggetto sta eseguendo, cioè l' insieme dei diritti di accesso posseduti dal processo.
+
+Un dominio di protezione è unico per un soggetto mentre un processo può cambiare dominio durante la sua esecuzione, può infatti switchare in modalità sistema tramite le system call, può cambiare i propri privilegi verso il basso, nel caso di binari suid che droppano i privilegi.
+
+
+\subsubsection{Politiche}
+E' l' insieme di regole che, definiti soggetti e oggetti, permette ai soggetti di accedere agli oggetti.
+Conosciamo sostanzialmente 3 politiche:
+\begin{itemize}
+    \item Discretional Access Control (DAC): il creatore di un oggetto controlla i diritti di accesso per quell' oggetto.
+    E' la politica utilizzata da UNIX.
+
+    \item Mandatory Access Control (MAC): i diritti di accesso vengono gestiti in maniera centrale.
+    Ad esempio l' utente che crea un file comunque non può deciderne i permessi, deve sottostare alle decisioni di qualcuno più alto in grado.
+    E' la politica utilizzata da installazioni di alta sicurezza.
+    
+    \item Role-Based Access Control (RBAC): ad un ruolo sono associati specifici diritti di accesso sulle risorse e gli utenti hanno diversi ruoli.
+\end{itemize}
+La caratteristica comune delle politiche di protezione è il \emph{principio del privilegio minimo}: ad un soggetto sono garantiti i diritti di accesso solo agli oggetti strettamente necessari per la sua esecuzione.
+
+
+\subsubsection{Meccanismi}
+Sono gli strumenti messi a disposizione dal sistema di protezione per imporre una determinata politica.
+
+C'è una netta differenza tra meccanismi e politiche: le politiche definiscono cosa va fatto mentre i meccanismi come ciò va fatto.
+
+\subsection{Dominio di protezione}
+Un dominio di protezione definisce un insieme di oggetti e i tipi di operazioni che si possono eseguire su ciascun oggetto: i diritti di accesso.
+Possiamo immaginarlo come una lista di tuple: $<$nome oggetto, insieme diritti di accesso$>$.
+Un soggetto può accedere solo agli oggetti definiti nel dominio.
+
+\subsubsection{Associazione statica}
+Se l' insieme di risorse disponibili ad un processo rimane fisso durante il suo tempo si dice che l' associazione è \emph{statica}.
+Questo sistema è molto rigido in quanto se facciamo partire un processo con i minimi privilegi e successivamente si ha la necessità di aggiungerne alcuni non potremmo farlo, sarebbe pertanto necessario stoppare il processo e farlo ripartire, non è qualcosa di comodo da fare.
+
+\subsubsection{Associazione dinamica}
+Se l' insieme di risorse disponibili ad un processo varia durante l' esecuzione del processo.
+Con questa politica quindi il soggetto del processo cambia durante l' esecuzione, il PID rimane identico perché non cambio processo, però cambio UID o GID, per cambiare dominio.
+
+Ci serve quindi un meccanismo per consentire il cambio di dominio, ne conosciamo alcuni:
+\begin{itemize}
+    \item interruzioni o in generale chiamata alle system call
+    \item suid in quanto cambiamo i privilegi se eseguiamo una exec su un binario suid
+\end{itemize}
+
+\subsection{Modello a matrice degli accessi}
+Questo modello mantiene tutta l' informazione che specifica il tipo di accessi che i soggetti hanno per gli oggetti e consente di:
+\begin{itemize}
+    \item rappresentare lo stato di protezione
+    \item garantire il rispetto dei vincoli di accesso per ogni tentativo di accesso
+    \item permettere la modifica controllata dello stato di protezione
+\end{itemize}
+
+Ci serve quindi una struttura dati che ci permetta di cercare e modificare efficientemente.
+Immaginiamo di avere una matrice in cui:
+\begin{itemize}
+    \item le colonne sono gli oggetti (PID)
+    \item le righe rappresentino i soggetti (UID, GID)
+\end{itemize}
+
+Quando un soggetto richiede l' accesso ad un oggetto dobbiamo conoscere PID, UID e GID, questo è noto in quanto è il processo stesso a fare la richiesta, quindi queste informazioni sono nel descrittore di processo.
+
+Il meccanismo deve consentire ad un processo che opera nel dominio $D_j$ l' accesso solo agli oggetti specificati nella riga $i$ e solo con i diritti di accesso indicati.
+
+Normalmente sono gli utenti a decidere il contenuto degli elementi della matrice di accesso:
+\begin{itemize}
+    \item creando un nuovo oggetto questo viene aggiunto nelle colonne della matrice di accesso e l' utente decide quali diritti aggiungere
+    \item usando le primitive (come chmod e chown) possiamo modificare i valori all' interno di questa colonna
+\end{itemize}
+
+\subsubsection{Modifica controllata}
+Graham e Denning hanno gettato le idee per i meccanismi di base per la gestione dei diritti di accesso:
+\begin{itemize}
+    \item propagazione dei diritti di accesso: se ho dei diritti su un oggetto posso propagarli anche ad altri soggetti.
+    La notazione per indicare la propagazione di un diritto su un oggetto è l' asterisco, ed è detto \emph{copy flag}.
+
+    Possiamo ovviamente copiare solo il diritto, possiamo copiare il diritto ed il copy flag (e quindi dare il diritto di propagare) ed infine possiamo anche \emph{trasferire} il diritto cioè associarlo a qualcun altro e perderlo a nostra volta.
+
+    \item aggiunta e rimozione di diritti di accesso
+\end{itemize}
+
+\subsubsection{Esempio di matrice degli accessi}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c|c|c|c|c}
+        & $X_1$ & $X_2$ & $X_3$ & $S_1$ & $S_2$ & $S_3$ \\
+        \hline
+        $S_1$ & read* & read & execute & & terminate & receive \\ 
+        $S_2$ & & \thead{owner \\ write} & & \thead{control \\ receive} & & terminate \\
+        $S_3$ & \thead{write \\ execute} & & read & send & \thead{send \\ receive} & \\
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item $S_1$ sulla risorsa $X_1$ può leggere e può propagare il permesso
+    \item $S_1$ può eseguire $X_3$
+    \item $S_1$ può terminare il soggetto $S_2$
+    \item $S_3$ inviare e ricevere informazioni da $S_2$
+    \item $S_2$ è owner di $X_2$
+\end{itemize}
+
+\subsubsection{Assegnazione ed eliminazione dei diritti di accesso}
+L' assegnazione di un diritto di accesso può essere eseguita solo dal soggetto owner della risorsa.
+
+L' eliminazione di un diritto può essere eseguita solo dall' owner e da chi ha il permesso control sulla risorsa.
+
+Graham e Denning mostrano che le regole che abbiamo definito fino ad ora danno luogo ad un sistema di protezione in grado di risolvere problemi come:
+\begin{itemize}
+    \item confinement: propagazione limitata e controllata dei diritti di accesso
+
+    \item sharing parameters: prevenire la modifica indiscriminata dei diritti di accesso di un processo
+
+    \item trojan horse: uso non corretto dei diritti di accesso di un processo da parte di un altro
+\end{itemize}
+
+\subsubsection{Realizzazione della matrice nella pratica}
+Costruire una matrice delle dimensioni richieste spesso non è fattibile in quanto un sistema operativo ha tantissimi file e risorse da gestire.
+Inoltre la matrice potrebbe essere sparsa, non tutti gli utenti hanno qualche diritto in tutte le risorse quindi stiamo sprecando spazio, in fine abbiamo una certa ridondanza se siamo in alcuni casi particolari come quelli di un soggetto che ha un determinato privilegio su tutto o una risorsa sulla quale tutti i soggetti hanno un determinato privilegio.
+
+Una prima implementazione potrebbe essere quella a \emph{liste di controllo di accesso} (ACL), prendo la matrice e tratto le colonne singolarmente, ho tante liste, una per ogni oggetto del sistema, e la lista ha esclusivamente le entrate associate ai soggetti che hanno un qualche diritto su quella risorsa.
+In questo modo abbiamo risolto lo spreco di spazio dato dalla matrice sparsa.
+Un problema di questo approccio sta nella ricerca, data una risorsa vogliamo sapere se un determinato soggetto ha un particolare diritto, dobbiamo quindi scorrerci tutta la lista per quella risorsa.
+
+Data questa implementazione possiamo inoltre distribuire queste ACL, esattamente come fa Linux che negli i-node inserisce i bit di protezione.
+Si noti che Linux ha una ACL di dimensione costante perché raggruppa gli utenti in owner, gruppo ed altri ed assegna i privilegi a questi tre raggruppamenti.
+
+\subsubsection{Lista degli accessi}
+Quando si deve eseguire una operazione $M$ su un oggetto $O_j$ da parte del soggetto $S_i$ dobbiamo cercare nella lista degli accessi di $O_j$ la coppia $<S_i, R_k>$ con $M$ appartenente a $R_k$, cioè si recuperano i permessi dell' utente $S_i$ e si cerca in questi permessi se può eseguire l' operazione $M$.
+
+Per velocizzare questa ricerca prima di andare direttamente sull' oggetto si cerca in una lista di default che contiene i diritti di accesso che sono generali ed applicabili a tutti gli oggetti (es destroy object, copy object).
+Una volta eseguita la ricerca nella lista default si cerca nella specifica Access List e se non c'è il permesso in nessuno dei due allora si nega l' operazione.
+
+\subsubsection{Gruppi}
+La ACL è introdotta per sistemi a singoli utenti, quando si è passati al concetto di multi utenza è stato necessario introdurre il concetto di \emph{gruppo di utenti}, i gruppi hanno un nome e possono essere inclusi nella ACL, un gruppo può contenere più utenti.
+L' utente quindi ora è identificato da uno UID e da un GID ed associamo i diritti a questa coppia.
+
+Indichiamo questa possibilità con $<UID_1, GID_1>$:$<$diritti di utenti$>$, si noti che possiamo aggiungere delle policy molto particolari:
+\begin{itemize}
+    \item $<UID_1, *>$:$<$diritti di utenti$>$: do all' utente $UID_1$ un insieme di permessi indipendentemente dal gruppo al quale appartiene
+    \item $<*, *>$:$<$diritti di utenti$>$: do a qualsiasi utente appartente a qualsiasi gruppo un insieme di diritti di default
+    \item $<UID_1, *>$:$<$insieme vuoto$>$: tolgo all' utente $UID_1$ qualsiasi diritto per qualsiasi gruppo al quale appartiene
+\end{itemize}
+
+\subsubsection{Capability List}
+Memoriziamo la matrice per righe, quindi ogni lista è relativa ad un soggetto ed inseriamo nella lista le risorse sui quali il soggetto ha dei permessi.
+Se la risorsa non è nella lista allora il soggetto non ha alcun permesso.
+Possiamo ancora avere una implementazione distribuita nei descrittori degli utenti.
+
+In UNIX si usano assieme alle ACL per implementare il meccanismo di controllo.
+Nel file system sono presenti le ACL, quando si esegue l' apertura di una risorsa le capability su quella risorsa vengono aggiunte alla lista di capability del processo.
+Abbiamo quindi un meccanismo ibrido che ci permette di fare ricerca dei permessi in maniera più veloce.
+
+Una rappresentazione grafica potrebbe essere:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        $Tipo$ & $Diritti$ & $Oggetto$  \\
+        \hline
+        File & R & Puntatore a $F_3$ \\
+        File & RWE & Puntatore a $F_4$ \\
+        File & RW & Puntatore a $F_5$ \\
+        Printer & W & Puntatore a stampante \\
+    \end{tabular}
+\end{table}
+
+Queste capability list ovviamente devono essere protette da manomissioni degli utenti, possiamo ottenere ciò tramite:
+\begin{itemize}
+    \item architettura etichettata: aggiungiamo un bit ad ogni parola che indica se la word è usata in una capability list, questi bit sono trasparenti al sistema e possono essere modificati solo ed esclusivamente in kernel mode
+    
+    \item lasciar gestire la capability list al sistema operativo e solo a lui, l' utente ne fa uso indicando esplicitamente l' indice della capability nella lista.
+\end{itemize}
+
+\subsubsection{Revoca dei diritti di accesso}
+In un sistema dinamico può essere necessario revocare i diritti.
+La revoca può essere:
+\begin{itemize}
+    \item selettiva o generale: cioè valere per tutti gli utenti che hanno quel diritto di accesso o solo per un gruppo
+    \item parziale o totale: cioè riguardare un sottoinsieme di diritti per l' oggetto o tutti
+    \item temporanea o permanente: cioè il diritto di accesso non sarà più disponibile oppure può essere successivamente riottenuto 
+\end{itemize}
+
+In un sistema con ACL la revoca è semplice e veloce in quanto ci basta andare nella colonna dell' oggetto e nella riga del soggetto e modificare i permessi.
+
+In un sistema con capability list invece dobbiamo aggiornare ogni dominio in cui il soggetto compare.
+
+\subsubsection{Sicurezza multilivello}
+In alcuni ambienti è richiesta una sicurezza più rigorosa e controllata.
+Si stabiliscono regole su chi possa vedere cosa e queste regole non possono essere modificate senza avere permessi speciali, essere l' owner di una risorsa non comporta il diritto di modificare i diritti su una risorsa.
+Questo modello è detto MAC: controllo degli accessi obbligatorio.
+
+Il modello Bell-La Padula, nato in ambienti militari, è progettato per gestire la sicurezza in base a livelli.
+Supponiamo di avere 4 livelli di sicurezza:
+\begin{itemize}
+    \item non classificato
+    \item confidenziale
+    \item segreto
+    \item top secret
+\end{itemize}
+Questi livelli sono assegnati sia alle risorse che ai soggetti.
+
+Supponiamo di avere una funzione che ci restituisca il livello di sicurezza di un qualcosa: $SC(O)$, introduciamo le regole:
+\begin{itemize}
+    \item proprietà di semplice sicurezza: un soggetto in esecuzione al livello $k$ può leggere solo oggetti al suo livello o ai livelli inferiori: $SC(S) \geq SC(O)$.
+    
+    \item Proprietà*: un soggetto in esecuzione al livello di sicurezza $k$ può scrivere solamente oggetti al suo livello o a quelli superiori: $SC(S) \leq SC(O)$.
+\end{itemize}
+si può leggere verso il basso e si può scrivere verso l' alto, non il contrario.
+
+Queste regole ci risolvono il problema del flusso delle informazioni: un utente malizioso ad un livello $K$ legge un documento al suo livello e lo scrive su un oggetto a livello inferiore, così facendo  abbiamo esfiltrato informazioni verso i livelli inferiori, questa cosa è un problema!
+
+Tuttavia non abbiamo risolto il problema dell' integrità in quanto un utente a livello $k$ può modificare file a livello superiore e potenzialmente fare danni.
+Per risolvere questo problema alle politiche di Bell-La Padula aggiungiamo le ACL, non solo i due schemi sono completamente compatibili tra di loro ma ci aiutano a risolvere i problemi di integrità e del cavallo di troia.
+
+Un ulteriore modello è quello di Biba che si concentra sulla integrità:
+\begin{itemize}
+    \item proprietà di semplice sicurezza: un soggetto al livello $k$ può scrivere solamente oggetti al suo livello o inferiori
+    
+    \item proprietà di integrità*: un soggetto al livello $k$ può leggere solo oggetti al suo livello o superiori
+\end{itemize}
+questo modello è totalmente l' opposto di Bell-La Padula quindi non si possono usare contemporaneamente.
+Biba è compatibile con ACL.
+
+ 

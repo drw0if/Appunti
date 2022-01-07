@@ -1,0 +1,126 @@
+\section{Interazione tra processi}
+I processi UNIX aderiscono al modello ad ambiente locale cioè hanno uno spazio di indirizzamento completamente privato, senza possibilità di condividere variabili.
+Non c'è quindi bisogno di sincronizzare i processi in modo da gestire l' accesso alle variabili condivise.
+L'unica forma di interazione tra processi è la cooperazione:
+\begin{itemize}
+    \item sincronizzazione: imporre vincoli temporali
+    \item comunicazione: tramite scambio di messaggi
+\end{itemize}
+queste forme di interazione sono sempre mediate dal kernel attraverso system call che ci vengono messe a disposizione.
+
+\subsection{Sincronizzazione mediante segnali}
+La sincronizzazione può essere ottenuta tramite l' utilizzo dei segnali tra processi parenti.
+Un segnale può essere visto come una interruzione software, cioè: quando un processo riceve un segnale salta ad eseguire una determinata callback in maniera asincrona.
+
+I segnali sono utilizzati in UNIX/Linux anche dal sistema operativo per notificare ai processi eventuali eccezioni.
+
+Un processo utente può inviare segnali solo ad altri processi dello stesso utente, solo i processi root possono inviare segnali a qualunque processo.
+
+\subsubsection{Ricezione di un segnale}
+La ricezione di un segnale ha tre possibili effetti sul processo:
+\begin{itemize}
+    \item viene eseguita una funzione di gestione, un handler, definita dal programmatore
+    \item viene eseguita un'azione predefinita dal sistema operativo, default handler
+    \item il segnale viene ignorato
+\end{itemize}
+se il segnale viene gestito la sua gestione è asincrona nel senso che l'esecuzione standard del processo viene interrotta, si passa ad eseguire l' handler, alla fine si ritorna nel punto in cui è scattato il segnale.
+
+\subsubsection{Tipi di segnali}
+Nelle varie versioni di UNIX si possono avere diversi segnali, in Linux tuttavia sono 32.
+La lista completa si trova nel file \emph{signal.h}, ciascuno è identificato da un intero ma ci sono delle macro simboliche collegate a questi interi.
+
+I più comuni sono:
+\begin{itemize}
+    \item SIGHUP - 1 - Segnala che il terminale è stato chiuso, di norma comporta la chiusura del processo.
+    \item SIGINT - 2 - Interruzione del processo, è il segnale associato al CTRL+C
+    \item SIGQUIT - 3 - Interruzione del processo con creazione del core dump, è il segnale associato al CTRL + \verb{\{
+    \item SIGKILL - 9 - Interruzione immediata del processo. Questo segnale non può essere gestito dal processo con un handler apposito
+    \item SIGTERM - 15 - Terminazione del programma, mascherabile dall' utente
+    \item SIGUSR1 - 10 - Lasciato libero all' utente, di default termina il processo
+    \item SIGUSR2 - 12 - Lasciato libero all' utente, di default termina il processo
+    \item SIGSEGV - 11 - Errore di segmentazione
+    \item SIGALRM - 14 - Indica che il timer è scaduto, normalmente non è gestito
+    \item SIGCHLD - 17 - Processo figlio terminato, fermato o risvegliato. Di default non è gestito
+    \item SIGSTOP - 19 - Ferma temporaneamente il processo. Non può essere ignorato
+    \item SIGTSTP - 20 - Sospende il processo. E ' segnale associato a CTRL+Z
+    \item SIGCONT - 18 - Se il processo era stato fermato da SIGSTOP o SIGTSTP può ripartire
+\end{itemize}
+NB: per evitare che un processo venga chiuso all' uscita dal terminale bisogna detacharlo in modo che non gli arrivi il segnale SIGHUP.
+Una volta fatto non potrà accedere allo standard input ed allo standard output in quanto, appunto, il terminale è stato chiuso.
+
+\subsection{System call per i segnali}
+\subsubsection{signal}
+Permette di associare la funzione handler al segnale da gestire.
+\begin{verbatim}
+    typedef void(*sighandler_t)(int);
+
+    sighandler_t signal(int sig, sighandler_t handler);
+\end{verbatim}
+Il primo parametro è l' intero relativo al segnale (o la sua macro), il secondo parametro è un puntatore a funzione che prende un parametro di tipo intero e non ha valori di ritorno.
+
+Il valore associato può anche essere:
+\begin{itemize}
+    \item SIG\_IGN: per ignorare il segnale
+    \item SIG\_DFL: per ripristinare l'azione di default
+\end{itemize}
+
+Restituisce un puntatore al vecchio handler del segnale oppure SIG\_ERR in caso di errore.
+
+Se dopo la signal eseguo una fork il figlio eredita le modifiche ai segnali attuate dal padre, dopo la fork altre modifiche non vengono propagate né dal padre al figlio, né dal figlio al padre, in quanto si ha uno spazio di indirizzamento privato.
+
+Le sycall exec** non mantengono eventuali cambiamenti, in quanto il codice cambia.
+Tuttavia se abbiamo detto di ignorare alcuni segnali questa istruzione viene propagata.
+
+\subsubsection{kill}
+Invia uno specifico segnale ad uno specifico processo.
+\begin{verbatim}
+    int kill(pid_t pid, int sig);
+\end{verbatim}
+Il primo parametro può essere:
+\begin{itemize}
+    \item pid $>$ 0: il segnale viene inviato al pid specificato
+    \item pid == 0: il segnale viene inviato a tutti i processi nello stesso process group
+    \item pid == -1: il segnale viene inviato a tutti i processi a cui il chiamante può inviare segnali, quindi tutti i processi dell' utente
+    \item pid $<$ -1: il segnale viene inviato ai processi il cui process group è -pid
+\end{itemize}
+Il secondo parametro è l' identificativo numerico del segnale da inviare.
+
+In caso di successo ritorna 0, altrimenti un numero negativo.
+
+\subsubsection{sleep}
+Il processo va in sleep per un certo quantitativo di tempo o finché il processo non riceve un segnale che non ignora.
+\begin{verbatim}
+    unsigned int sleep(unsigned int seconds);
+\end{verbatim}
+Una volta passati i secondi richiesti il processo viene svegliato da un SIGALARM.
+
+Se ha dormito per il tempo richiesto ritorna 0, altrimenti ritorna il tempo mancante per arrivare alla fine del periodo richiesto.
+
+\subsubsection{alarm}
+Istruisce il kernel ad inviare SIGALARM dopo un certo quantitativo di tempo, nel frattempo il processo continua ad andare.
+\begin{verbatim}
+    unsigned int alarm(unsigned int seconds);
+\end{verbatim}
+
+Se eseguo più alarm in sequenza conta solo l' ultimo.
+Se come parametro do 0 elimino l' eventuale timer inserito precedentemente.
+
+Ritorna 0 se non c'era un allarme programmato altrimenti ritorna il numero di secondi mancanti all'ultimo allarme programmato.
+
+\subsection{Scambio di messaggi mediante pipe}
+Una pipe ci permette di comunicare con un altro processo tramite comunicazione indiretta, cioè senza inserire un destinatario.
+E' una specie di mailbox: chi deve scrivere confeziona un messaggio e lo inserisce nella pipe, chi legge preleva il messaggio dalla pipe.
+Applica la disciplina FIFO quindi permette di accodare svariati messaggi che verranno letti in sequenza.
+
+E' un canale monodirezionale quindi dal lato in ingresso si può solo scrivere e dal lato in uscita si può solo leggere.
+Questa astrazione è mantenuta dal kernel tramite file quindi ad ogni endpoint del canale è associato un file descriptor.
+
+Non c'è necessità di sincronizzare i processi in quanto sono risolti dalle primitive read/write.
+
+Alla fork vengono trasmessi anche i file descriptor quindi un processo padre trasmette ai figli le eventuali pipe create/accedute.
+Questo ci permette di comunicare con processi della stessa gerarchia, per andare fuori c'è la necessità di passare ai socket.
+
+
+
+
+

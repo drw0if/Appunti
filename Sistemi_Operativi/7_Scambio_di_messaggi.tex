@@ -1,0 +1,109 @@
+\section{Scambio di messaggi}
+Nei modelli a memoria locale per comunicare tra processi si usa lo scambio di messaggi tramite le primitive \emph{send} e \emph{receive}:
+\begin{verbatim}
+    Produttore:
+        ...
+        send(destination, message);
+        ...
+        
+    Consumatore:
+        ...
+        receive(sender, message);
+        ...
+\end{verbatim}
+destinazione e sorgente a volte possono non esserci necessariamente, ad esempio se sono un server web non devo ricevere solo da un determinato processo, devo ricevere da tutti gli utenti che hanno intenzione di richiedere la risorsa che espongo.
+
+\subsection{Formato dei messaggi}
+In genere bisogna definire un formato per lo scambio di questi messaggi.
+In base all' applicazione alcune cose possono essere necessarie o meno ma obbligatoriamente abbiamo:
+\begin{itemize}
+    \item Intestazione: 
+    \begin{itemize}
+        \item origine
+        \item destinazione
+        \item tipo del messaggio
+        \item lunghezza del messaggio
+        \item informazioni di controllo
+    \end{itemize}
+    \item Corpo:
+        \begin{itemize}
+            \item messaggio
+        \end{itemize}
+\end{itemize}
+
+\subsection{Socket}
+L' implementazione principalmente usata nei sistemi moderni è l' interfaccia basata sui \emph{socket}.
+In generale sono usati per dialogare tramite Internet, tuttavia se due processi sullo stesso host vogliono comunicare tramite scambio di messaggi possono usarli comunque.
+Ce ne sono di due tipi in base al tipo di connessione che serve.
+
+\subsection{Comunicazione diretta simmetrica}
+Supponiamo di avere due processi che vogliano dialogare tra di loro direttamente e solo tra di loro (simmetria), immaginiamo il seguente pseudocodice:
+\begin{verbatim}
+    Produttore:
+        pid C = -----;
+        msg M;
+        do{
+            produci(&M);
+            -----------
+            send(C, M);
+        }while(!fine);
+    
+    Consumatore:
+        pid P = -----;
+        msg M;
+        do{
+            receive(P, &M);
+            --------------
+            consuma(M);
+        }while(!fine);
+\end{verbatim}
+Non abbiamo nulla che ci permetta la sincronizzazione esplicitamente.
+Diamo una semantica alle primitive:
+\begin{itemize}
+    \item la send può essere:
+    \begin{itemize}
+        \item non bloccante: invio il messaggio e fine, non aspetto che venga recapitato tantomeno aspetto che venga processato.
+        Con questa modalità non ho certezze su niente.
+        \item bloccante: invio il messaggio e rimango in attesa di una notifica di avvenuta ricezione, non ho la certezza che il messaggio sia stato processato.
+        \item RPC - remote procedure call: invio il messaggio, aspetto che venga consumato e mi aspetto anche un valore di ritorno.
+    \end{itemize}
+    \item la receive può essere:
+    \begin{itemize}
+        \item bloccante: mi blocco finché non ricevo un messaggio da processare.
+        \item non bloccante: controllo un buffer del sistema operativo, se c'è qualcosa ho ricevuto un messaggio, se è vuoto non l' ho ricevuto e restituisco un errore.
+        Questa modalità è utile per implementazioni che devono essere responsive.
+    \end{itemize}
+\end{itemize}
+Le versioni bloccanti sono spesso la via migliore in quanto ci permettono di non sprecare tempo della CPU in attesa attiva!
+
+\subsection{Comunicazione diretta asimmetrica}
+Nel caso in cui il ricevitore non aspetti messaggi esplicitamente da un host siamo nel caso di comunicazione asimmetrica:
+\begin{verbatim}
+    Produttore:
+        pid C = -----;
+        msg M;
+        do{
+            produci(&M);
+            ------------
+            send(C, M);
+        }while(!fine);
+    
+    Consumatore:
+        msg M;
+        do{
+            receive(&id, &M);
+            -----------------
+            consuma(M);
+        }while(!fine);
+\end{verbatim}
+Il produttore sa a chi invia e lo esplicita, il consumatore è in ascolto generico, capisce da chi sta ricevendo tramite la primitiva receive.
+
+\subsection{Porta}
+Nei nostri esempi abbiamo presupposto che i processi conoscessero i PID da usare per comunicare, questo è uno scenario molto surreale, i PID cambiano ad ogni esecuzione quindi non possono essere inseriti in maniera statica nei programmi.
+Per eseguire queste connessioni usiamo il concetto di \emph{porta}: il processo ricevitore si mette in ascolto su una porta, tutti i processi concordano sulla porta da usare quindi i produttori inviano i messaggi a quella porta specifica.
+In fine per indicare l' host da usare si usa un indirizzo IP che identifica univocamente il calcolatore.
+
+
+
+
+

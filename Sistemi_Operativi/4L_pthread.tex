@@ -1,0 +1,232 @@
+\section{Libreria pthread}
+Il thread è un flusso di esecuzione indipendente all' interno di un processo.
+Ogni processo può quindi avere più thread associati che condividono le risorse e lo spazio di indirizzi.
+I thread sono anche detti processi leggeri in quanto la creazione e la distruzione è meno onerosa di un processo e perché il cambio di contesto fra thread dello stesso processo è immediata in quanto non deve passare per il sistema operativo.
+
+Alcuni vantaggi dell' approccio sono l' interazione più semplice tra i thread in quanto hanno risorse comuni ed il cambio di contesto è più semplice.
+
+Alcuni svantaggi invece riguardano la concorrenza fra thread perché il codice deve essere scritto in maniera thread safe:
+\begin{itemize}
+    \item il codice è scritto in modo da garantire il corretto comportamento del programma e l' assenza di interazioni non volute fra i thread
+    \item le risorse condivise devono essere accedute in mutua esclusione
+\end{itemize}
+
+\subsection{Thread in Linux}
+Linux supporta nativamente i thread direttamente nel sistema operativo.
+Il thread è l' unità di scheduling e può essere eseguito in parallelo con altri thread.
+Il processo tradizionale non è altro che un thread che non condivide risorse con altri thread.
+
+Utilizzare le interfacce native messe a disposizione da Linux tuttavia potrebbe essere problematico in quanto non è detto che il codice sia portabile attraverso le varie distribuzioni.
+
+\subsection{Pthread e POSIX}
+Lo standard POSIX definisce la librerie \emph{pthread} (POSIX thread) per la programmazione di applicazioni multithread portabili.
+
+Per utilizzarla bisogna:
+\begin{itemize}
+    \item includere la libreria:
+    \begin{verbatim}
+    #include <pthread.h>
+    \end{verbatim}
+    
+    \item compilare specificando la libreria da linkare
+    \begin{verbatim}
+        gcc file.c -lpthread
+    \end{verbatim}
+\end{itemize}
+
+NB: su debian 8.6 bisogna anche specificare lo standard del C da utilizzare:
+\begin{verbatim}
+    gcc file.c -lpthread -std=c99
+\end{verbatim}
+
+\subsubsection{Identificatori del thread}
+Un thread è identificato da un Thread ID di tipo \verb{pthread_t{, per ottenere il proprio tid si usa:
+\begin{verbatim}
+    pthread_t pthread_self(void)
+\end{verbatim}
+Essendo un tipo opaco è pensato per essere utilizzato mediante apposite funzioni ad esempio:
+\begin{verbatim}
+    pthread_equals(tid1, tid2)
+        // per controllare che due tid siano uguali
+\end{verbatim}
+
+NB: su linux esiste la primitiva \verb{gettid{ che restituisce il TID (se il thread è unico coincide con il PID), ma non è portabile e quindi su altre distribuzioni potrebbe non funzionare.
+
+\subsubsection{Creazione di un thread}
+In Linux lanciando un programma si crea anche il primo thread che esegue il main.
+Possiamo costruire una gerarchia di thread tramite:
+\begin{verbatim}
+int pthread_create(pthread_t* thread, const pthread_attr_t* attr,
+    void* (*start_routing)(void *), void* arg)
+\end{verbatim}
+\begin{itemize}
+    \item puntatore all' identificatore del thread dove verrà scritto l'ID del thread creato
+    \item attributi del thread, NULL per utilizzare i valori di default
+    \item puntatore alla funzione che contiene il codice del nuovo thread
+    \item puntatore che viene passato come argomento alla funzione associata al thread
+\end{itemize}
+ritorna 0 se non c'è stato alcun errore.
+
+\subsubsection{Terminazione}
+Un thread può terminare tramite:
+\begin{verbatim}
+void pthread_exit(void* retval);
+\end{verbatim}
+\begin{itemize}
+    \item il parametro è il valore di ritorno del thread
+\end{itemize}
+
+Con la chiamata a questa funzione l' esecuzione del thread termina ed il sistema libera le risorse allocate.
+Se un thread padre termina prima dei thread figli:
+\begin{itemize}
+    \item se termina tramite \verb{exit{ i figli terminano
+    \item se termina tramite \verb{pthread_exit{  i figli continuano la loro esecuzione
+\end{itemize}
+Si noti che la terminazione coatta dei figli potrebbe essere un problema di thread-safeness quindi si consiglia di usare sempre la \verb{pthread_exit{.
+
+\subsubsection{Join}
+Un thread può bloccarsi in attesa che un altro termini:
+\begin{verbatim}
+int pthread_join(pthread_t thread,
+    void** retval)
+\end{verbatim}
+\begin{itemize}
+    \item identificativo del thread di cui si aspetta la terminazione
+    \item puntatore al puntatore dove verrà salvato l' indirizzo restituito dal thread. Se non ci interessa si può specificare NULL
+\end{itemize}
+In caso di successo ritorna 0 altrimenti ritorna un codice di errore (ad esempio se più thread si mettono in attesa sullo stesso thread o c'è un rischio di deadlock).
+
+\subsubsection{Esempio}
+\begin{verbatim}
+    #include <pthread.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    
+    void* tr_code(void* arg){
+        printf("Hello world! Arg: %d", *(int*)arg);
+        free(arg);
+        pthread_exit(NULL);
+    }
+    
+    int main(){
+        pthread_t tr1, tr2;
+        int* arg1 = (int*)malloc(sizeof(int));
+        int* arg2 = (int*)malloc(sizeof(int));
+        *arg1 = 1;
+        *arg2 = 2;
+        int ret;
+        ret = pthread_create(&tr1, NULL, tr_code, arg1);
+        if(ret){
+            printf("Error: pthread_create: %d\n", ret);
+            exit(-1);
+        }
+        
+        ret = pthread_join(&tr2, NULL, tr_code, arg2)
+        if(ret){
+            printf("Error: pthread_create: %d\n", ret);
+            exit(-1);
+        }
+        
+        pthread_exit(NULL);
+    }
+\end{verbatim}
+
+\subsubsection{Mutex}
+Per garantire la mutua esclusione sui dati condivisi abbiamo la necessità di utilizzare i mutex.
+Ci permettono di eseguire una sincronizzazione indiretta.
+Chi esegue l' accesso alla sezione critica deve accedere al mutex, quando esce deve liberarlo.
+
+La libreria ci mette a disposizione la struttura \verb{pthread_mutex_t{ che ha come componenti utili:
+\begin{itemize}
+    \item lo stato del mutex: 0 occupato, 1 libero
+    \item la coda dove i thread sospesi vengono locati se sono in attesa che il mutex si liberi
+\end{itemize}
+
+Per inizializzare la variabile:
+\begin{verbatim}
+    pthread_mutex_t M;
+\end{verbatim}
+
+Per inizializzare questa struttura si utilizza:
+\begin{verbatim}
+int pthread_mutex_init(pthread_mutex_t* M,
+    const pthread_mutexattr_t* mattr)
+\end{verbatim}
+\begin{itemize}
+    \item puntatore al mutex da inizializzare
+    \item puntatore ad una struttura con attributi di inizializzazione, oppure NULL per utilizzare quelli di default
+\end{itemize}
+
+Per ottenere il lock all' inizio della sezione critica, cioè eseguire la wait:
+\begin{verbatim}
+int pthread_mutex_lock(pthread_mutex_t* M);
+\end{verbatim}
+
+Per rilasciare il lock alla fine della sezione critica, cioè eseguire la signal:
+\begin{verbatim}
+int pthread_mutex_unlock(pthread_mutex_t* M);
+\end{verbatim}
+Entrambe le funzioni ritornano 0 in caso di successo ed un codice di errore altrimenti.
+
+NB: si ricordi che una volta presa una risorsa quando si è finito di usarla la si deve rilasciare altrimenti l' accesso ad essa rimane bloccato per sempre!
+
+
+\subsubsection{Variabili condizioni}
+Per la sincronizzazione diretta dei thread la libreria fornisce le variabili condizione.
+Un thread può sospendersi in attesa del verificarsi di una determinata condizione, possiamo quindi realizzare politiche avanzate di accesso alle risorse condivise.
+
+La libreria ci mette a disposizione la struttura \verb{pthread_cond_t{, è di fatto una coda nella quale i thread possono sospendersi volontariamente.
+
+Per inizializzare la variabile:
+\begin{verbatim}
+int pthread_cond_init(pthread_cond_t* C,
+    pthread_cond_attr_t* attr);
+\end{verbatim}
+\begin{itemize}
+    \item puntatore alla condition da inizializzare
+    \item puntatore alla struttura con attributi di inizializzazione, oppure NULL per utilizzare quelli di default
+\end{itemize}
+
+Possiamo eseguire due operazioni su queste variabili:
+\begin{itemize}
+    \item sospendersi sulla variabile condition, quindi il thread dopo aver verificato la veridicità di una condizione logica, si sospende sulla variabile condition in attesa di essere risvegliato
+    
+    \item risvegliare uno dei thread (signal) o tutti i thread (broadcast) sospesi sulla variabile condition
+\end{itemize}
+NB: queste variabili condition sono implementate con politica signal-and-continue quindi il thread che si risveglia deve comunque controllare lo stato di una risorsa perché non è garatito l' accesso in mutua esclusione.
+
+Lo schema generico della wait è:
+\begin{verbatim}
+    while (condizione_logica)
+        wait(condition_variable)
+\end{verbatim}
+il thread controlla la condizione, se è vera si blocca sulla condition.
+Rimane quindi in attesa di essere risvegliato e che la condizione sia resa falsa.
+Si noti che la condizione logica è basata sul controllo di una risorsa condivisa, questo controllo deve quindi essere eseguito in mutua esclusione.
+Ci verrebbe da pensare che: dovendo entrare in sezione critica, checkando la condizione e finendo in coda potremmo impedire agli altri thread di entrare nella sezione critica per eventualmente svegliarci!
+Per evitare questo problema la primitiva di wait implementata da pthread ci chiede di passargli anche un mutex associato alla variabile condition, in questo modo l' accesso in mutua esclusione sulla condizione logica viene rilasciato quando il thread si sospende con la wait, dopo essere stato risvegliato prova nuovamente ad eseguire il lock sul mutex per riottenere la mutua esclusione.
+La sintassi è:
+\begin{verbatim}
+int pthread_cond_wait(pthread_cond_t* C,
+    pthread_mutex_t* M);
+\end{verbatim}
+\begin{itemize}
+    \item puntatore alla variabile condizione da checkare
+    \item puntatore al mutex associato alla variabile condizione, viene liberato automaticamente quando il thread si sospende, e si esegue una lock su di esso quando il thread si risveglia
+\end{itemize}
+
+La sintassi della signal è:
+\begin{verbatim}
+int pthread_cond_signal(pthread_cond_t* C);
+\end{verbatim}
+se esistono thread in coda sulla condition almeno uno viene risvegliato, se non ce ne sono non ha effetti.
+
+Per risvegliare tutti i thread in coda possiamo usare:
+\begin{verbatim}
+int pthread_cond_broadcast(pthread_cond_t* C)
+\end{verbatim}
+\begin{itemize}
+    \item puntatore alla variabile condizione da checkare
+\end{itemize}
+
+
