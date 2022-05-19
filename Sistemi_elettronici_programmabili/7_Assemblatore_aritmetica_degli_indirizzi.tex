@@ -1,0 +1,61 @@
+\section{Funzionamento dell'assemblatore e aritmetica degli indirizzi}
+Il software si scrive utilizzando un comune editor di testo, il codice sorgente non è nient' altro che testo, per trasformarlo in codice macchina comprensibile dal microcontrollore si deve utilizzare un programma chiamato \emph{assemblatore}.
+Questo software si occupa di prendere il testo, leggerlo, trasformare il sorgente in codice macchina e costruire un file \emph{binario} pronto per essere scritto sulla memoria FLASH del SoC.
+
+\subsection{Location counter}
+Per eseguire la traduzione l'assemblatore ha la necessità di conoscere l' indirizzo di ogni istruzione, per fare ciò una variabile chiamata \emph{location\_counter} viene inizializzata a zero e man mano che le istruzioni del codice sorgente vengono elaborate viene incrementato (di 1 o 2 in base alla lunghezza dell'istruzione costruita).
+\begin{verbatim}
+    LDI r9, 47      # address: 0, size: 1
+    ADIW r10, 810   # address: 1, size: 2
+    MOV r0, r3      # address: 3, size: 1
+\end{verbatim}
+
+Attraverso alcune direttive all'assemblatore il location\_counter si può modificare, questo è spesso utilizzato per lasciare buchi nella flash.
+
+\subsection{Simboli}
+Un simbolo è una stringa di testo usata come identificatore per un valore.
+Si possono usare lettere e numeri (non come primo carattere), sono case-insensitive, gli underscore (\_) sono ammessi.
+L'assemblatore associa a ciascun simbolo un valore a 16 bit, si costruisce una tabella man mano che si va avanti e si incontrano dichiarazioni di simboli.
+Ci sono due metodi per dichiarare un simbolo:
+\begin{itemize}
+    \item direttive .EQU e .DEF:
+    \begin{verbatim}
+        .EQU FOO=0x3900
+        .DEF BAR=0x03A0
+    \end{verbatim}
+    entrambe queste direttive associano il valore a destra dell' uguale alla stringa a sinistra dell' uguale
+    
+    \item etichette:
+    \begin{verbatim}
+        QUI: <istruzione>
+    \end{verbatim}
+    si associa l' indirizzo dell' istruzione (il valore del location\_counter) all' etichetta specificata
+\end{itemize}
+
+\subsubsection{Etichette nei salti}
+Le etichette possono essere utilizzate all' interno dei salti per non dover calcolare manualmente gli offset e gli indirizzi:
+\begin{verbatim}
+    RESET:
+        RJMP START
+    
+    START:
+        LDI r16, 0x5f
+        LDI r17, 0x08
+\end{verbatim}
+Il codice di un ciclo di ritardo potrebbe quindi essere scritto:
+\begin{verbatim}
+        LDI r16, 100
+    CICLO:
+        DEC r16
+        BRNE CICLO
+\end{verbatim}
+
+\subsubsection{Etichette nelle espressioni}
+Le etichette possono essere utilizzate, come placeholder dei loro valori, all' interno delle espressioni, purché se ne conosca il valore a tempo di assemblaggio.
+
+
+
+
+
+
+

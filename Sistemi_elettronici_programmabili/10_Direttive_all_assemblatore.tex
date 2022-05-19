@@ -1,0 +1,167 @@
+\section{Altre strutture dell' assemblatore}
+\subsection{Direttive}
+Abbiamo detto che l' assemblatore si occupa di prendere il nostro codice assembly e produrre un file caricabile sulla flash del controllore, tuttavia non fa solo questo.
+In particolare si occupa anche di gestire gli indirizzi attraverso le etichette e ci toglie il lavoro di fare i calcoli per i salti relativi.
+
+Al suo interno ha 3 location\_counter:
+\begin{itemize}
+    \item CSEG: location\_counter della flash
+    \item DSEG: location\_counter della SRAM
+    \item ESEG: location\_counter della EEPROM
+\end{itemize}
+questi 3 contatori sono usati per mantenere gli indirizzi mentre si avanza con la traduzione, all' avvio partono tutti da 0 anche se DSEG a 0 è inutile in quanto lì non c'è SRAM ed all' avvio è attivo il contatore CSEG quindi di default siamo in una sezione codice.
+
+Possiamo dare delle istruzioni all' assemblatore attraverso le \emph{direttive}, si usano per modificare i contatori, aggiungere informazioni utili e tanto altro.
+Iniziano tutte con il . davanti.
+
+\subsubsection{.BYTE}
+Ci permette di creare della "variabili" cioè associare un nome mnemonico ad un indirizzo della SRAM.
+\begin{verbatim}
+    NOME_VARIABILE: .BYTE <dimensione>
+\end{verbatim}
+il nome viene specificato tramite una etichetta, successivamente la direttiva .BYTE alloca tanti byte quanti specificati nella dimensione.
+\begin{verbatim}
+    array10: .BYTE 10
+    array20: .BYTE 10+10
+\end{verbatim}
+Dato che stiamo parlando della SRAM l' assemblatore usa il contatore DSEG per assegnare l' indirizzo, quindi lo incrementa.
+
+\subsubsection{.DSEG, .CSEG, .ESEG}
+Sono direttive che indicano all' assemblatore quale location counter usare come principale da quel momento in poi.
+Di fatto usarne uno indica che si sta creando una nuova sezione in quel tipo di memoria.
+
+\subsubsection{.DB}
+Si usa per allocare costanti, quindi diamo un nome ad un valore scritto nella FLASH.
+\begin{verbatim}
+    NOME_COSTANTE: .DB <lista_di_valori>
+\end{verbatim}
+in base alla lunghezza della lista sceglie quanti byte utilizzare e quindi quanto lunga sarà questa struttura.
+Essendo in FLASH alloca sempre un numero pari di byte per prendere tutta la riga.
+Se specifichiamo un valore più grande di 255 esso verrà troncato ai primi 8 bit.
+\begin{verbatim}
+    consts: .DB 0, 255, 0b01010101, -128, 0xaa
+    str:    .DB "asg!\0"
+    char:   .DB 'c'
+\end{verbatim}
+
+\subsubsection{.DEF}
+Si usa per dare un sinonimo ad un registro.
+\begin{verbatim}
+    .DEF Symbol=Register
+\end{verbatim}
+
+\subsubsection{.DEVICE}
+Si usa per specificare per quale dispositivo si sta scrivendo il codice.
+Questo è utile per far comprendere all' assemblatore quale subset di istruzioni sono accettabili.
+Non è necessario usarlo, in tal caso però l' assemblatore userà tutte le istruzioni possibili quindi se una non è supportata dal microcontrollore non ci verrà detto.
+
+\subsubsection{.DW}
+Si usa per allocare costanti a 16 bit.
+\begin{verbatim}
+    NOME_COSTANTE: .DW <lista_di_valori>
+\end{verbatim}
+Anche in questo caso se la variabile è più di 16 bit verrà troncata.
+\begin{verbatim}
+    varlist: .DW 0, 0xffff, 0b1001100110011001, -32768, 65535
+\end{verbatim}
+
+\subsubsection{.EQU}
+Definisce un simbolo con un valore.
+\begin{verbatim}
+    .EQU var1=3
+    .EQU var2=var1*3
+\end{verbatim}
+Si possono usare tutte le espressioni costanti per indicare il valore.
+
+\subsubsection{.EXIT}
+Si usa per indicare la fine di un file, quando viene incontrata dall' assemblatore esso smette di processare il file corrente.
+Non è obbligatorio usarla.
+
+\subsubsection{.INCLUDE}
+Include il file specificato nel punto in cui uso la direttiva.
+In questo assembly, detto \emph{assoluto} non conviene separare il codice in troppi file per lavorare in gruppo, questo perché le etichette non possono ripetersi pertanto diverse persone a scrivere il codice significa più probabilità di commettere errori di questo tipo.
+Gli assembly che permettono questa feature sono detti \emph{relativi}.
+
+\subsubsection{.LIST}
+Abilita la creazione del list file, cioè un file che contiene gli indirizzi delle singole istruzioni, il loro codice operativo assieme all' assembly.
+Può tornare utile ai fini di debug.
+
+\subsubsection{.LISTMAC}
+Aggiunge le macro nel listfile.
+
+\subsubsection{.MACRO}
+Si usa per creare delle pseudoistruzioni cioè mnemonici che poi vengono sostituiti con altre operazioni.
+\begin{verbatim}
+    .MACRO NOME_MACRO
+        <espanzione della macro>
+    .ENDMACRO
+\end{verbatim}
+All' interno della espansione si possono usare i parametri usando la sintassi \verb{@n{ con $n$ il numero della posizione del parametro.
+\begin{verbatim}
+    .MACRO SUBI16
+        subi @1, low(@0)
+        sbci @2, high(@0)
+    .ENDMACRO
+\end{verbatim}
+Per usare la macro non serve altro che scriverne il nome e specificare i parametri.
+\begin{verbatim}
+    .CSEG
+    SUBI16 0x1234, r16, r17
+    ; verrà tradotto con
+    ; subi r16, low(0x1234)
+    ; sbci r17, high(0x1234)
+\end{verbatim}
+
+Si consiglia di usare le macro per espansioni di poche istruzioni o pseudoistruzioni, se sono tante ed usate spesso conviene creare ed usare delle sub-routine.
+
+\subsubsection{.ORG}
+Altera a mano il location\_counter attivo in quel momento
+
+
+\subsection{Funzioni}
+Ci sono anche alcune funzioni che si possono applicare ai valori costanti, queste vengono calcolate dall' assemblatore che poi sostituisce le chiamate con i valori effettivi.
+
+\subsubsection{LOW}
+Applicata ad un numero restituisce gli 8 bit più bassi.
+
+\subsubsection{HIGH}
+Applicata ad un numero restituisce i bit dall'8 al 15.
+
+\subsubsection{EXP2}
+Applicata ad un numero restituisce la sua potenza di 2.
+
+\subsubsection{LOG2}
+Applicata ad un numero restituisce la parte intera del suo logaritmo in base 2.
+
+
+\subsection{Operatori}
+Abbiamo a disposizione tutti gli operatori del C per calcolare le espresioni costanti.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+        Operatore & Significato \\
+         ! & NOT logico \\
+         $ \Tilde{} $ & NOT binario \\ 
+         - & meno unario \\ 
+         * & moltiplicazione \\ 
+         / & divisione intera \\ 
+         + & somma \\ 
+         - & sottrazione \\ 
+         $<<$ & shift a sinistra \\
+         $>>$ & shift a destra \\
+         $<$ & minore \\
+         $<=$ & minore o uguale \\
+         $>$ & maggiore \\
+         $>=$ & maggiore o uguale \\
+         == & controllo di uguaglianza \\
+         != & controllo di diversità \\
+         \& & AND bit a bit \\
+         $\wedge$ & XOR bit a bit \\
+         $|$ & OR bit a bit \\
+         \&\& & AND logico \\
+         $||$ & OR logico \\
+    \end{tabular}
+\end{table}
+
+
+

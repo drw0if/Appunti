@@ -1,0 +1,86 @@
+\section{Esercitazione 1}
+
+\subsection{Radice quadrata con metodo di Newton}
+Calcolare la radice quadrata di un numero a 16 bit:
+$$ k = \sqrt{a} $$
+tramite il metodo iterativo di Newton.
+
+Se abbiamo $a$ a 16 bit la sua radice quadrata $k$ sta sempre su 8 bit.
+Usando il metodo di Newton possiamo approssimare le soluzioni di $f(x) = 0$, nel nostro caso abbiamo $x^2 - a = 0$, in particolare a noi servono solo le soluzioni positive.
+Il metodo di Newton prevede che si parta da un punto casuale, si tracci la tangete della funzione per quella coordinata $x$, si trovi l' intersezione con l' asse delle $x$ e si usi quel punto come nuova approssimazione per reiterare il processo.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=220px]{images/13_Esercitazione_1/metodo_di_newton.png}
+\end{figure}
+
+Data la funzione $f(x) = x^2 - a$, abbiamo come derivata $\frac{\partial f}{\partial x} = 2x$, per tracciare la tangente nel punto $P_i(x_i, f(x_i)) = (x_i, x_i^2-a)$ dobbiamo risolvere:
+$$ y - y_p = m(x - x_p) $$
+Si ricordi che $m = \frac{\partial f}{\partial x}(x_i) = 2x_i$ quindi:
+$$ y = 2x_i(x-x_i) + x_i^2 - a $$
+$$ y = 2xx_i - x_i^2 - a $$
+ci interessa l' intersezione con l'asse delle $x$ quindi quando $y=0$:
+$$ 2xx_i - x_i^2 - a = 0 $$
+$$ x_{i+1} = x = \frac{x_i^2 + a}{2x_i} $$
+Dobbiamo eseguire una moltiplicazione, per il quadrato, una somma ed una divisione, possiamo arrangiarla diversamente:
+$$ \frac{1}{2} \left( \frac{a + x_i^2}{x_i} \right) = \frac{1}{2} \left( \frac{a}{x_i} + x_i \right) $$
+In questa formulazione ci bastano una divisione, una somma ed uno shift a destra.
+
+Ci serve inoltre un punto per iniziare la nostra iterazione, per convergere in maniera veloce per questa funzione conviene scegliere un punto iniziale maggiore del valore effettivo, quindi dato che vale $a > \sqrt{a}$ se $a \neq 0, a \neq 1$, usiamo $a$ stesso come prima approssimazione.
+
+Proviamo per $a = 100$:
+$$ x_0 = 100 \xrightarrow{} x_1 = \left\lfloor \frac{1}{2} \left( \frac{100}{100} + 100 \right) \right\rfloor = 50 $$
+$$ x_1 = 50 \xrightarrow{} x_2 = \left\lfloor \frac{1}{2} \left( \frac{100}{50} + 50 \right) \right\rfloor = 26 $$
+$$ x_2 = 26 \xrightarrow{} x_3 = \left\lfloor \frac{1}{2} \left( \frac{100}{26} + 26 \right) \right\rfloor = 14 $$
+$$ x_3 = 14 \xrightarrow{} x_4 = \left\lfloor \frac{1}{2} \left( \frac{100}{14} + 14 \right) \right\rfloor = 10 $$
+$$ x_4 = 10 \xrightarrow{} x_5 = \left\lfloor \frac{1}{2} \left( \frac{100}{10} + 10 \right) \right\rfloor = 10 $$
+Come criterio di stop possiamo usare $x_i = x_i+1$, con 4 iterazioni ho finito!
+
+Provimo per $a = 900$:
+$$ x_0 = 900 \xrightarrow{} x_1 = \left\lfloor \frac{1}{2} \left( \frac{900}{900} + 900 \right) \right\rfloor = 450 $$
+$$ x_1 = 450 \xrightarrow{} x_2 = \left\lfloor \frac{1}{2} \left( \frac{900}{450} + 450 \right) \right\rfloor = 226 $$
+$$ x_2 = 226 \xrightarrow{} x_3 = \left\lfloor \frac{1}{2} \left( \frac{900}{226} + 226 \right) \right\rfloor = 114 $$
+$$ x_3 = 114 \xrightarrow{} x_4 = \left\lfloor \frac{1}{2} \left( \frac{900}{114} + 114 \right) \right\rfloor = 60 $$
+$$ x_4 = 60 \xrightarrow{} x_5 = \left\lfloor \frac{1}{2} \left( \frac{900}{60} + 60 \right) \right\rfloor = 37 $$
+$$ x_5 = 37 \xrightarrow{} x_6 = \left\lfloor \frac{1}{2} \left( \frac{900}{37} + 37 \right) \right\rfloor = 30 $$
+$$ x_6 = 30 \xrightarrow{} x_7 = \left\lfloor \frac{1}{2} \left( \frac{900}{30} + 30 \right) \right\rfloor = 30 $$
+Con 6 iterazioni abbiamo finito!
+
+Si noti tuttavi che se il radicando non è perfetto il risultato potrebbe oscillare:
+$$ x_1 = 13 $$
+$$ x_2 = 12 $$
+$$ x_3 = 13 $$
+$$ x_4 = 12 $$
+quindi come condizione di uscita useremo: $ x_i = x_{i+1} \vee x_i = x_{i+2} $
+
+Si noti che i casi in cui $a = 0, a = 1$ vanno gestiti separatamente in quanto non si possono risolvere con l'algoritmo di Newton.
+
+\subsection{Crivello di Eratostene}
+Implementare in assembly il crivello di Eratostene per la ricerca dei numeri primi.
+
+Si elencano tutti i numeri da 1 ad $N$, tralaciamo 1 e partiamo da 2:
+\begin{itemize}
+    \item elimino tutti i suoi multipli in successione, dato che servono in successione posso continuare a sommare 2 finché non arrivo oltre $N$, non servono dunque le moltiplicazioni
+    
+    \item prendo il prossimo numeri non cancellato ed eseguo l' algoritmo a partire da lui
+\end{itemize}
+
+NB: cancellare significa inserire al posto di quel numero un valore convenzionalemnte associato a niente, ad esempio lo 0.
+
+\begin{verbatim}
+    TODO: immagini del crivello in azione
+\end{verbatim}
+
+Si prenda $N$a scelta ma \emph{maggiore} di 1000, usando numeri a 16 bit si consiglia di rappresentare ogni numero su 16 bit.
+
+Il programma deve quindi:
+\begin{itemize}
+    \item svuotare la RAM
+    \item inzializzarla inserendo i numeri da 2 ad $N$
+    \item eseguire il crivello
+    \item compattare tutti i numeri primi trovati
+\end{itemize}
+
+
+
+
+

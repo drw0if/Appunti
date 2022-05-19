@@ -1,0 +1,21 @@
+\section{Watchdog}
+E' un timer simile al timer 0 usato per una feature di sicurezza.
+Ha un contatore interno che al wrap causa il reset del chip.
+Il software deve quindi azzerare il contatore periodicamente via software in modo da evitare il reset.
+
+Utilizza un oscillatore di clock tutto suo sempre per motivi di sicurezza, usa però un circuito LC a bassa precisione.
+Contiene un prescaler programmabile.
+
+Si programma tramite il registro WDTCR:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=330px]{images/28_Watchdog/WDTCR.png}
+\end{figure}
+\begin{itemize}
+    \item WDE: fa partire il watchdog
+    \item WDTOE: va settato ad 1 per poter disabilitare il watchdog.
+    Subito dopo averlo settato si hanno 4 cicli di clock per scrivere 0 su WDE
+    \item WDP0-2: usati per settare il prescaler 
+\end{itemize}
+
+Per resettare il contatore si usa l' istruzione \verb{wdr{.

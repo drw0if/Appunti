@@ -1,0 +1,131 @@
+\section{Introduzione}
+
+Le lezioni del corso sono divise in due appuntamenti da 3 ore e 2 ore.
+Durante le 2 ore si farà teoria, durante le 3 ore si faranno le esercitazioni che dato che non c'è possibilità di avere l'hardware sono esclusivamente software.
+
+Durante le 3 ore pertanto ci sarà una revisione ed assistenza delle consegne a casa. Le esercitazioni hanno una deadline e possono valere fino a 10-12 punti su 30 per il voto finale.
+E' importante consegnare le esercitazioni anche se non funzionanti. La consegna di tutte le esercitazioni porta a 10 punti, se sono fatte completamente bene si arriva a 12.
+
+Chi arriva a 6 punti o più è ammesso all'esame e dovrà fare solamente uno scritto ed un orale, entrambi da 10 punti. Chi totalizza meno di 6 punti o non segue le lezioni deve fare anche un esame pratico. Le esercitazioni non hanno scadenza, una volta consegnate valgono per sempre.
+
+\subsection{Materiale del corso}
+Il materiale fondamentale per il corso è il datasheet dell'ATmega32 prodotto dalla ATMEL ora assorbita da Microchip.
+
+Si programma con AVR Studio, versioni consigliate 4.x e 7.x.
+
+Si hanno anche alcune dispense fatte dal prof e distribuite su teams ed una dispensa fatta da un altro studente sempre distribuita dal professore.
+
+A Dicembre ci sarà un pre-appello composto da 2 domande che soppianta l'orale. La modalità prevede un'ora per la prima domanda, una pausa ed un'altra ora per la seconda domanda. Nel pre-appello la seconda domanda è di tipo \emph{creativo}, cioè anziché scrivere un programma ne verrà dato uno e bisogna analizzarlo e giustifica alcune scelte fatte.
+
+\subsection{Che cos'è un microcontrollore?}
+Un microcontrollore è un computer su un singolo chip. A volte è detto anche \emph{SoC} cioè \emph{System on a chip}. La differenza sostanziale con un processore è che i processori hanno le varie componenti distaccate: memoria RAM, disco, periferiche di ingresso/uscita, mentre i Soc/microcontrollori comprendono tutto ciò che serve per funzionare in un unico pezzo di silicio.
+
+In genere i dispositivi di uscita dei microcontrollori sono usati per controllarne altri, per interfacciarsi con attuatori elettronici:
+\begin{itemize}
+    \item motori
+    \item led
+    \item ...
+\end{itemize}
+o per misurae informazioni dal mondo circostante tramite sensori:
+\begin{itemize}
+    \item sensori di temperatura
+    \item ...
+\end{itemize}
+
+Nei microcontrollori di solito il software è fisso, viene impresso in fabbrica e non varia più. Nei modelli più recenti invece è contemplato l'aggiornamento software.
+
+I System on a Chip, rispetto ai microcontrollori sono più potenti, più grossi in memoria  dimensioni e quindi più costosi.
+
+\subsection{Un po' di storia}
+Il problema storico principale è quello di \emph{avere una memoria non volatile} cioè una memoria che una volta impressa non perda il suo contenuto quando smette di essere alimentato. Tutte le memorie necessitano di energia sia per leggere che per scrivere, ma le memorie volatili ne necessitano anche per mantenere in memoria le informazioni.
+
+Tra le invenzioni recenti troviamo le \emph{EPROM} che sono memorie non volatili che una volta programmate permettono la persistenza del dato. Per svuotarle e riprogrammarle ancora possono essere esposte ai raggi UV (banalmente al sole) e successivamente programmate con la stessa procedura della prima volta.
+
+Successivamente troviamo le \emph{EEPROM} che sono sempre memorie non volatili che tuttavia permettono la cancellazione tramite segnali elettrici. Sono anche dette \emph{memorie flash}. Una flash EPROM permette la cancellazione dei dati ma interamente, quindi se un singolo bit va modificato è necessaria una riscrittura di tutto il banco di memoria. Nelle applicazioni moderne (chiavette USB, SSD, ecc) non si ha una singola memoria quanto dei singoli blocchi, più piccoli, proprio per evitare di dover riprogrammare interi GB di memoria, ma al massimo un singolo settore.
+
+Nei vecchi uC la EPROM era di solito un chip separato dal microcontrollore stesso, questa è quindi una differenza spartiacque tra vecchi modelli e nuovi modelli.
+
+I vecchi modelli erano inoltre pensati per avere poca potenza, per spremerla completamente quindi si usava programmarli in assembly direttamente. I nuovi modelli hanno più potenza e spesso sono pensati proprio per essere programmati in C/C++.
+
+Tra i vecchi uC citiamo:
+\begin{itemize}
+    \item 8051
+    \item Z80 (usato spesso nei controller degli hard disk)
+\end{itemize}
+
+Tra i uC recenti citiamo invece:
+\begin{itemize}
+    \item AVR: sono quelli che useremo
+    \item MSP430
+    \item ARM
+    \item PIC
+\end{itemize}
+
+Molti dei dialetti assembly utilizzati da questi microcontrollori sono simili tra di loro, questo perché sono tutti nati dopo il PDP-11, il computer per l'insegnamento per antonomasia da cui quindi derivano alcune caratteristiche chiave.
+
+\subsubsection{AVR}
+E' un uC molto semplice da imparare, adatto al principiante. E' nato per essere programmabile in C ed è quindi completamente compatibile con le strutture di questo linguaggio.
+Alcune versioni di questo uC sono:
+\begin{itemize}
+    \item AT8515: l'originale che ormai è fuori produzione.
+    \item ATtiny: una versione più piccola per applicazioni \emph{usa e getta}. E' su 8 o 16 bit ed ha un prezzo inferiore a 1\euro.
+    \item ATMega: una versione maggiorata dell'originale che lo ha completamente soppiantato. Ha un prezzo che varia dai 2\euro ai 3\euro. Anche lui è presente in versioni a 8 ed a 16 bit.
+    \item ATxMega: una versione maggiorata degli ATMega con più GPIO e più memoria. Si trova sui circa 5\euro.
+\end{itemize}
+
+\subsubsection{MSP430}
+E' un AVR migliorato ma essendo arrivato 5 anni dopo è poco diffuso. Alcuni modelli utilizzano la memoria termoelettrica cioè un nuovo tipo di memoria che permette l'autoprogrammazione poiché è possibile modificare i singoli bit memorizzati. Sono a 16 bit.
+
+\subsubsection{ARM}
+E' nato come processore per PC nel 1982 ed è a 32 bit. E' molto potente e quindi più costoso. Ce ne sono di tantissime versioni ma ha una architettura molto complessa non adatta ad un principiante. Le serie principali sono:
+\begin{itemize}
+    \item M: noti come Cortex M0/M3/M4
+    \item R: non ha avuto successo
+    \item A: usati largamente nei cellulari
+\end{itemize}
+
+\subsubsection{PIC}
+E' una architettura strana ma nuova, le prime versioni sono compatibili con la programmazione in C. Ogni modello ha una architettura diversa con alcune similitudini, anche per questo sono poco utilizzati.
+
+
+\subsection{Criteri di scelta di un microcontrollore}
+Tra i criteri di scelta di un microcontrollore annoveriamo:
+\begin{itemize}
+    \item Costo
+    \item Potenza di calcolo
+    \item Memorie: quanto grandi, quanto veloci e di che tipo
+    \item Sistema di sviluppo
+    \item Complessità del sistema
+\end{itemize}
+
+\subsubsection{Sistemi di sviluppo}
+In questo corso noi useremo AVRStudio poiché messo a disposizione gratuitamente dalla stessa AVR, ciò ha probabilmente contribuito alla sua diffusione massiva.
+Esistono altri ambienti di sviluppo per AVR come IAR, tuttavia è uno strumento semi a pagamento, l'assemblatore è gratuito ma il compilatore no, quindi per l'assembly useremo la sintassi IAR, per il C useremo la sintassi GCC.
+
+Altri microcontrollori possono godere del loro ambiente di sviluppo, alcuni sono basati su Eclipse (in quanto open source e facilmente personalizzabile). Altri usano una versione di \emph{SDCC} (Small Device C Compiler), questa suite permette anche di compilare codice C per architetture che non sono nate per essere usate con il C, in questi casi la sintassi è molto rivoluzionata per permettere questa compatibilità.
+
+\subsubsection{Potenza di calcolo}
+Come potenza di calcolo si intendono varie cose, una prima caratteristica è il numero di bit della architettura, ne abbiamo a 8 bit, a 16 bit, a 32 bit ed in futuro anche a 64 bit. Un altro fattore importante è la frequenza del processore:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c c c}
+    8051 & 12MHz & 12 cicli/istruzione \\
+    AVR & 20MHz & 1 ciclo/istruzione \\
+    ARM & 40MHz - 400MHz & 1 ciclo/istruzione \\
+    \end{tabular}
+\end{table}
+
+In fine un'ultima classificazione riguarda il tipo di set di istruzioni:
+\begin{itemize}
+    \item CISC: complex instruction set computer
+    \item RISC: reduced instruction set computer
+\end{itemize}
+inizialmente gli instruction set prevedevano tante istruzioni che facevano cose complesse: accedere in memoria, copiare il valore in un registro, incrementare il registro, attorno al 1980 una analisi statistica ha rilevato che alla fine i programmatori preferivano usare un ristretto set di istruzioni per implementare ciò che alcune istruzioni complesse facevano già.
+Sono stati quindi ideati dei set di istruzioni ridotte, molto ottimizzate e quindi veloci, sono nati i processori RISC, lo spazio sul silicio liberato dalla rimozione di queste istruzioni è generalmente utilizzato per nuovi registri, cosa molto comoda sempre per motivi di velocità
+
+
+
+
+
+

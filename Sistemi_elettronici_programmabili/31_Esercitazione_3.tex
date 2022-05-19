@@ -1,0 +1,15 @@
+\section{Esercitazione 3 - Salto del cavallo}
+Data una scacchiera 8x8 prendiamo una cella e marchiamola come visitata, da quel posto marcare le celle sulle quali si può andare se il pezzo da muovere è un cavallo.
+Si noti che il cavallo negli scacchi si muove: $(x \pm 2, y \pm 1)$ e $(x \pm 1, y \pm 2)$.
+
+Facendo questi movimenti è possibile vederle tutte senza ripassare sulle celle visitate?
+
+In input abbiamo la dimensione della scacchiera ($4 \leq N \leq 8$) e la posizione di partenza.
+Scrivere un algoritmo ricorsivo.
+
+Se in un punto dell' algoritmo non posso più andare avanti ma non ho comunque finito segno la cella come non visitata e torno indietro, eseguo un \emph{backtracking}.
+
+Inserire in più all' algoritmo un controllo sullo stack ogni 10k cicli di clock.
+
+Dividere il progetto in almeno 3 file con almeno un file in assembly, formattare bene e commentare il codice.
+

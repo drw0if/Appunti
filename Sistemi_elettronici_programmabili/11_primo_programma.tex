@@ -1,0 +1,69 @@
+\section{Primo programma}
+Vogliamo fare un programma che esegue la divisione tra un numero a 16 bit ed uno a 8 bit:
+\begin{verbatim}
+    .include "m32def.inc"   ; includiamo i simboli messi
+                            ; a disposizione da ATMEL
+    .equ dividendo=1000
+    .equ divisore=150
+
+    .org 0x2a               ; lascio spazio vuoto fino a 0x2a
+    
+    start:
+        ldi r16, low(RAMEND)
+        ldi r17, high(RAMEND)
+        out SPL, r16
+        out SPH, r17
+        ; stack inizializzato
+        
+        ldi XL, low(dividendo)
+        ldi XH, high(dividendo)
+        ldi YL, low(divisore)
+        clr YH
+        
+        rcall divb
+    
+    fine:
+        rjmp fine
+        ; program halt
+    
+    ; X:    dividendo
+    ; YL:   divisore
+    ; Z:    quoziente
+    ; divisione attraverso sottrazioni successive
+    divb:
+        tst YL
+        brne ok
+        sec         ; setto il carry
+                    ; per segnalare errore
+        ret
+    
+    ok:
+        clr ZH
+        clr ZL
+        clr r0
+    
+    test:
+        cp XL, YL
+        cpc XH, r0  ; se ho carry ho finito
+        brcc avanti
+        clc
+        ret
+    
+    avanti:
+        sub XL, YL
+        sbc XH, r0
+        adiw ZL, 1
+        rjmp test
+\end{verbatim}
+Compilando il programma si ottengono:
+\begin{itemize}
+    \item .hex: codice da flashare ul uC
+    \item .lss: listato del programma compilato
+    \item .map: contiene i valori dei simboli, sono numeri rappresentati su 32 bit ma in realtà durante l' assemblaggio vengono troncati a 16
+\end{itemize}
+
+Si ricordi che il file ottenuto dall' assemblaggio va flashato sulla FLASH interna del uC, per fare ciò bisogna cancellare tutto il suo contenuto, questo non fa altro che settare ad 1 tutta la flash, dopodiché si scrivono gli 0.
+Questo si fa perché le memorie flash permettono di passare un singolo bit da 1 a 0 ma non viceversa, per fare ciò si deve cancellare tutto quanto, resettare la flash, quindi in genere non si fa a runtime una scrittura in flash.
+Inoltre le flash hanno un numero massimo di riscritture, in particolare l' ATmega32 garantisce fino a 10k scritture.
+
+

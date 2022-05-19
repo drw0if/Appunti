@@ -1,0 +1,25 @@
+\section{EEPROM interna}
+L' ATmega32 ha una terza memoria interna, una EEPROM, quindi una memoria non volatile.
+Si scrive un byte per volta ed ha una endurance di 100k scritture.
+Ha dimensione 1024 byte e si usa per dati che cambiano ma poco frequentemente e che devono persistere.
+
+Non è memoria mappata direttamente quindi per indirizzarla si usano i registri EEARH-EEARL, i dati da scrivere o il dato letto è in EEDR ed i bit di controllo sono in EECR:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=330px]{images/29_EEPROM_interna/EECR.png}
+\end{figure}
+\begin{itemize}
+    \item EERIE: abilita l' interruzione relativa alla scrittura sulla EEPROM
+    \item EEMWE: deve essere settato ad 1 per abilitare la scrittura
+    \item EEWE: inizia una scrittura (è lenta quindi la fine viene segnalata da una interruzione)
+    \item EERE: inizia una lettura (istantanea)
+\end{itemize}
+
+Si noti che nella libc ci sono già delle funzioni utilizzate per leggere e scrivere dalla EEPROM:
+\begin{itemize}
+    \item \verb{eeprom_read_byte{
+    \item \verb{eeprom_read_block{
+    \item \verb{eeprom_write_byte{
+    \item ...
+\end{itemize}
+

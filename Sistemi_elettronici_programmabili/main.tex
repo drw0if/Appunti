@@ -1,0 +1,69 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{amssymb}
+\usepackage{svg}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{graphicx,wrapfig,lipsum}
+\usepackage[makeroom]{cancel}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{eurosym}
+
+
+\begin{document}
+
+\include{0_Cover}
+
+\chapter{Introduzione}
+\include{1_Introduzione}
+\include{2_Architetture}
+\include{3_Architettura_ATmega32}
+
+\chapter{Programmazione in assembly}
+\include{4_Status_register}
+\include{5_Indirizzamento}
+\include{6_Instruction_set}
+\include{7_Assemblatore_aritmetica_degli_indirizzi}
+\include{8_LPM}
+\include{9_Stack}
+\include{10_Direttive_all_assemblatore}
+\include{11_primo_programma}
+\include{12_Divisione_efficiente}
+\include{13_Esercitazione_1}
+\include{14_Endianness_e_allineamento}
+\include{15_Esercitazione_2}
+
+\chapter{Gestione delle periferiche}
+\include{16_Interrupt}
+\include{17_Sleep_mode}
+\include{18_Clock}
+\include{19_Timer}
+\include{20_PWM}
+\include{21_GPIO}
+
+\chapter{Periferiche di comunicazione}
+\include{22_USART}
+\include{23_SPI}
+\include{24_I2C-TWI}
+\include{25_JTAG}
+
+\chapter{Uso avanzato}
+\include{26_Stack_frames}
+\include{27_Bootloader}
+\include{28_Watchdog}
+\include{29_EEPROM_interna}
+
+\chapter{Programmazione in C}
+\include{30_Programmazione_C}
+\include{31_Esercitazione_3}
+
+\chapter{Altre tecnologie}
+\include{32_freeRTOS}
+\include{33_ARM}
+
+
+\end{document}
