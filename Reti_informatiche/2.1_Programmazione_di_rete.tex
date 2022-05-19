@@ -1,0 +1,637 @@
+\section{Programmazione di rete in C}
+
+\subsection{Socket}
+Un socket è l' estremità di un canale di comunicazione fra due processi in esecuzione su macchine connesse in rete.
+E' una astrazione implementata dal sistema operativo che ci mette a disposizione system call per:
+\begin{itemize}
+    \item creare un nuovo socket
+    \item assegnargli un indirizzo
+    \item connettersi ad un altro socket
+    \item accettare connessioni in entrata
+    \item scambiare messaggi
+    \item ...
+\end{itemize}
+
+\subsection{Formato delle informazioni}
+\subsubsection{Strutture definite}
+\begin{verbatim}
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    
+    struct sockaddr_in {
+        sa_family_t     sin_family; /* Address family: AF_INET */
+        in_port_t       sin_port;   /* Porta in network order */
+        struct in_addr  sin_addr;   /* Address */
+    };
+    
+    struct in_addr {
+        uint32_t s_addr;            /* Address in network order */
+    };
+\end{verbatim}
+NB: $\_t$ indica la certezza che il tipo non vari la sua dimensione in base all' architettura di compilazione.
+
+\subsubsection{Endianness}
+Il formato usato in rete (\emph{network order}) è il big-endian, l' ordine dei byte nelle macchine (\emph{host order}) invece dipende dall' architettura.
+
+Per convertire dall' host order al network order e viceversa possiamo utilizzare le funzioni di utilità:
+\begin{verbatim}
+    #include <arpa/inet.h>
+    
+    uint32_t htonl(uint32_t hostlong)
+        // Host TO Network Long
+    uint16_t htons(uint16_t hostshort)
+        // Host TO Network Short
+    uint32_t ntohl(uint32_t networklong)
+        // Network TO Host Long
+    uint16_t ntohs(uint16_t networkshort)
+        // Network TO Host Short
+\end{verbatim}
+
+\subsubsection{Formato degli indirizzi}
+Gli indirzzi possono essere scritti in due notazioni:
+\begin{itemize}
+    \item formato numerico: numero a 32 bit
+    \item formato presentazione: notazione decimale puntata
+\end{itemize}
+per convertire tra l'una e l'altra usiamo:
+\begin{itemize}
+    \item 
+        \begin{verbatim}
+int inet_pton(int af, const char* src, void* dst)
+    // Presentation TO Numeric
+        \end{verbatim}
+        \begin{itemize}
+            \item af: famiglia (per noi sempre AF\_INET)
+            \item src: stringa in notazione decimale puntata
+            \item dst: puntatore alla variabile nella quale inserire il valore convertito
+        \end{itemize}
+
+    \item
+        \begin{verbatim}
+const char* inet_ntop(int af, const void* src,
+    char* dst, socklen_t size)
+    // Network TO Presentation
+        \end{verbatim}
+        \begin{itemize}
+            \item af: famiglia (per noi sempre AF\_INET)
+            \item src: puntatore alla network structure che contiene l' indirizzo
+            \item dst: puntatore al buffer nel quale inserire la notazione puntata
+            \item size: dimensione del buffer passato
+        \end{itemize}
+\end{itemize}
+
+\subsection{System call}
+\subsubsection{socket()}
+E' il wrapper della primitiva che ci permette di richiedere al sistema operativo un nuovo socket:
+\begin{verbatim}
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    
+    int socket(int domain, int type, int protocol);
+\end{verbatim}
+\begin{itemize}
+    \item domain: famiglia di protocolli da utilizzare:
+    \begin{itemize}
+        \item AF\_LOCAL: comunicazione locale, sulla stessa macchina
+        \item AF\_INET: protocolli IPv4, TCP e UDP
+    \end{itemize}
+
+    \item type: il tipo di socket:
+    \begin{itemize}
+        \item SOCK\_STREAM: socket TCP
+        \item SOCK\_DGRAM: socket UDP
+    \end{itemize}
+
+    \item protocol: per noi vale sempre 0
+
+    \item return value: il \emph{file descriptor} del socket creato, -1 se c'è stato un errore
+\end{itemize}
+Si noti che il socket restituito non è associato né ad un IP, né ad una porta.
+
+\subsubsection{bind()}
+Questa primitiva si usa per associare una coppia IP:porta ad un socket.
+Indica dove il server deve \emph{ricevere} richieste di connessione, la usa infatti il processo server.
+\begin{verbatim}
+    int bind(int sockfd, const struct sockaddr* addr,
+            socklen_t addrlen);
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: socket file descriptor
+    \item addr: puntatore alla struttura sockaddr che si vuole bindare al socket (usando sockaddr\_in dovremo effettuare un cast esplicito)
+    \item addrlen: dimensione di addr
+\end{itemize}
+
+Restituisce 0 se ha successo, -1 in caso di errore.
+
+\subsubsection{listen()}
+Specifica che il socket è usato per ricevere richieste di connessione, è un \emph{socket passivo}.
+Può essere fatto solo per i SOCK\_STREAM.
+
+\begin{verbatim}
+    int listen(int sockfd, int backlog);
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: il socket file descriptor
+    \item backlog: il numero massimo di richieste che il socket può mettere in attesa, se ne arrivano di più vengono scartate
+\end{itemize}
+Ritorna 0 se ha successo, -1 se c'è stato un errore.
+
+\subsubsection{accept()}
+Stoppa il processo fino all'arrivo di una connessione, se ce ne sono già in coda accetta la prima arrivata.
+Può essere fatto solo per i SOCK\_STREAM.
+\begin{verbatim}
+    int accept(int sockfd, struct sockaddr *addr,
+                socklen_t *addrlen);
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: il socket file descriptor
+    \item addr: puntatore ad una struttura sockaddr, qui verranno inserite le informazioni del client di cui è stata accettata la connessione.
+    Noi useremo una struttura sockaddr\_in
+    \item addrlen: dimensione della struttura sockaddr
+\end{itemize}
+Ritorna il descrittore di un nuovo socket da utilizzare per la comunicazione.
+
+Es:
+\begin{verbatim}
+    struct sockaddr_in cl_addr;
+    int len = sizeof(cl_addr);
+    int new_sd = accept(sd, (struct sockaddr*)&cl_addr, &len);
+\end{verbatim}
+
+\subsubsection{connect()}
+Permette ad un socket locale di inviare una richiesta di connessione ad un socket remoto.
+\begin{verbatim}
+    int connect(int sockfd, const struct sockaddr* addr,
+                socklen_t addrlen);
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: descrittore del socket locale
+    \item addr: puntatore alla struttura contenente l' indirizzo del socket remoto
+    \item addrlen: dimensione di addr
+\end{itemize}
+La funzione restituisce 0 se ha successo e -1 se si verifica un errore.
+La funzione è bloccante quindi il programma si ferma in attesa che la richiesta di connessione sia accettata dal server.
+
+\subsection{Instaurare una connessione}
+\subsubsection{Processo server}
+\begin{verbatim}
+    #include <arpa/inet.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    
+    int main(int argc, char** argv){
+        int ret, sd, new_sd, len;
+        struct sockaddr_in my_addr, client_addr;
+
+        // creo il socket
+        sd = socket(AF_INET, SOCK_STREAM, 0);
+        
+        // creo l' indirizzo
+        memset(&my_addr, 0, sizeof(my_addr);
+        my_addr.sin_family = AF_INET;
+        my_addr.sin_port = htons(4242);
+        inet_pton(AF_INET, "192.168.4.5", &my_addr.sin_addr);
+        // in alternativa my_addr.sin_addr.s_addr = INADDR_ANY;
+        // mette in ascolto su tutte le interfacce
+        
+        ret = bind(sd, (struct sockaddr*)&my_addr, sizeof(my_addr));
+        ret = listen(sd, 10);
+        len = sizeof(client_addr);
+        new_sd = accept(sd, (struct sockaddr*)&client_addr, &len);
+    
+        /* ... */
+    
+        return 0;
+    }
+\end{verbatim}
+
+\subsubsection{Processo client}
+\begin{verbatim}
+    #include <arpa/inet.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    
+    int main(int argc, char** argv){
+        int ret, sd;
+        struct sockaddr_in server_addr;
+        
+        sd = socket(AF_INET, SOCK_STREAM, 0);
+        
+        memset(&server_addr, 0, sizeof(server_addr);
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(4242);
+        inet_pton(AF_INET, "192.168.4.5", &server_addr.sin_addr);
+        
+        ret = connect(sd, (struct sockaddr*)&server_addr,
+                        sizeof(server_addr));
+        
+        /* ... */
+        return 0;
+    }
+\end{verbatim}
+
+\subsection{Scambio di dati attraverso i socket}
+I socket sono canali di comunicazione bidirezionali, quindi ogni endpoint può inviare e ricevere.
+Per eseguire ciò ci sono a disposizione alcune system call.
+
+Queste primitive si basano sull' utilizzo di alcuni buffer del sistema operativo, quando inviamo dati infatti la system call copia i dati dal nostro buffer locale verso un buffer del sistema che provvederà ad inviarli pian piano con le disponibilità della rete, idem alla ricezione.
+
+Questo utilizzo dei buffer e la loro limitata dimensione può portare ad alcuni problemi, ad esempio quando voglio trasmettere dei dati chiedo di trasferirne troppi ed allora la primitiva non li copia per intero restituendomi un codice di errore.
+
+\subsubsection{send()}
+Permette di inviare un messaggio attraverso un socket connesso.
+\begin{verbatim}
+    ssize_t send(int sockfd, const void* buf, size_t len,
+                int flags);
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: descrittore del socket connesso
+    \item buf: puntatore al buffer contenente il messaggio da inviare
+    \item len: dimensione del messaggio in byte
+    \item flags: opzioni aggiuntive (per ora 0)
+\end{itemize}
+La funzione restituisce il numero di byte inviati oppure -1 se si ha un errore.
+La funzione è bloccante (se il socket è bloccante) quindi il programma si ferma finché non riesce ad inviare tutto il messaggio o meglio finché non satura il buffer del sistema operativo.
+
+Es:
+\begin{verbatim}
+    int ret, sd, len;
+    char buffer[1024];
+    /* ... */
+    strcpy(buffer, "Hello Server!");
+    len = strlen(buffer);
+
+    ret = send(sd, (void*)buffer, len, 0);
+    
+    if(ret < len){
+        // Gestire il problema
+    }
+\end{verbatim}
+
+\subsubsection{recv()}
+Riceve un messaggio da un socket connesso, legge dal socket e copia nel buffer locale che gli passiamo.
+\begin{verbatim}
+    ssize_t recv(int sockfd, const void* buf, size_t len,
+                int flags);
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: descrittore del socket
+    \item buf: puntatore al buffer in cui salvare il messaggio
+    \item len: dimensione in byte del messaggio desiderato
+    \item flags: opzioni aggiuntive
+\end{itemize}
+La funzione restituisce il numero di byte ricevuti, -1 se c'è stato un errore, 0 se il socket remoto si è chiuso.
+La funzione è bloccante, in particolare rimane in pausa finché non ha ricevuto qualcosa.
+
+\begin{verbatim}
+    int ret, sd, bytes_needed;
+    char buffer[1024];
+    /* ... */
+    bytes_needed = 20;
+
+    ret = recv(sd, (void*)buffer, bytes_needed, 0);
+    
+    if(ret < bytes_needed){
+        // Gestire il problema
+    }
+
+    ret = recv(sd, (void*)buffer, bytes_needed, MSG_WAITALL);
+    // Questa versione chiede di aspettare finché non
+    // riceve tutti i byte richiesti
+\end{verbatim}
+
+\subsubsection{close()}
+Si usa per chiudere un socket, una volta invocata questa primitiva il socket non potrà essere utilizzato per inviare o ricevere dati.
+
+\begin{verbatim}
+    #include <unistd.h>
+    
+    int close(int fd);
+\end{verbatim}
+\begin{itemize}
+    \item fd: descrittore del socket da chiudere
+\end{itemize}
+La funzione restituisce 0 se ha successo, -1 se c'è stato un errore.
+L' host remoto riceve 0 nella recv.
+
+\subsection{Gestione degli errori}
+Le primitive restituiscono -1 quando c'è un errore, per saperne di più circa la causa dell' errore bisogna controllare la variabile globale \verb{errno{.
+Nel manuale di ogni funzione ci sono i possibili valori che prende errno.
+
+\begin{verbatim}
+    ret = bind(sd, (struct sockaddr*)&any_addr, sizeof(my_addr));
+    if(ret == -1){
+        // Ci stampa la stringa che passiamo e poi il
+        // motivo dell' errore
+        perror("Error: ");
+        exit(1);
+    }
+\end{verbatim}
+
+\subsection{Server concorrenti}
+Il server che abbiamo visto fino ad ora una volta che accettava una richiesta diveniva bloccato su quella richiesta, non ne poteva quindi accettare delle altre.
+Questo meccanismo è limitante perché pone gli altri client in una coda di attesa di durata indefinita.
+Il server visto fino ad ora è detto \emph{iterativo} e serve una richiesta alla volta in quanto per ogni richiesta accettata con \verb{accept(){ il processo server la elabora ed accoda quelle successive nella backlog.
+
+Esiste un' altra tipologia di server: quello concorrente che ci permette di servire più richieste alla volta.
+Questo è possibile perché dopo ogni richiesta accettata il processo server crea un processo figlio che la elabora, quindi il processo padre può continuare ad accettare altre richieste.
+
+\subsubsection{fork()}
+La primitiva fork clona il processo, il processo figlio è un clone perfetto del padre ed esegue lo stesso codice:
+\begin{verbatim}
+    #include <unistd.h>
+    pid_t fork(void);
+\end{verbatim}
+il valore di ritorno può essere:
+\begin{itemize}
+    \item 0 nel processo figlio
+    \item il PID del figlio nel padre
+\end{itemize}
+controllando il valore di ritorno quindi possiamo dividere il codice in base al fatto che siamo nel figlio o nel padre.
+
+\subsubsection{Utilizzo}
+Una volta duplicati sia il padre che il figlio si ritrovano gli stessi descrittori di socket, è pertanto consigliato che il processo padre chiuda il socket di comunicazione e che il processo figlio chiuda il socket di ascolto.
+\begin{verbatim}
+    pid_t pid;
+    ...
+    while(1){
+        new_sd = accept(sd, ...);
+        pid = fork();
+        
+        if(pid == -1){
+            // gestione dell' errore
+        }
+        
+        if(pid == 0){
+            // sono nel figlio
+            // chiudo il socket di ascolto
+            close(sd);
+            // servo la richiesta
+            ...
+            // chiudo il socket di comunicazione
+            close(new_sd);
+            // esco dolcemente
+            exit(0);
+        }
+        // sono nel padre
+        // chiudo il socket di comunicazione
+        close(new_sd);
+    }
+\end{verbatim}
+
+\subsection{Socket non bloccanti}
+I socket visti fino ad ora sono bloccanti perché è il comportamento di default:
+\begin{itemize}
+    \item la \verb{connect{ blocca il processo finché il socket non è connesso
+    \item la \verb{accept{ blocca il processo finché non arriva una richiesta di connessione
+    \item la \verb{send{ blocca il processo finché tutto il messaggio non è stato inviato
+    \item la \verb{recv{ blocca il processo finché non ci sono dati disponibili o finché tutto il messaggio richiesto non è disponibile (utilizzando il flag \verb{MSG_WAITALL{)
+\end{itemize}
+
+Per ottenere un socket non bloccante dobbiamo aggiungere un parametro all' apertura del socket:
+\begin{verbatim}
+    socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+\end{verbatim}
+con questa modifica cambiano anche alcuni comportamenti delle altre primitive:
+\begin{itemize}
+    \item \verb{connect(){: se non può connettersi restituisce -1 ed imposta \verb{errno{ a \verb{EINPROGRESS{
+    
+    \item \verb{accept(){: se non ci sono richieste restituisce -1 ed imposta \verb{errno{ a \verb{EWOULDBLOCK{
+    
+    \item \verb{send(){: se non può inviare tutto il messaggio (ad esempio il buffer di trasmissione è pieno) restituisce -1 ed imposta \verb{errno{ a \verb{EWOULDBLOCK{
+    
+    \item \verb{recv(){: se non ci sono messaggi restituisce -1 ed imposta \verb{errno{ a \verb{EWOULDBLOCK{
+\end{itemize}
+in questo modo quando dobbiamo prendere dei dati eseguiremo una serie di \verb{read(){ fino a quando non ci verranno effettivamente consegnati dati, tutto il tempo in mezzo alle chiamate il processo può fare altro!
+
+
+\subsection{I/O multiplexing}
+Se faccio operazioni su un socket bloccante non posso controllarne altri perché, appunto, sono bloccato su un socket.
+Una soluzione a questo problema potrebbe essere il multiplexing dell' I/O attraverso la primitiva \verb{select(){.
+Questa primitiva esamina più socket ed il primo che \emph{è pronto} viene usato.
+
+Per pronto si può intendere pronto per una particolare azione come:
+\begin{itemize}
+    \item pronto in lettura: se c'è almeno un byte da leggere oppure il socket è stato chiuso, oppure il socket è in ascolto e ci sono delle nuove connessioni effettuate oppure c'è un errore
+    
+    \item pronto in scrittura: se c'è spazio nel buffer del kernel per scrivere oppure c'è un errore, oppure se il socket è chiuso (in questo caso \verb{errno{ vale \verb{EPIPE{)
+\end{itemize}
+
+\subsubsection{Insiemi di descrittori}
+Un descrittore è un intero che va da 0 a \verb{FD_SETSIZE{ (di solito 1024).
+Un insieme di descrittori invece è un set che si rappresenta come una variabile di tipo \verb{fd_set{ e si manipola attraverso delle macro:
+\begin{verbatim}
+    void FD_SET(int fd, fd_set* set);
+        // aggiunge il descrittore fd al set set
+
+    void FD_ISSET(int fd, fd_Set* set);
+        // controlla se il descrittore fd è in set
+    
+    void FD_CLR(int fd, fd_set* set);
+        // rimuove il descrittore fd dal set set
+        
+    void FD_ZERO(fd_set* set);
+        // svuota l' insieme set
+\end{verbatim}
+
+\subsubsection{select()}
+\begin{verbatim}
+    #include <sys/time.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+    
+    int select(int nfds, fd_set* readfds, fd_set* writefds,
+        fd_set* exceptfds, struct timeval* timeout);
+\end{verbatim}
+\begin{itemize}
+    \item \verb{nfds{: numero del descrittore più alto tra quelli da controllare +1
+    \item \verb{readfds{/\verb{writefds{: lista dei descrittori da controllare per la lettura/scrittura
+    \item \verb{exceptfds{: lista di descrittori da controllare per le eccezioni
+    \item \verb{timeout{: intervallo di timeout
+\end{itemize}
+come valore di ritorno ci da il numero di descrittori pronti o -1 in caso di errore.
+
+E' una syscall bloccante in quanto si blocca finché almeno uno dei descrittori da controllare non è pronto oppure finché non scade il timeout che gli diamo, in questo caso restituisce 0.
+
+La timeval è una struttura che rappresenta un intervallo di tempo espresso in secondi e microsecondi:
+\begin{verbatim}
+    struct timeval{
+        long tv_sec;    /* secondi */
+        long tv_usec;   /* microsecondi */
+    };
+\end{verbatim}
+passando a select il valore NULL gli si dice di avere una attesa indefinita, passandogli un timeout invece gli si dice di rispettare quelle tempistiche richieste.
+Ad esempio passando \verb{0, 0{ gli si dice di controllare i file descriptor e di ritornare subito, in pratica si esegue un polling.
+
+Prima di chiamare la select bisogna quindi costruire i set di descrittori da monitorare.
+Dopo la select invece quei gruppi conterranno solamente i descrittori pronti.
+Conviene pertanto crearli una volta e poi copiarli prima di passarli alla select, altrimenti rischierei di perdere alcuni descrittori.
+
+\subsection{Socket UDP}
+Sono una variazione dei socket TCP che implementano il protocollo UDP.
+Un socket UDP è connectionless quindi non ci sono operazioni preliminari per instaurare una connessione, inoltre non permettono il recupero, il riordino dei pacchetti e non c'è un controllo del flusso.
+Pertanto i pacchetti possono andare persi e/o corrompersi.
+
+Ci sono delle primitive dedicate esplicitamente alla ricezione ed all' invio di datagrammi:
+% TODO: disegno del socket UDP %
+ognuna di queste primitive deve specificare ogni volta l' indirizzo del socket remoto con cui comunicare.
+
+\subsubsection{sendto()}
+\begin{verbatim}
+ssize_t sendto(int sockfd, const void* buf, size_t len,
+    int flags, const struct sockaddr* dest_addr,
+    socklen_t addrlen)
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: descrittore del socket
+    \item buf: puntatore al buffer contenente il messaggio da inviare
+    \item len: dimensione in byte del messaggio
+    \item flags: per settare le opzioni (0 per noi)
+    \item dest\_addr: puntatore alla struttura contenente l' indirizzo del destinatario
+    \item addrlen: lunghezza di dest\_addr
+\end{itemize}
+ritorna il numero di byte inviati (o -1 in caso di errore).
+
+E' una chiamata bloccante in quanto il programma si ferma finché non ha scritto tutto il messaggio.
+
+
+\subsubsection{recvfrom()}
+\begin{verbatim}
+ssize_t recvfrom(int sockfd, const void* buf, size_t len,
+    int flags, const struct sockaddr* src_addr,
+    socklen_t addrlen)
+\end{verbatim}
+\begin{itemize}
+    \item sockfd: descrittore del socket
+    \item buf: puntatore al buffer contenente il messaggio da ricevere
+    \item len: dimensione in byte del messaggio
+    \item flags: per settare le opzioni (0 per noi)
+    \item dest\_addr: puntatore ad una struttura vuota per salvare poi l' indirizzo del mittente
+    \item addrlen: lunghezza di dest\_addr
+\end{itemize}
+ritorna il numero di byte ricevuti oppure -1 in caso di errore e 0 se il socket remoto è stato chiuso.
+
+E' bloccante in quanto il programma si ferma finché non ha letto almeno un byte.
+
+\subsubsection{Codice server}
+\begin{verbatim}
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    
+    memset(&my_addr, 0, sizeof(my_addr));
+    
+    ret = bind(sd, (struct sockaddr*)&my_addr, sizeof(my_addr));
+    
+    while(1){
+        len = recvfrom(sd, buf, BUFLEN, 0, (struct sockaddr*))
+    }
+\end{verbatim}
+
+\subsubsection{Codice client}
+\begin{verbatim}
+int main(){
+    int ret, sd, len;
+    char buf[BUFLEN];
+    struct sockaddr_in sv_addr;
+    
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    
+    memset(&sv_addr, 0, sizeof(sv_addr));
+    sv_addr.sin_family = AF_INET;
+    sv_addr.sin_port = htons(4242);
+    inet_pton(AF_INET, "192.168.4.5", &sv_addr.sin_addr);
+    
+    while(1){
+        len = sendto(sd, buf, BUFLEN, 0, 
+            (struct sockaddr*)&sv_addr, sizeof(sv_addr);
+    }
+\end{verbatim}
+
+\subsection{Socket UDP connesso}
+Per associare un socket UDP ad un indirizzo (remoto) si può usare \verb{connect{ sul client.
+Il socket riceverà ed invierà pacchetti solo a quell' indirizzo che si è connesso.
+
+In questo modo si possono usare le primitive \verb{send{ e \verb{recv{ senza specificare ogni volta l' indirizzo del dirimpettaio.
+
+Si noti che non c'è una connessione, al livello trasporto continua ad esserci ancora UDP!
+% Disegnino socket udp connesso %
+
+\subsection{Protocolli Text a Binary}
+I protocolli a livello applicazione prevedono principalmente due codifiche:
+\begin{itemize}
+    \item testuale: si inviano i dati in formato testuale e poi alla ricezione si decodificano
+    \item binario: si inviano le strutture dati così come sono
+\end{itemize}
+
+\subsection{Serializzazione dei dati}
+Se vogliamo usare un protocollo binary per inviare i dati devo serializzare le strutture in maniera che siano uniformi per tutti i tipi di calcolatori:
+\begin{verbatim}
+    struct temp{
+        int a;
+        char b;
+    };
+\end{verbatim}
+se inviassi la struttura così com'è avrei tre problemi con i quali lavorare:
+\begin{itemize}
+    \item endianness: macchine diverse leggono i dati più lunghi di un byte in maniera diversa
+    \item padding: le strutture potrebbero avere del padding e potrebbe cambiare da compilatore a compilatore
+    \item dimensione dei dati: i tipi di dato non timbrato cambiano di dimensione in base all' architettura
+\end{itemize}
+E' quindi necessario che i dati vengano trasformati in una maniera che sia coerente su tutte le architetture:
+
+\subsubsection{Serializzazione e deserializzazione su protocollo testuale}
+Supponiamo di voler serializzare l' oggetto visto prima:
+\begin{verbatim}
+    char buffer[1024];
+    struct temp t;
+    
+    sprintf(buffer, "%d %c", t.a, t.b);
+
+    // invio buffer
+\end{verbatim}
+Per deserializzare:
+\begin{verbatim}
+    char buffer[1024];
+    struct temp t;
+    
+    // Ricevo i dati nel buffer
+    
+    sscanf(buffer, "%d %c", &t.a, &t.b);
+\end{verbatim}
+
+\subsubsection{Serializzazione e deserializzazione su protocollo binario}
+Supponiamo di voler serializzare l' oggetto visto prima, devo universalizzare i tipi utilizzando i tipi opachi.
+Devo costruire una struttura fissata con campi che rappresentano l' informazione da scambiare, ogni campo deve avere una lunghezza ed un tipo che possa essere trasferito.
+Se il protocollo prevede campi a lunghezza variabile è necessario che si definisca una lunghezza massima del messaggio.
+\begin{verbatim}
+    struct temp{
+        uint32_t a;
+        uint8_t b;
+    };
+\end{verbatim}
+Per serializzare:
+\begin{verbatim}
+    struct temp t;
+    
+    t.a = htonl(t.a);
+    
+    //spedire
+    ret = send(new_sd, (void*)&t.a, sizeof(uint32_t), 0);
+    ret = send(new_sd, (void*)&t.b, sizeof(uint8_t), 0);
+\end{verbatim}
+Per deserializzare:
+\begin{verbatim}
+    struct temp t;
+    ret = recv(new_sd, (void*)&t.a, sizeof(uint32_t), 0);
+    if(ret < sizeof(uint32_t)){
+        // gestire
+    }
+    t.a = ntohl(t.a);
+    
+    ret = recv(new_sd, (void*)&t.b, sizeof(uint8_t), 0);
+    if(ret < sizeof(uint8_t)){
+        // gestire
+    }
+\end{verbatim}
+

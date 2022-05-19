@@ -1,0 +1,162 @@
+\section{Apache}
+Apache è un server HTTP, sulla nostra macchina virtuale è presente la versione 2.4 implementata tramite il programma \verb{apache2{, in altre distribuzioni è presente con il nome \verb{httpd{.
+
+Non si invoca direttamente ma tramite la utility \verb{apache2ctl{:
+\begin{itemize}
+    \item \verb{start{
+    \item \verb{stop{
+    \item \verb{restart{
+    \item \verb{status{
+    \item \verb{configtest{
+\end{itemize}
+In alternativa si usa il comando \verb{service{:
+\begin{verbatim}
+    service apache2 <comando>
+\end{verbatim}
+\begin{itemize}
+    \item \verb{start{
+    \item \verb{stop{
+    \item \verb{restart{
+\end{itemize}
+
+Una volta in esecuzione si può aprire il browser ad accedere al sito:
+\begin{verbatim}
+    http://localhost
+\end{verbatim}
+i file serviti si trovano in \verb{/var/www/html/index.html{.
+
+Permette di accettare e service più richieste contemporaneamente: in particolare si può anche modificare il modello di I/O da usare.
+
+\subsection{Configurazione}
+La directory principale in cui ci sono i file di configurazione è \verb{/etc/apache2{ ed il file principale è \verb{/etc/apache2/apache2.conf{.
+La configurazione è effettuata attraverso singole \emph{direttive} o \emph{direttive contenitore} che contengono più voci di configurazione.
+
+Il file di configurazione principale recupera le varie parti di configurazione da altri file con la direttiva \verb{Include{, usa infatti un sistema modulare:
+Es:
+\begin{verbatim}
+    # File apache2.conf
+    Include ports.conf
+
+    
+    # File ports.conf
+    Listen 80
+\end{verbatim}
+
+Le singole parti di configurazione vanno nella directory \verb{/etc/apache2/conf-available{, qui in particolare ci vanno le parti di configurazione che sono disponibili ad essere abilitate.
+Prima di includere una parte di configurazione devo anche abilitarla con il comando:
+\begin{verbatim}
+    a2enconf <nome_file>
+\end{verbatim}
+NB: ci vanno i nomi dei file nella cartella \verb{conf-available{.
+
+Con questo comando viene creato un soft link al file nella cartella \verb{conf-enabled{ e da questa cartella i file vengono inclusi nella configurazione principale.
+
+NB: dopo ogni modifica alla configurazione occorre riavviare il server.
+
+Per disabilitare un file:
+\begin{verbatim}
+    a2disconf <nome_file>
+\end{verbatim}
+
+\subsection{Moduli}
+Anche qui abbiamo due cartelle: \verb{mods-enabled{ e \verb{mods-available{ e si gestiscono con i comandi:
+\begin{verbatim}
+    a2enmod <nome_file>
+    a2dismod <nome_file>
+\end{verbatim}
+
+NB: dopo aver modificato la configurazione si deve riavviare il server.
+
+\subsection{Direttive globali}
+Specificano opzioni globali quindi valide per tutto il server:
+\begin{itemize}
+    \item ServerRoot: specifica la directory principale dei file di configurazione di apache.
+    I path relativi specificati nelle altre direttive sono risolti partendo da questa directory.
+    NB: su debian è settato automaticamente da apache2ctl quindi nel file di configurazione è commentata
+
+    \item KeepAlive e KeepAliveTimeout: specificano se offrire o meno le connessioni persistenti di HTTP 1.1 e specifica quanti secondi attendere la successiva richiesta dal client su una stessa connessione prima di chiuderla.
+
+    \item Listen: specifica le porte su cui Apache si mette in ascolto di connessioni.
+    E' obbligatoria, se la direttiva non c'è il server non parte.
+    Possiamo specificare più porte.
+
+    \item ErrorLog: specifica la path del file di log del server.
+\end{itemize}
+
+\subsection{Virtual hosting}
+Con il paradigma standard se volessimo hostare $n$ siti web dovremmo farlo su $n$ computer diversi con $n$ ip diversi, questo è un grande spreco di risorse.
+I virtual host ci permettono invece di ospitare diversi siti web con nome diverso con un solo server fisico.
+Questa disambiguazione è eseguita attraverso l' header \verb{Host{ di HTTP durante la richiesta.
+
+La configurazione di questi virtual host è eseguita nei file contenuti in \verb{sites-available{ e per gestirli:
+\begin{verbatim}
+    a2ensite <nome_file>
+    a2dissite <nome_file>
+\end{verbatim}
+i siti abilitati avranno un soft link in \verb{sites-enabled{.
+
+NB: una volta abilitati e disabilitati occorre riavviare per applicare la configurazione.
+
+
+\subsubsection{File di configurazione dei vhosts}
+Nel caso semplice Apache ha un default Virtual Host abilitato in \verb{/etc/apache2/...{:
+\begin{verbatim}
+    <VirtualHost *:80>
+        ServerName www.example.com
+        ...
+        DocumentRoot /var/www/html
+    </VirtualHost>
+\end{verbatim}
+
+Per aggiungerne altri occorre creare altri file con la configurazione del vhost ed abilitarlo.
+
+Alcune direttive utili nella configurazione del vhost:
+\begin{itemize}
+    \item \verb{DocumentRoot{: specifica la directory dei file del sito
+\end{itemize}
+
+
+\subsection{Multi-Processing Module}
+Apache accetta e serve più richieste contemporaneamente.
+Ciò viene fatto tramite moduli Multi-Processing Module che si occupano di:
+\begin{itemize}
+    \item gestire i socket
+    \item bindare le porte
+    \item processare le richieste usando processi figli e thread
+\end{itemize}
+
+Su UNIX possiamo scegliere tra:
+\begin{itemize}
+    \item \verb{prefork{: non usa i thread ma usa i processi figli. All' avvio del server il processo padre lancia un certo numero di processi figli (preforking).
+    I figli detti worker restano in ascolto ed accettano connessioni e le servono.
+    Dopo aver servito una connessione il worker torna disponibile.
+    Il padre gestisce il pool dei figli cercando di mantenerne sempre alcuni disponibili.
+    
+    Così facendo evitiamo l' overhead del fork alla richiesta in quanto abbiamo già fatto tutto allo start del server.
+    
+    Possiamo indicare il numero di figli da generare all' avvio con \verb{StartServers{, il numero massimo di worker è \verb{MaxRequestWorkers{, ... % TODO %
+
+    Gode della massima compatibilità in quanto alcuni moduli di apache o librerie non supportano il multithreading.
+    E' stabile perché al crash di un processo si interrompe solo una connessione.
+    
+    Tuttavia c'è una grande occupazione di memoria perché abbiamo processi ricopiati per intero.
+    Inoltre il tuning dei parametri potrebbe essere difficile
+
+    \item \verb{worker{: rende il server sia multi-processo che multi-thread, abbiamo quindi all' avvio un prefork, ogni figlio genera un thread \emph{listener} che si occupa di accettare e smistare le connessioni ed un pool di worker (thread) che servono realmente le richieste.
+    
+    Abbiamo dunque un ridotto overhead utilizzando il prefork ed un risparmio di memoria grazie ai thread in caso di autotuning (quando deve aprire altri thread perché quelli che ci sono non bastano).
+    
+    Possiamo indicare il numero di figli con \verb{StartServers{, il numero massimo di thread totali è \verb{MaxRequestWorkers{, il numero minimo di thread liberi è \verb{MinSpareThreads{, il numero massimo di thread liberi è \verb{MaxSpareThreads{.
+    Possiamo indicare il numero massimo di thread per figlio con \verb{ThreadsPerChild{ ed il numero di connessioni gestite da ogni thread prima di essere riciclato è \verb{MaxConnectionsPerChild{.
+
+
+    \item \verb{event{: è una versione migliorata dei \verb{worker{ ed è il default da Apache 2.4.
+    Oltre ad accettare le connessioni il listener gestisce le connessioni temporaneamente inattive.
+    Per esempio se un worker sta servendo un client che tarda ad inviare una richiesta, invece di attendere restituisce il controllo del socket al listener e passa a servire un altro client.
+    Quando il primo client invierà la richiesta il listener lo assegnerà ad un worker libero e verrà gestito.
+    
+    Con questa politica il numero di connessioni servibili contemporaneamente a parità di numero di thread aumenta in quanto si eliminano i tempi morti.
+    
+\end{itemize}
+
+
