@@ -133,7 +133,7 @@ $p$ e $q$ vanno quindi scelti \emph{molto} grandi, \emph{entrambi} (attorno ai 1
 
 Sia $p-1$ che $q-1$ devono contenere fattori grandi (altrimenti $n$ si fattorizza velocemente).
 
-$gcd(p-1, q-1)$ deve essere piccolo! Conviene scegliere $p$ e $q$ tali che $\frac{p-1}{2}$ e $\frac{q-1}{2}$ siano coprimi.
+$MCD(p-1, q-1)$ deve essere piccolo! Conviene scegliere $p$ e $q$ tali che $\frac{p-1}{2}$ e $\frac{q-1}{2}$ siano coprimi.
 
 Mai riutilizzare uno dei primi per altri moduli:
 \begin{equation}
@@ -141,7 +141,7 @@ Mai riutilizzare uno dei primi per altri moduli:
     n_1 = p \cdot q_1 \\
     n_2 = p \cdot q_2
     \end{cases}
-    \implies gcd(n_1, n_2) = p
+    \implies MCD(n_1, n_2) = p
 \end{equation}
 
 Scegliere $p$ e $q$ distanti tra loro! Se $p \approx q$ allora $n \approx q^2 \approx p^2$, quindi $p \approx \sqrt{n}$ e si cerca nei dintorni. Valgono infatti:
@@ -208,7 +208,7 @@ si hanno dunque:
     \end{cases}
 \end{equation}
 sarà quindi vero che $m < n_i \forall i: 1 \leq i \leq e$.
-Ipotiziamo che $n_1$, $n_2$, $\_$, $n_e$ siano coprimi tra loro (se non lo fossero si potrebbe fattorizzarne qualcuno usando il $gcd$).
+Ipotiziamo che $n_1$, $n_2$, $\_$, $n_e$ siano coprimi tra loro (se non lo fossero si potrebbe fattorizzarne qualcuno usando il $MCD$).
 Per il teorema cinese del resto esiste e si può calcolare un unico $m'$ tale che:
 \begin{equation}
     \begin{cases}
