@@ -70,7 +70,7 @@ $$
 $$
 possiamo concludere che:
 $$
-    \lim_{n \to \inf} \frac{T}{S} = 0 \implies T << S
+    \lim_{n \to \infty} \frac{T}{S} = 0 \implies T << S
 $$
 
 \subsection{Indecibilità di Kolmogorov}
@@ -95,10 +95,10 @@ Costruiamo l'algoritmo:
 percorriamo tutte le sequenze in ordine crescente finché non ne troviamo una che è casuale e di dimensione maggiore di $|p|$ definito come:
 $$
     |p| = |PARADOSSO| + |RANDOM|
-$$
-Si noti che $|p|$ è costante in quanto $n$ viene preso come parametro e non è presente all'interno del programma. Dato che le sequenze casuali esistono questo programma si fermerà sempre fornendoci la prima sequenza casuale che soddisfa il vincolo di dimensione. Siamo giunti ad un assurdo: abbiamo un programma piccolo che genera $h$ quindi $h$ non può essere casuale secondo Kolmogorov, tuttavia $RANDOM$ ci dice che è casuale.
-
-Ne segue quindi che $RANDOM$ non può esistere: dire se una sequenza è casuale secondo la definizione di Kolmogorov è un problema indecidibile!
-
+    $$
+    Si noti che $|p|$ è costante in quanto $n$ viene preso come parametro e non è presente all'interno del programma. Dato che le sequenze casuali esistono questo programma si fermerà sempre fornendoci la prima sequenza casuale che soddisfa il vincolo di dimensione. Siamo giunti ad un assurdo: abbiamo un programma piccolo che genera $h$ quindi $h$ non può essere casuale secondo Kolmogorov, tuttavia $RANDOM$ ci dice che è casuale.
+    
+    Ne segue quindi che $RANDOM$ non può esistere: dire se una sequenza è casuale secondo la definizione di Kolmogorov è un problema indecidibile!
+    
 \subsection{Alternative}
 Non possiamo dire con certezza se una sequenza è casuale, tuttavia possiamo usare dei test statistici per farci una idea qualitativa.
