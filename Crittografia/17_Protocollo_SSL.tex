@@ -18,6 +18,8 @@ SSL è organizzato in:
 
 C'è uno scambio di messaggi preliminare per la creazione del canale sicuro, nel frattempo client e server si identificano a vicenda e cooperano per costruire le chiavi simmetriche. Vediamo singolarmente le fasi.
 
+\subsection{Fasi di SSL}
+
 \subsubsection{client hello}
 $U$ manda ad $S$ un messaggio con il quale si richiede la connessione SSL, si specificano i cifrari e meccanismi che $U$ supporta e le prestazioni di sicurezza richieste.
 Si aggiungono in fine dei byte casuali. Tutto questo è mandato in chiaro!
