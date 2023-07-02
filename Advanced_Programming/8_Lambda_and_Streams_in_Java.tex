@@ -1,0 +1,319 @@
+Java 8 is the biggest change to Java since beginning of the language.
+Main new features are:
+\begin{itemize}
+    \item Lambda expressions
+    \item default methods in interfaces
+    \item improved type inference
+    \item Stream API
+\end{itemize}
+This introduction is done with retrocompatibility in mind in order to avoid to recompile existing binaries.
+
+\section{Lambdas}
+Lambdas in Java are a way to introduce a bit of functional programming in the context, in particular they enable to pass behaviours as well as data to the functions and introduces the lazy evaluation with the stream processing.
+Moreover they allows cleaner and more compact code and facilitate parallel programming.
+
+\subsection{Syntax}
+Let's say we want to print a list of integers with a lambda:
+\begin{verbatim}
+    List<Integer> intSeq = Arrays.asList(1,2,3);
+    intSeq.forEach(x -> System.out.println(x));
+\end{verbatim}
+the expression inside the \verb|forEach| function is a lambda expression that defines an \emph{anonymous function} with one parameter name \verb|x| of type integer (the type is infered by the context).
+There are some more equivalent syntaxes:
+\begin{verbatim}
+    intSeq.forEach((Integer x) -> System.out.println(x));
+
+    // for multiline functions
+    intSeq.forEach(x -> {
+        System.out.println(x);
+    })
+
+    // using method reference
+    intSeq.forEach(System.out.println);
+\end{verbatim}
+
+Inside a lambda function we can declare variables that will be local to it but it is not a new scope so we can't redefine already defined variables.
+
+\subsubsection{Local and static variable capture}
+Local variables used inside the body of a lambda must be final or effectively final (this means that after the lambda declaration that variable must not be used again):
+\begin{verbatim}
+    int var = 10;
+    intSeq.forEach(x -> System.out.println(x + var));
+    // var = 3; // <- uncommenting this line won't compile
+\end{verbatim}
+This happens because the variable is on the stack but the lambda function can be propagated and backpropagated so we don't know when actually it will be executed, so we don't know if the variable will still be on the stack.
+Though an object which is never reassigned is in fact effectively final, so an object can still be used after the lambda declaration as long as the variable is not reassigned.
+
+Instead a static variable is always captured, because basically it is not on the stack.
+
+\subsection{Implementation}
+Java 8 compiler first converts a lambda expression into a function, compiling its code, then it generates code to call the compiled function where needed.
+Java 8 lambdas are instances of \emph{functional interfaces} which are Java interfaces with exactly one abstract method, some useful examples are:
+\begin{verbatim}
+    public interface Comparator<T>{
+        int compare(T 01, T 02);
+    }
+
+    pubic interface Runnable{
+        void run();
+    }
+
+    public interface Consumer<T>{
+        void accept(T t);
+    }
+
+    public interface Callable<V>{
+        V call() throws Exception;
+    }
+
+    public interface Supplier<T>{
+        T get();
+    }
+
+    public interface Predicate<T>{
+        boolean test(T t); 
+    }
+
+    public interface Function<T,R>{
+        R apply(T t);
+    }
+\end{verbatim}
+
+Functional interfaces can be used as \emph{target type} of lambda expressions:
+\begin{itemize}
+    \item as type of variables to which the lambda is assigned;
+    \item as type of formal parameter to which the lambda is passed.
+\end{itemize}
+so arguments and result types infered by the compiler must match those of the unique abstract method of the functional interface, then the lambda is invoked by calling the only abstract method of the functional interface.
+
+So in the end lambdas can be interpreted as instances of anonymous inner classes implementing the functional interface but the specifications doesn't prescribe a specific compilation strategy for lambdas which is left to the designer of the compiler, which can exploit this freedom gaining efficiency.
+
+\subsection{Some examples}
+Since \verb|Runnable| is a functional interface we can declare a new thread using lambda code:
+\begin{verbatim}
+    // Using anonymous inner function
+    Runnable r1 = new Runnable(){
+        @Override
+        public void run(){
+            ... // Thread code
+        }
+    }
+    new Thread(r1).start();
+
+    // Using lambda function
+    Runnable r2 = () -> {
+        ... // Thread code
+    }
+    new Thread(r2).start()
+\end{verbatim}
+
+\section{Default methods}
+Java 8 allows interface to include:
+\begin{itemize}
+    \item abstract methods, as usual;
+    \item static methods;
+    \item default methods, defined in terms of other possibly abstract methods.
+\end{itemize}
+To achieve backward compatibility Java 8 uses lambda expressions and default methods in conjunction with the Java collections framework.
+
+\section{Method references}
+Method references can be used to pass an existing function in places where a lambda is expected, of course the signature of the referenced method needs to match the signature of the functional interface method.
+Some example of method reference types are:
+\begin{itemize}
+    \item static: the syntax used is \verb|ClassName::StaticMethodName| \\
+    (\verb|String::valueOf|);
+    \item constructor: the syntax used is \verb|ClassName::new| \\
+    (\verb|ArrayList::new|);
+    \item specific object instance: the syntax used is \verb|obj::MethodReference| \\
+    (\verb|x::toString|);
+    \item arbitrary object of a given type: the syntax used is \verb|ClassName::InstanceMethodName| \\(\verb|Object::toString|).
+\end{itemize}
+
+\section{Streams}
+The \verb|java.util.stream| package provides utilities to support functional-style operations on streams of values.
+Some characteristics of streams are:
+\begin{itemize}
+    \item no storage: a stream is not a data structure, instead it conveys elements from a source (a data structure, an array, a generator, an IO function, ...) through a \emph{pipeline} of computational operations;
+    
+    \item an operation on a stream produces a result but does not modify it's source;
+    
+    \item lazyness seeking: many stream operations can be implemented lazily, exposing opportunities for optimization. Stream operations are divided into \emph{intermediate} and \emph{terminal}, the first ones produces streams while the second ones produce values or side-effects, so the first ones are always lazy;
+
+    \item possibly unbounded: collections have a finite size while streams doesn't need to, so short-circuiting operations such as \verb|limit(n)| or \verb|findFirst()| allow computations on infinite streams to complete in finite time;
+
+    \item consumable: the elements of a stream are only visited once during the life of a stream, so just like an iterator a new stream must be generate to revisit the same elements of the source.
+\end{itemize}
+
+\subsection{Pipeline}
+A typical pipeline contains:
+\begin{itemize}
+    \item \emph{source}: produces (by need) the elements of the stream;
+    
+    \item \emph{intermediate operations}: those operations take a stream, manipulate it and produce a new one.
+    Those operations are not processed until the terminal method is called;
+
+    \item \emph{terminal operation}: take a stream and produce side-effects or non-stream values.
+    Once this is applied no more operations on the stream can be performed.
+\end{itemize}
+for example:
+\begin{verbatim}
+    double average = listing        
+            // take a list of Person
+        .stream()
+            // produce a stream
+        .filter(p -> p.getGender() == Person.Sex.MALE)
+            // apply a filter to the elements
+        .mapToInt(Person::getAge)
+            // apply getAge mapping from person to int
+        .average()
+            // computes average
+        .getAsDouble();
+            // extract result from OptionalDouble
+\end{verbatim}
+
+\subsubsection{Stream sources}
+Streams can be obtained in several ways:
+\begin{itemize}
+    \item from a \verb|Collection| using the \verb|stream| and \verb|parallelStream| methods;
+    \item from an array via \verb|Array.stream(array)|;
+    \item from a static factory methods on the stream classes, for example:
+    \begin{itemize}
+        \item \verb|Stream.of(Object[])|;
+        \item \verb|IntStream.range(int,int)|;
+        \item \verb|Stream.iterate(Object, UnaryOperator)|.
+    \end{itemize}
+    \item lines of a file can be obtained using \verb|BufferedReader.lines()|;
+    \item streams of file paths can be obtained from methods in \verb|Files|;
+    \item a stream of random numbers can be obtained from \verb|Random.ints()|;
+    \item generators, like \verb|generate| or \verb|iterate|;
+    \item ...
+\end{itemize}
+
+\subsubsection{Intermediate operations}
+Several intermediate operations have arguments of \emph{functional interfaces}, so lambdas can be used:
+\begin{itemize}
+    \item \verb|filter|;
+    \item \verb|mapToInt|;
+    \item \verb|map|;
+    \item \verb|peek|: this does not affect the stream, it is typically used for debugging;
+    \item ...
+\end{itemize}
+
+\subsubsection{Terminal operations}
+A typical use is to collect values inside a data structure or to aggregate the stream to produce a single value:
+\begin{itemize}
+    \item \verb|forEach|;
+    \item \verb|toArray|;
+    \item \verb|reduce|;
+    \item ...
+\end{itemize}
+
+\subsubsection{Types of stream}
+Streams exists only for reference types, int, long and doubles, all the other types are missing but can be built using casts inside the lambdas in the intermediate operations.
+
+\subsubsection{Mutable reduction}
+Let's suppose we want to accumulate elements in a mutable object in order to avoid that the reduce aggregator builds a new version each time.
+This operation is called \verb|collect| and requires three functions as parameter:
+\begin{itemize}
+    \item a supplier: a function to construct new instances of the result container;
+    \item an accumulator: a function to incorporate an input element into a result container;
+    \item a combiner: a function to merge the content of one result container into another.
+\end{itemize}
+\begin{verbatim}
+    <R> R collect(
+        Supplier<R> supplier,
+        BiConsumer<R, ? super T> accumulator,
+        BiConsumer<R, R> combiner
+    );
+\end{verbatim}
+an example:
+\begin{verbatim}
+    ArrayList<String> strings = stream.map(Object::toString)
+        .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+\end{verbatim}
+we take a stream of object, convert each of them in a string and then apply mutable reduction in order to build a new ArrayList with those strings.
+
+In alternative the collect reductor can be called using a \verb|Collector| argument which encapsulates the needed functions:
+\begin{verbatim}
+    stringStream.collect(Collectors.toList());
+
+    personStream.collect(Collectors.groupingBy(Person::getCity));
+\end{verbatim}
+
+\subsection{Infinite Streams}
+Infinite streams can be generated using:
+\begin{itemize}
+    \item \verb|iterate|: takes a seed and a unary operator, then generates an infinite stream with the values returned by the unary operator which itself will update the seed:
+    \begin{verbatim}
+        Stream.iterate(0, x -> x+1).limit(10).reduce(0, (x,s) -> x+s);
+    \end{verbatim}
+
+    \item \verb|generate|: takes a function which supplies the data that will end up in the stream:
+    \begin{verbatim}
+        Stream.generate(Math::random).limit(10).forEach(System.out.println);
+    \end{verbatim}
+\end{itemize}
+
+\subsection{Parallelism}
+Stream operations can execute either in serial (the default behavior) or in parallel using \\
+\verb|parallelStream|.
+The runtime itself takes care of using multithreading for parallel execution, in a transparent way.
+If operations don't have side-effects then thread-safety is guaranteed even using non-thread-safe collections.
+There is even the support for concurrent mutable reduction but the order of processing the elements depends a lot by intermediate operations.
+
+It is correct to use parallel streams when:
+\begin{itemize}
+    \item operations are independent;
+    \item operations are computationally expensive and/or operations are applied to many elements of efficiently splittable data structures.
+\end{itemize}
+It is a good practice to always measure before and after parallelizing.
+
+Internally it is implemented using \verb|SplitIterator| which is the parallel analogue of an \verb|Iterator| which describes a collection of elements with support for:
+\begin{itemize}
+    \item sequentially advancing;
+    \item applying an action to the next or to all remaining elements;
+    \item splitting off some portion of the input into another splititerator which can be processed in parallel;
+\end{itemize}
+
+\subsection{Issues}
+Although streams are a lot powerful there are some issues:
+\begin{itemize}
+    \item we must guarantee non-interference with the source of the stream by the behavioural parameters (like the lambdas passed to the intermediate workers) because interference could lead to \verb|ConcurrentModificationException| even in single thread:
+    \begin{verbatim}
+        List<String> listOfStrings = 
+            new ArrayList<>(Arrays.asList("one", "two"));
+        String concatenatedString = listOfStrings
+            .stream()
+            // this will interfeere with the stream source
+            // so an exception will be raised
+            .peek(s -> listOfStrings.add("three"))
+            .reduce((a,b) -> a + " " + b)
+            .get()
+    \end{verbatim}
+
+    \item stateless behaviours: it is encouraged for intermediate operations as it facilitates parallelism, functional style and maintenance;
+
+    \item parallelism and thread safety: for parallel streams with side-effects ensuring thread safety is the programmer's responsibility.
+\end{itemize}
+
+\subsection{Monads in Java}
+We have optional to build partial functions and Streams:
+\begin{verbatim}
+    // Returns an Optional with the specified present non-null value.
+    public static <T> Optional<T> of(T value)
+
+    /* If a value is present, apply the provided Optional-bearing mapping
+    function to it, return that result, otherwise return an empty
+    Optional. */
+    <U> Optional<U> flatMap(Function<? super T,Optional<U>> mapper)
+
+    // Returns a sequential Stream containing a single element.
+    static <T> Stream<T> of(T t)
+
+    /* Returns a stream consisting of the results of replacing each element
+    of this stream with the contents of a mapped stream produced by applying
+    the provided mapping function to each element. */
+    <R> Stream<R> flatMap(
+        Function<? super T,? extends Stream<? extends R>> mapper)
+\end{verbatim}
+

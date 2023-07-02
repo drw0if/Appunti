@@ -1,0 +1,498 @@
+\section{Overview}
+Development of Rust started in 2006 by Graydon Hoare at Mozilla and then it has been sponsored by Mozilla itself since 2009, then it has been announced in 2010.
+In 2010 Rust shifted from the initial compiler in OCaml to a self-hosted compiler written in Rust: \verb|rustc|: it succesfully compiled itself in 2011.
+
+The rust compiler uses LLVM as its backend and is the most loved programming language in the stack overflow annual survey from 2016 to 2022.
+In 2021 the development of the language passes to the Rust Foundation: a non-profit and independent organization funded by Mozilla, Microsoft, Google, etc.
+
+It is a general purpose system programming language with a focus on \emph{safety}, especially \emph{safe concurrency} (it is often said that rust offers \emph{fear-less concurrency}) and supporting both functional and imperative paradigms.
+
+The main goal of the language is to ensure safety without penalizing efficiency.
+
+The syntax is similar to C and C++ adding match statement for pattern matching, though despite the superficial resemblance to C and C++, the syntax in a deeper sense is closer to that of the ML family of languages and Haskell.
+Nearly every part of a function body is an expression.
+
+Moreover no runtime is required to perform garbage collection, dynamic typing, binding, etc but we have more control over memory allocation and destruction like in C/C++.
+
+From a performance point of view rust compiles to object code for bare-metal, just like C but supports memory safety so:
+\begin{itemize}
+    \item programs dereference only previously allocated pointers that have not been freed;
+    \item out-of-bound array accesses are not allowed.
+\end{itemize}
+All of this with low overhead because compiler checks to make sure rules for memory safety are followed and with zero-cost abstraction in managing memory (so no garbage collection).
+
+This is all obtained via an advanced type system and using concepts like \emph{ownership}, \emph{borrowing} and \emph{lifetime} to prevent memory corruption bugs.
+The drawbacks of this is the needed cognitive cost to programmers who must think more about rules for using memory and dereferences as they program.
+
+\section{Memory safety}
+Memory safety means that there will be no:
+\begin{itemize}
+    \item null pointers;
+    \item dangling pointers;
+    \item double frees;
+    \item data races;
+    \item iterator invalidation.
+\end{itemize}
+in Rust those properties are guaranteed statically: if the program compiles it will never manifest those problems.
+This is obtained with a careful combination of several techniques: linguistic design choices, memory management policies and powerful static (data-flow) analysis.
+
+\subsection{Null pointers}
+The problem arise when accessing a variable which does not hold a value.
+To guarantee that a variable holds a value when access we can:
+\begin{itemize}
+    \item check that it has been assigned using data flow analysis;
+
+    \item use default values.
+\end{itemize}
+In Java the first solution is used for local variables of methods and the second one for global and static variables because it is hardly applicable the data flow analysis to that scope.
+
+Tony Hoare introduced Null references in ALGOL W. and after has been addressed as \emph{the billion dollar mistake}, also because \verb|NullPointerException| is the most thrown exception in Java.
+
+To solve this problem in Rust does not exists a null value.
+Data values can only be initialized through a fixed set of forms requiring their inputs to be already initialized and static and global variables must be initialized at declaration time.
+The compiler refuses to terminate build if any branch of code fails to assign a value to the variable.
+In any case to add nullable types which are a lot useful there exists the generic \verb|Option<T>| which plays the role of Haskell's Maybe or Java's Optional:
+\begin{verbatim}
+    enum std::option::Option<T>{
+        None,
+        Some(T)
+    }
+\end{verbatim}
+
+\subsection{Dangling pointers}
+A dangling pointer is a pointer to an invalid memory location, for example:
+\begin{itemize}
+    \item pointers to explicitly deallocated objects;
+    \item pointers to locations beyond the end of an arrays;
+    \item pointers to objects allocated on the stack and returned from a function.
+\end{itemize}
+Accesses to those pointers can raise to unpredictable effects like random results, segmentation fault and corruption of memory manager.
+
+\subsection{Double free}
+A double free happens when a memory location in the heap is reclaimed twice.
+This can happen in languages with explicit deallocation of memory (like C and C++).
+A double-free error could corrupt the state of the memory manager, causing a program to crash or modification of execution flow and can be exploited for software attacks.
+
+\subsection{Race condition}
+A race condition leads to unpredictable results in concurrent computations.
+For example unsynchronized access to global variables will lead to bad read/write.
+
+\section{Memory management}
+Rust uses a stack of activation records and a heap for dynamically allocated data structures.
+Rust favors stack allocations, which is the default behavior, so the user is forced to be aware of where the data are stored because there is no implicit boxing.
+
+Modern languages uses garbage collection, which leads to performance drawbacks because the main flow must be interrupted in order to cleanup, or leave the programmer the responsibility of managing the heap but the programmer can introduce subtle errors.
+Rust avoid both, providing deterministic management of resources, with very low overhead, using RAII (Resource Acquisition Is Initialization).
+
+\subsection{Immutability by default}
+By default in Rust variables are immutable, the programmer must explicitly declare a variable as mutable and the usage is checked by the compiler.
+\begin{verbatim}
+fn main() {
+    let mut a: i32 = 0;
+    let b = 10;
+
+    a = a + 1;
+    // b = b + 1; won't compile
+    println!("a == {}", a);
+}
+\end{verbatim}
+
+\subsection{RAII}
+Resource Acquisition Is Initialization (RAII) programming idioms states that resource allocation is done during object initialization, by the constructor, while resource deallocation is done during object destruction (also said finalization), by the destructor.
+
+It's popular in modern C++ in which small object are allocated on the stack but larger ones are on the heap (or elsewhere) and are owned by an object on the stack.
+This stack object is then responsible for releasing the resource in its destructor.
+In this way the object is bound to the scope (the function or the code block) where it is declared, and when the scope closes it is reclaimed, togheter with it's owned resource.
+Moreover each resource has a unique owner.
+
+\subsection{Ownership}
+Rust has an ownership system, which supports RAII in a strict way, based on the concepts of ownership and borrowing.
+This ownership mechanism can be summarized by three rules:
+\begin{itemize}
+    \item every value is owned by a variable, identified by a name (possibly a path);
+    \item each value has at most one owner at a time;
+    \item when the owner goes out-of-scope, the value is reclaimed/destroyed.
+\end{itemize}
+
+\subsubsection{Move semantics}
+By default an assignment between variables has a \emph{move semantics} which means that the ownership is moved from the rhs to the lhs (in order to enforce the second law of ownership), so after a move we can't use the old owner:
+\begin{verbatim}
+fn main() {
+    let x = Box::new(3);
+    let _y = x;
+    // println!("x = {}", x); won't compile
+}
+\end{verbatim}
+
+Some types like the primitive one and the one which implements the \emph{copy trait} are treated different because the assignment has a copy semantics.
+This isn't against the second law of ownership because a new value is created.
+
+The parameter passing and the function return has the same behavior so any value passed to the function will be reclaimed when it returns, as the formal parameters gets out of scope.
+Only returned values can survives, and tuples can be used in order to return more values.
+
+Since Rust does not allow for explicit memory deallocation, RAII frees memory automatically when the owner goes out of scope solving the problem of double free.
+
+\subsection{Borrowing}
+Since ownership rules are too restrictive a resource can be \emph{borrowed} from its owner both via assignment and parameter passing.
+To guarantee memory safety, borrowing rules ensure that aliasing and mutability cannot coexist: values can be passed by immutable reference using \verb|&T| and by mutable reference using \verb|&mut T| (or by value using \verb|T|) with some rules:
+\begin{itemize}
+    \item at most one mutable reference to a resource can exist at any time;
+    \item if there is a mutable reference, no immutable references can exist;
+    \item if there is no mutable reference, several immutable references to the same resource can exist.
+\end{itemize}
+During borrowing ownership is reduced or suspended:
+\begin{itemize}
+    \item owner cannot free or mutate its resource while it is immutably borrowed;
+    \item owner cannot even read its resource while it is mutably borrowed.
+\end{itemize}
+
+\subsection{Lifetimes}
+A \emph{lifetime} is a construct that the borrow checker uses to ensure the validity of the above rules and they are associated with each individual ownership and borrowing.
+A lifetime begins when the ownership starts and ends when it is moved or destroyed and for borrowings it ends where the borrowed value is accessed the last time.
+
+Lifetimes are mostly inferred but sometimes must be made explicit using the same syntax of generics, then the compiler checks the validity of the rules of ownership and borrowing in the expected way.
+In particular it ensures that (the owner of) every borrowed variable/reference has a lifetime that is longer than the borrower.
+
+\subsubsection{Lifetimes and function calls}
+Borrowed (reference) formal parameters of a function have a lifetime and if borrowed values are returned, each must have a lifetime.
+The compiler tries to infer lifetimes according to some rules:
+\begin{itemize}
+    \item the lifetimes of the borrowed parameters are, by default, all distinct;
+    \item if there is exactly one input lifetime, it will be assigned to each output lifetime;
+    \item if a method has more than one input lifetime, but one of them is \verb|&self| or \verb|&mut self|, then this lifetime is assigned to all output lifetimes.
+\end{itemize}
+If those rules infers the wrong lifetimes the developer needs to to explicit the correct ones.
+
+\begin{verbatim}
+fn longest(s1: &str, s2: &str) -> &str{
+    if s1.len() > s2.len() {
+        s1
+    } else{
+        s2
+    }
+}
+\end{verbatim}
+this example won't compile because the compiler assigns different lifetimes to the parameters so one of the two branches will return a value with the wrong one.
+To solve we can specify the same lifetime for both the parameters and the return value:
+\begin{verbatim}
+fn longest<'a>(s1: &'a str, s2: &'a str) -> &'a str{
+    if s1.len() > s2.len() {
+        s1
+    } else{
+        s2
+    }
+}
+\end{verbatim}
+
+
+\section{Primitive types in Rust}
+There exists a wide variety of types in rust:
+\begin{itemize}
+    \item numeric types:
+    \begin{itemize}
+        \item \verb|i8|, \verb|i16|, \verb|i32|, \verb|i64|, \verb|isize|;
+        \item \verb|u8|, \verb|u16|, \verb|u32|, \verb|u64|, \verb|usize|;
+        \item \verb|f32|, \verb|f64|;
+    \end{itemize}
+    \item \verb|bool|;
+    \item \verb|char|: which is a 4-byte unicode(-ish);
+    \item tuples like in Haskell;
+    \item arrays with fixed length in order to add runtime check for out-of-bound.
+\end{itemize}
+There is some kind of type inference if declaring variables with the keyword \verb|let|.
+There is no overloading for literals but type annotations are needed to disambiguate.
+
+\begin{verbatim}
+fn main() {
+    // numeric types
+    let k = 3; // 3u8, 3.0, 3.2f32, ...
+
+    // tuple
+    let tup = (500, 6.4, 1);
+    // unpack of tuples
+    let (x, y, z) = tup;
+
+    println!("The value of y is: {}",y);
+    println!("The value of tup.1 is: {}",tup.1);
+
+    // array declaration
+    let a: [i32;5] = [1,2,3,4,5];
+    let b: [i32;5] = [3;5];
+}
+\end{verbatim}
+
+
+\section{Strings}
+In Rust there exists two main types of strings:
+\begin{itemize}
+    \item \verb|String|: does not require to know the length at compilation time, thus allocated on heap;
+
+    \item \verb|&str|: size must be known statically, allocated on the stack.
+\end{itemize}
+The method \verb|String::from()| allocates memory on the heap and takes an argument of types \verb|&str| and returns a \verb|String|.
+
+A String object has three components:
+\begin{itemize}
+    \item a reference to the heap allocation containing the character sequence;
+    \item a capacity;
+    \item an unsigned integer values for the actual length.
+\end{itemize}
+String does not implement the Copy trait so assignment has move semantics.
+Assignment creates a copy of length, capacity and reference but not of the char sequence in the heap.
+
+\section{Enums}
+Enums in Rust are really like the data constructor in Haskell and replaces unions in C/C++:
+\begin{verbatim}
+enum RetInt{
+    Fail(u32),
+    Succ(u32)
+}
+
+fn foo_may_fail(arg: u32) -> RetInt {
+    ...
+    if fail {
+        RetInt::Fail(errno)
+    } else{
+        RetInt::Succ(result)
+    }
+}
+\end{verbatim}
+
+\subsection{Pattern matching}
+A \verb|match| statement can be used in order to find out which enum variants is binded to a variable.
+In Rust the compiler enforces that matching is complete so that each variants has been dealt with.
+Of course pattern matching is useful for integral types too.
+
+\section{Classes}
+Rust doesn't have a proper OOP mechanisms but it can be somehow built using struct and impl blocks:
+\begin{verbatim}
+#[derive(Debug)] // needed to print
+
+struct Rectangle {  // kind of class
+    width: u32,     // instance variable    
+    height: u32,
+}
+
+impl Rectangle {    // methods associated to the struct
+    fn area(&self) -> u32 { // first arg is this
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    println!(
+        "The area of the rectangle is {}", rect1.area()
+    );
+}
+\end{verbatim}
+NB: Rust has no inheritance mechanism because it pushes \emph{composition over inheritance}.
+
+\section{Traits}
+It's equivalent to type classes in Haskell and to concepts in C++20, similar to Interfaces in Java.
+A trait can include abstract and concrete (default) methods but not fields and variables.
+A struct can implement a trait providing an implementation for at least its abstract methods using:
+\begin{verbatim}
+impl <TraitName> for <StructName>{ ... }
+\end{verbatim}
+NB: The \verb|#[derive]| clause for a struct can be used to derive automatically an implementation of a trait, if possible.
+
+
+Moreover the trait mechanism adds support for \emph{bounded universal explicit polymorphism} with generics, as in Java, where bounds are one or more traits.
+\begin{verbatim}
+struct SLStack<T> {
+    top: Option<Box<Slot<T>>>,
+}
+struct Slot<T> {
+    data: Box<T>,
+    prev: Option<Box<Slot<T>>>,
+}
+
+trait Stack<T> {
+    fn new() -> Self;
+    fn is_empty(&self) -> bool;
+    fn push(&mut self, data: Box<T>);
+    fn pop(&mut self) -> Option<Box<T>>;
+}
+
+impl<T> Stack<T> for SLStack<T> {
+    fn new() -> SLStack<T> {
+        SLStack { top:None }
+    }
+    ...
+    fn is_empty(&self) -> bool {
+        match self.top {
+            None => true,
+            Some(..) => false,
+        }
+    }
+}
+\end{verbatim}
+
+\subsection{Generic functions}
+Generic functions may have the generic type of parameter bound by one or more traits thus Rust generics offers bounded polymorphism.
+Within such a function, the generic value can only be used through those traits so a generic function can be type-checked when defined, like in Java.
+Implementation in rust though is similar to typical implementation of C++ templates because a separate copy of the code is generated for each instantiation if static dispatching has been used for generic arguments, otherwise it can use dynamic dispatching using virtual table if the keyword \verb|dyn| has been used.
+
+Rust uses monomorphization and contract with the type erasure scheme of Java so it generates optimized code for each specific use case but of course the compilation time and the size of the resulting binaries increases.
+
+To specify the bound (even multiple one) for the polymorphism:
+\begin{verbatim}
+    fn generic_push<T, S. Stack<T>>(stk: &mut S, data: Box<T>){
+        ...
+    }
+
+    fn generic_push<T, S. Stack<T>+Clone>(stk: &mut S, data: Box<T>){
+        ...
+    }
+\end{verbatim}
+
+\subsection{System traits}
+Traits are widely used as predicates/annotations on data types in order to help the compiler in its job, for example:
+\begin{itemize}
+    \item \verb|Clone|: tells the compiler that the object can be deep copied so instead of the move semantics it must use the copy one, so arbitrary code can run in order to copy correctly;
+    \item \verb|Copy|: allows to duplicate a value by only copying bits stored on the stack.
+    In this case no arbitrary code is necessary;
+    \item \verb|Debug|: adds a default conversion to text for printing purposes ;
+    \item \verb|Display|: adds a custom conversion to text, always for printing purposes.
+    This traits asks to implement \verb|fmt| method;
+    \item \verb|Deref| and \verb|Drop|: traits implemented by Smart pointers;
+    \item \verb|Sync| and \verb|Send|: needed for data type that can be moved to another thread.
+\end{itemize}
+
+\section{Smart pointers}
+The concept of smart pointer originates in C++ and generalizes the references (which are basically the borrowed values in Rust).
+A smart pointer is a pointer but with additional metadata and capabilities, some examples are the \verb|String| type which encapsulates a reference to str and the \verb|Vec<T>| type.
+Structs that implements \verb|Deref| and \verb|Drop| are smart pointers.
+
+\subsection{Box}
+The smart pointer \verb|Box<T>| allows to store a data of type \verb|T| on the heap without any performance overhead.
+The Deref operator \verb|*| returns its actual value and it's optional by coercion.
+
+It is a lot useful when the size of the data is not known statically, for example in the case of recursive struct, and when the data structure is so big that we want to transfer ownership without copying it avoiding large stack allocation.
+\begin{verbatim}
+enum Tree<T> {
+    Empty,
+    Node(T, Box<Tree<T>>, Box<Tree<T>>),
+        // if instead Node(T, Tree<T>, Tree<T>)
+        // it won't compile because can't calculate
+        // the actual size
+}
+\end{verbatim}
+
+\subsection{Rc}
+The smart pointer Rc is an implementation of pointer with reference counter.
+It supports \emph{immutable} access to resource with reference counting.
+In this struct the method \verb|Rc::clone(...)| doesn't clone but returns a new reference to the same object, incrementing the counter.
+The method \verb|Rc::strong_count| returns the value of the counter and when this value reaches 0 the resource is reclaimed.
+
+\begin{verbatim}
+enum List {
+    COns(i32, Rc<List>),
+    Nil,
+}
+fn main(){
+    let a = Rc::new(Cons(5, Rc::new(Const(10, Rc::new(Nil)))));
+    let b = Cons(3, Rc::clone(&a));
+    let c = Cons(4, Rc::clone(&a));
+}
+\end{verbatim}
+
+\subsection{RefCell}
+The RefCell smart pointer supports shared access to a mutable resource through the \emph{interior mutability} pattern.
+It has the methods \verb|borrow| and \verb|borrow_mut| which return a smart pointer of the type \verb|Ref<T>| or \verb|RefMut<T>|.
+It keeps track of how many reference and mutable reference are active and panics if the ownership/borrowing rules are invalidated.
+In single-threaded programs it is typically used with \verb|Rc<T>| to allow multiple accesses to objects. 
+
+Basically it moves the borrow checker from compile time to execution time.
+
+\begin{verbatim}
+enum List {
+    Cons(Rc<RefCell<i32>>, Rc<List>),
+    Nil,
+}
+
+fn main() {
+    let value = Rc::new(RefCell::new(5));
+    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+    let b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&a));
+    *value.borrow_mut() += 10;
+}
+\end{verbatim}
+
+\section{Functional programming}
+Rust has a form of closure and anonymous functions, closure can capture non-local variables too, in three ways corresponding to ownership, mutable and immutable borrowing.
+This is reflected i the trait they implement among \verb|FnOnce|, \verb|FnMut| and \verb|Fn|, this policy is inferred but with \verb|move| before the argument list the trait \verb|FnOnce| is enforced.
+\begin{verbatim}
+let vector = vec![1,2,3,4,5];
+vector.iter()
+    .map(|x| x+1)
+    .filter(|x| x % 2 == 0)
+    .for_each(|x| println!("{}", x));
+\end{verbatim}
+
+\section{Threads and race condition avoidance}
+Rust has powerful built-ins for multi-threading programming, moreover the borrow checker rules enables race condition avoidance:
+\begin{verbatim}
+fn main(){
+    let mut counter = 0;
+    let task = || {
+        for _ in 0..10000{
+            counter += 1;
+        }
+    }
+    let thread1 = thread::spawn(task);
+    let thread2 = thread::spawn(task);
+    thread1.join().unwrap();
+    thread2.join().unwrap();
+    println!("{}", counter);
+}
+\end{verbatim}
+this code won't compile because at the declaration of the closure the variable counter is borrowed from the main to the closure but then it is accessed again inside the main function, this goes against ownership rules so won't compile.
+The solution here is to not use the variable again after the closure declaration, or instead to use a \verb|Mutex| wrapped inside an \verb|Arc|, which ensures thread-safe access to the content of the variable.
+
+\subsection{Sync and Send}
+If a value not implementing the \verb|Send| trait is passed to another thread the compiler signals an error, moreover for a value to be referenced by more threads, it has to implement the \verb|Sync| traits.
+
+A type \verb|T| implements \verb|Send| if and only if \verb|&T| implements \verb|Sync|.
+\verb|Arc<T>| is a thread-safe version of \verb|Rc<T>| which implements both the traits so can be used in multi-thread context.
+In the end \verb|Mutex<T>| supports mutual exclusive access to a value via a lock, it implements both traits and is typically wrapped in \verb|Arc| in order to be shared among threads.
+
+\section{Unsafe}
+In programming mutably sharing is inevitable so Rust offers the concepts of \emph{raw pointers}:
+\begin{verbatim}
+// Node for a doubly linked list
+struct Node{
+    prev: Option<Box<Node>>,
+    next: *mut Node
+}
+\end{verbatim}
+the compiler allows the creation of raw pointers but if you want to dereference it you need to wrap the access inside an \verb|unsafe| block:
+\begin{verbatim}
+    let a = 3;
+    let b = &a as *const i32;
+
+    unsafe {
+        *b = 4;
+    }
+\end{verbatim}
+using this syntax we are saying to the compiler that we know what we are doing so it doesn't need to apply all of his rules to enhance safety (but unsafe doesn't switch off the borrow checker!).
+
+\subsection{Foreign Function Interface}
+Rust offers too the capability to re-use all the old code written in C and C++ using the foreign function interface but all foreign functions are unsafe:
+\begin{verbatim}
+extern {
+    fn write(fd: i32, data: *const u8, len: u32) -> i32;
+}
+fn main() {
+    let msg = "Hello, world!\n";
+    unsafe {
+        write(1, &msg[0], msg.len());
+    }
+}
+
+\end{verbatim}

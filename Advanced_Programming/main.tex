@@ -1,0 +1,54 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{amssymb}
+\usepackage{svg}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+\usepackage{graphicx,wrapfig,lipsum}
+\usepackage[makeroom]{cancel}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage[hidelinks]{hyperref}
+\usepackage{eurosym}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{verbatimbox}
+
+
+\begin{document}
+
+\include{0_Cover}
+
+\chapter{Introduction}
+\include{1_Introduction}
+
+\chapter{Java Virtual Machine}
+\include{2_JVM}
+
+\chapter{Software Components}
+\include{3_Software_Components}
+
+\chapter{Reflection}
+\include{4_Reflection}
+
+\chapter{Polymorphism}
+\include{5_Polymorphism}
+
+\chapter{C++ Standard Template Library}
+\include{6_STL}
+
+\chapter{Functional programming}
+\include{7_Functional_Programming}
+
+\chapter{Lambda and Streams in Java}
+\include{8_Lambda_and_Streams_in_Java.tex}
+
+\chapter{Frameworks}
+\include{9_Frameworks}
+
+\chapter{Rust}
+\include{10_Rust}
+
+\end{document}
