@@ -1,0 +1,173 @@
+\section{Tokens}
+A token is something serving to represent or indicate some fact, event, feeling, etc, but also something used to indicate authenticity or authority.
+Tokens are coin-like objects generally lacking a legal framework, usually they are issued by a private entity for a specific use and it's value may be high but only within the community that makes use of them.
+Historically tokens are a pseudo-currencies used as replacement for fiat money in a ecosystem in which everyone agree on their use and exchange, also they used to be easily to counterfeit and not very transparent since they are controlled by a single entity.
+
+\subsection{Fungibility}
+Fungibility means being of such nature or kind as to be freely exchangeable or replaceable, in whole or in part, for another of like nature or kind.
+Fungible stuff have some properties:
+\begin{itemize}
+    \item interchangeability: each token is interchangeable with other token of its same kind, there are no defining feature of that specific token so they can be seamlessly replaced by something identical to itself;
+    \item merging: can merge units of a fungible asset to get a higher value in quantity;
+    \item divisibility: can send or receive a fraction of a token.
+\end{itemize}
+
+When an item is non-fungible two items may look to be identical at a glance but each will have unique information or attributes that make them irreplaceable or impossible to swap.
+They tend to be scarce, original and collectibles.
+
+\subsection{Fungible tokens}
+Crypto-tokens are developed on the blockchain as smart contracts and they open the possibility of creating highly secure and reliable tokens because inherit some characteristics of cryptocurrencies, also they allow companies and private to generate tokens for several uses.
+
+Some fungible tokens widely used are:
+\begin{itemize}
+    \item utility token: application tokens or user tokens offered by a company giving future access to products or services, they were not created to be an investment, rather like coupons;
+
+    \item security token: an hybrid between shares of a company and a cryptocurrency because they give the owners rights and obligations like voting rights and dividends.
+    Company use to sell shares in form of cryptographic tokens.
+    They are usually used through a ICO (Initial Coin Offering), allowing companies to obtain capital by selling shares in the form of token at a lower cost and higher speed.
+    They can also be equity tokens.
+\end{itemize}
+
+Fungible tokens that exists on Ethereum blockchain are known as ERC20 tokens, that's an Ethereum stardard defining the functions of the smart contract.
+
+\subsection{Non fungible tokens}
+They are cryptographic assets traced on a blockchain with unique identification codes and metadata that distinguish them from each other, define by a smart contract.
+Are widely used to represent online-only assets like digital artwork or in-game object but also real-world assets like artwork and real estate but also individual identities, property rights and more.
+The idea of tokenizing real-world tangible assets makes buying, selling, and trading them more efficient while reducing the probability of fraud.
+
+NFT may allow to solve major problems regarding traditional art and collectibles:
+\begin{itemize}
+    \item authenticity: each NFT's is a smart contracts, so it has associated a 42-character Ethereum address, so anyone can go to block explorer, enter that address and look for the address that originated the NFT.
+    On some marketplace it is even more easy due to the Trading History section.
+    Authenticity can be verified by the blobkchain;
+
+    \item provenance: inherited from blockchain verification, every transaction is recorded on the blockchain, so everyone can search for a NFT's address and get the various owners, date and amounts of each transaction;
+
+    \item scarcity: copies of the same NFT cannot be produced, the associated artcraft can be copied but not the NFT that gives the artcraft's ownership.
+    Also scarcity and authenticity togeth makes it possible for artists to sell digital artwork without worrying about unauthorized of fraudulent originals.
+
+    \item ongoing loyalties for creators: the NFT allows for an artist to get come coins back for each sell of the NFT, even after the first one.
+    This way the original artist can have continuing royalties from that artcraft.
+\end{itemize}
+
+Some use cases for NFTs are:
+\begin{itemize}
+    \item digital arts: it's a form of art born in the '80s, however it created a big controversy since every user can copy an artwork, however copying does not mean that you own the image.
+    The ownership of the image will rest with whoever has the copyright (generally the artist) and NFT gives the ownership of some art craft that the artist can retain.
+    Thea idea is similar to first edition of something (book, comics, etc), they are more valuable than successive replicas;
+
+    \item in-game items: sometimes instead of grinding items in a game it is more easy to purchase them from someone else;
+
+    \item blockchain domain names: they are domain name with \verb|.crypto| or \verb|.eth| TLD, they are mainly used to simplify cryptocurrency payments because can be associated to an address.
+    This way it is easier to send payment, you use the domain name instead of the long random looking wallet address.
+    Moreover you pay for it once and it's yours, instead of an annual renewal fee, to buy and sell domain name you trade NFTs.
+\end{itemize}
+
+\subsubsection{Buy and sell NFTs}
+To create (mint), sell or buy NFT you can use one of the many NFT marketplaces, there is no need to code a contract by ourself.
+Some of those shops are:
+\begin{itemize}
+    \item opensea: it's the largest and most popular NFT marketplace.
+    Through it you can easily create, buy and sell NFTs, also you can make English and Dutch auctions, managed automatically by smart contracts.
+    Also you can buy and sell NFTs only with cryptocurrencies because the platform is based on the Ethereum blockchain, which can have high gas prices for transactions;
+
+    \item Rarible: it has some social media feature incorporated, for example you can follow NFT creators and get notified when the creator drops new stuff.
+    Can buy and sell NFTs only with cryptocurrencies because it's Ethereum based.
+
+    \item Nifty gateway;
+    \item SuperRare;
+    \item Wax.
+\end{itemize}
+
+\subsection{Semi-fungible tokens}
+Semi-fungibe token (SFT) can change state from being fungible to non fungible, for example a ticket for the final football championship match is interchangeable for any other ticket of the same match and same seating class, however once the match is over it can no longer be used for entering the stadium but may become a collector's item for fans with a different value assigned to it.
+
+\section{ERC tokens standard}
+ERC (Ethereum Request for Comments) are standardized smart contracts which have:
+\begin{itemize}
+    \item a pre-enstablished standard structure for storing and managing tokens;
+    \item a set of pre-defined functions that can be executed on the token;
+    \item give developers the guarantee that assets will behave in a specific way and describe exactly how to interact with the basic functionality of the assets.
+\end{itemize}
+
+The most widespread standards are:
+\begin{itemize}
+    \item ERC-20 which is the original one, and it's the standard for fungible token;
+    \item ERC-721: standard for non-fungible tokens;
+    \item ERC-1155: standard for semi fungible tokens.
+\end{itemize}
+
+\subsection{ERC-20}
+This standard defines a minimum set of functions to be implemented by all ERC20 tokens so as to allow integration with other contracts, wallets or marketplaces.
+In general each ERC-20 is a sub-accounting system parallel to the Ethereum main ledger, having their own unit of account.
+There is no mixing with the Ether balances of the various addresses involved and at the same time it guarantees the transparency, traceability and security provided by the main Ethereum network.
+
+The madatory functions are:
+\begin{itemize}
+    \item \verb|totalSupply|: returns the total units of tokens that currently exist in the token smart contract;
+    \item \verb|balanceOf|: given an address returns the token balance of that address;
+    \item \verb|transfer|: tokens may be transferred from an account to another by updating the balances, this function gets an address and an amount, takes the address of the user who is doing the transaction and transfers tokens from him to the specified destination address.
+    In order to signal the transaction the contract emits a \verb|Transaction| event on the blockchain;
+    \item \verb|transferFrom|;
+    \item \verb|approve|;
+    \item \verb|allowance|;
+\end{itemize}
+and then there are some optional fields:
+\begin{itemize}
+    \item \verb|name|: returns the human readable name of the token (eg: Us dollars);
+    \item \verb|symbol|: returns the human readable symbol for the token (eg: USD);
+    \item \verb|decimal|: number of digits that comes after the decimal place, when displaying values on the screen.
+    It's required because Ethereum does not deal with decimal numbers representing all numeric values as integers.
+\end{itemize}
+
+The ERC-20 contract contains a mapping of account addresses and their balance, the balance of course can represent an amount of physical objects, rights, monetary values, etc.
+
+\subsubsection{Allowance}
+It's a two-step payment process in which a user allows a third party to carry out a transaction of tokens, on his behalf.
+The idea behind the allowance is for recurring payments like rent, bills, etc: you allow some address to withdraw some amount of tokens from you address every month, for example.
+This mechanism is implemented in three functions:
+\begin{itemize}
+    \item \verb|approve|: the owner of the address that executes the function, approves a delegate address to withdraw tokens from his/her account and to transfer them to other accounts.
+    Can define a maximum amount of allowed token transfer;
+
+    \item \verb|allowance|: takes as input the address of the owner and the address of the delegate, checks the current approved number of tokens by an owner to that specific delegate;
+
+    \item \verb|transferFrom|: allows a delegate approved for withdrawal to transfer owner funds to a third-party account, then subtracts the tokens transferred from delegate's allowance.
+\end{itemize}
+
+
+\subsection{ERC-721}
+It's the Ethereum token standard which enables Non Fungible Tokens, it's main functions are:
+\begin{itemize}
+    \item \verb|ownerOf|: each ERC721 token is referenced on the blockchain via a unique ID and this function given a unique ID, returns the address of the owner of a token;
+    \item \verb|transferFrom|: used to transfer the ownership of an NFT, the caller is responsible to confirm that the receiver is capable of receiving the NFTs, otherwise they are permanently lost;
+    \item \verb|name|: this field is used to indicate the name of the token to external contracts and applications;
+    \item \verb|symbol|: provides outside programs with the token's shorthand name, also used for compatibility with ERC20 standards;
+    \item \verb|approve|: approves, or grants another entity permission to transfer oneof the tokens on the owner's behalf;
+    \item \verb|setApproveForAll|: enable or disable approval for a third party to manage all the assets of the user which executes this command;
+    \item \verb|safeTransferFrom|: transfer the ownership of a NFT from one address to another address;
+    \item \verb|transferFrom|: transfer ownership of an NFT, in this case the caller is responsible to confirm that the receiver is capable of receiving the NFTs, otherwise they are permanently lost.
+\end{itemize}
+
+There can also be some \emph{unlockable content} which are contents that only the owner of the NFT can see or access, like:
+\begin{itemize}
+    \item actual files (suc as image for digital art, or video);
+    \item information for redeeming physical items or other perks;
+    \item login credentials for something;
+    \item game activation key;
+    \item note from the NFT creator;
+    \item ...
+\end{itemize}
+
+We said that NFT have some kind of specific attributes that makes them non-fungible, those information are stored in a \verb|metadata| structure, which is a mapping from token ID to a struct of information.
+Usually one of those metadata field is \verb|ongoing royalty|, if it is set every time the NFT is sold in the future, a certain percentage will go back to the original creator, this way artists and NFT creators in general can still earn from future sales of their creations without having to do anything more.
+
+Also this metadata can be stored:
+\begin{itemize}
+    \item directly in the smart contract (on-chain data): may be extremely expensive and not recommended, but for some applications it could be necessary, if for example the contract actually interacts with those metadata or if the data must be persistently recorded on-chain;
+    \item hosted separately (off-chain data): two main solutions:
+    \begin{itemize}
+        \item some cloud storage: not really in the spirit of the blockchain;
+        \item IPFS (InterPlanetary File System): a decentralized p2p network of computer around the world who stores content across multiple locations.
+    \end{itemize}
+\end{itemize}

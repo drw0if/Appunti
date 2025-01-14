@@ -1,0 +1,22 @@
+Blockchain systems tend to grow as they are an append only ledger.
+A blockchain client to interact with the system can:
+\begin{itemize}
+    \item download all the blockchain, storing and verifying the entire blockchain history;
+    \item forfeit blockchain security guarantees and place its trust on third party intermediary servers.
+\end{itemize}
+In the recent years an alternative was developed: \emph{light client}.
+Using this concept a resource constrained client (browsers, mobile phones, embedded devices, etc) can participate in the system by querying and/or submitting transactions without holding the full blockchain, while still having the blockchain's security guarantees.
+
+\section{Bitcoin lightweight client}
+SPV (Simplified Payment Verification) or lightweight client downloads only the header of the blocks (approximately 1000 times smaller, because block header is only 80 bytes).
+This way the client is still able to verify PoW because the header contains the nonce and also the validity of a transaction.
+
+A SVP node can talk to a full node in order to download the header-only blockchain, then the client builds a bloom filter with only the addresses in the wallet and sends it to the full node.
+Then the full node exchanges to the light client the headers of the new blocks, not already downloaded by SVP, and also transactions involving requested addresses, also a Merkle tree paths in order to solve a Merkle proof and be sure that the transaction is inside the block.
+
+NB: the idea of bloom filter is both for space occupancy and for privacy, because the client does not necessarily transmit it's addresses.
+
+
+
+
+

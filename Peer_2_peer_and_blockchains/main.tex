@@ -1,0 +1,60 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{afterpage}
+\usepackage{amssymb}
+\usepackage{svg}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+\usepackage{graphicx,wrapfig,lipsum}
+\usepackage[makeroom]{cancel}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage[hidelinks]{hyperref}
+\usepackage{eurosym}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{verbatimbox}
+
+
+\begin{document}
+
+\include{0_Cover}
+
+\chapter{Introduction}
+\include{1_Introduction}
+
+\chapter{P2P network}
+\include{2_p2p_networks}
+
+\chapter{Distributed Hash Table}
+\include{3_DHT}
+
+\chapter{Cryptographic tools for Blockchain}
+\include{4_Cryptographic_Toolbox}
+
+\chapter{Blockchain}
+\include{5_Blockchain}
+
+\chapter{Bitcoin}
+\include{6_Bitcoin}
+
+\chapter{Ethereum}
+\include{7_Ethereum}
+
+\chapter{Tokenization}
+\include{8_Tokenization}
+
+\chapter{Lightweight clients}
+\include{9_Lightweight_Clients}
+
+\chapter{Scaling blockchain}
+\include{10_Scaling_blockchain}
+
+\chapter{IPFS}
+\include{11_IPFS}
+
+%\chapter{Applications}
+%\include{12_Applications}
+
+\end{document}

@@ -1,0 +1,151 @@
+At a glance a blockchain is a ledger which is replicated among the nodes of a peer-to-peer network in which all nodes have the same replica of the ledger.
+It is immutable, so once a block is approved by the network it cannot be changed, which gives this structure the \emph{tamper freeness property}.
+This structure may act like a notary.
+
+\section{Block structure}
+Inside a block we have mainly three components:
+\begin{itemize}
+    \item data: the actual data of the block;
+    \item the hash of the entire block;
+    \item the hash of the previous block, used as a pointer to the previous block.
+    In particular this part is used to build the actual chain of blocks.
+\end{itemize}
+
+\subsection{Data}
+The data contained in the block highly depends on the usage of the blockchain.
+The most typical case, which for instance is cryptocurrencies, contains data to describe transactions which transfer an amount of money between two entities, so we have the user who is transferring money, the user who is receiving those money and the amount which is being transferred.
+
+\section{Tamper freeness}
+Blockchain is tamper free because arbitrarily changing a block means having a completely different hash for that block, so we should recompute all the hash of the following block in order to keep the chain coherent.
+However in order to confirm the block there is a protocol called proof-of-work which is highly expensive in term of both time and power which will be need in order to recompute all of the following blocks.
+
+\section{Network}
+Of course a blockchain is built on top of a p2p network, this network is used in order to reach consensus about which block should be the next one in the chain.
+
+\section{The ledger}
+The first abstraction we can build on top of a blockchain is the ledger abstraction one.
+A ledger is like a bullettin storing operations and maintains the order of operations.
+A ledger has the following properties:
+\begin{itemize}
+    \item append-only;
+    \item tamper-proof: for auditability, like a notary;
+    \item everyone agrees on the content: thanks a mechanism of consensus.
+\end{itemize}
+A ledger is not only used for financial usages, but of course for any application which needs a log of event with those properties.
+
+Since everyone in the network keeps a copy of the ledger and updates it we need to find a way to provide consistency across the different nodes.
+Let's make a simplification: each block contains a single operation (not true for the actual blockchains), then there is the actual chain already computed and to which every node agrees upon, and then a bunch of operations that already happened but need confirmation, so need to be added to the chain.
+
+\section{Consensus}
+To decide which next block to append to the chain we need a \emph{consensus} mechanism which defines:
+\begin{itemize}
+    \item who decides which operation will be added to the blockchain;
+    \item which operation among those to be confirmed, will be added.
+    Of course making some check to avoid double spending.
+\end{itemize}
+Through consensus nodes reach an agreement on the same value and the validity of those value, but of course faulty or malicious node may exits!
+
+The true power of blockchain is the participation in the block generation, this makes the blockchain really decentralized.
+There are hundreds of proposal to solve the consensus problem that need to tackle several challenges:
+\begin{itemize}
+    \item maintain consistency in presence of different network jitter, delay, etc;
+    \item some parties can cheat: \emph{byzantine parties}.
+\end{itemize}
+
+\subsection{Voting}
+If the majority of the nodes is honest then the system works well but we need to understand what we mean with the term \emph{majority}.
+We can implement a consensus mechanism by voting, each node in the network can answer to the question "is this the correct bulletin-board?".
+The voting problem is a well known problem in distributed systems because:
+\begin{itemize}
+    \item who prevents someone to spend twice or more the times the same digital currency without the presence of a central authority?
+    \item how to prevent for a single node to perform \emph{sybil attack}? (basically a single node authenticates more time appearing as multiple different nodes and voting more than one time)
+\end{itemize}
+
+Some of the potental defenses are:
+\begin{itemize}
+    \item proof of work: require computational power in order to participate to the consensus mechanism;
+    \item proof of stake: require staking coins/token to be take part to the voting system;
+    \item certified node-ids: requires a central authority.
+\end{itemize}
+
+In proof or work instead of counting users as the single entity enrolled in the network we use the computing power controlled by each identity, so creating multiple identities is not useful if the attacker only owns a single computer.
+
+\subsection{Proof of work}
+Proof of work is not born for blockchain, it was firstly proposed by Dwork \& Naor in 1993.
+It's based on a cryptographic problem which is hard to solve but easy to verify.
+It's like a lottery to choose which node will decide the next block, because gaining tickets is expensive and at some point there is a winner which then needs to be endorsed by the network who will attest the validity of the winning ticket.
+Who wins this lottery can decide the next block of the blockchain and as an incentive to play, who wins obtains a compensation.
+
+In this scheme sybil attack is not only expensive but even pointless.
+
+If multiple nodes win at the same time, which actually happens from time to time, there is the creation of a \emph{fork} in the blockchain.
+The two winners attach their new block to the blockchain and the network basically splits in two groups following the different tips.
+When new winners emerges for the subsequent blocks then the network decide to move to the longest chain following the longest chain rule.
+Following this concept we have various possible continuation of the chain, but at the beginning the blocks are not stable, then with time passes and with more nodes added we have the stabilization of older blocks.
+
+This is not a classical consensus mechanism in which first there is the establish of a unique winner and once it is decided it is permanent.
+Here the stabilization happens after quite some time.
+
+\section{Proof of ownership}
+In the blockchain world there is the concept of ICO (Initial Coin Offering):
+\begin{itemize}
+    \item someone proposes a project that will be implemente on a blockchain;
+    \item it can gets funding from people proposing to partecipate to the project;
+    \item it creates tokens to be given to the funders, as a compensation.
+\end{itemize}
+Those tokens then will be a part of the initial project (let's think to them as a crypto-coupons useful to get benefit as a member of the fund raising).
+
+In this scenario we need to think to a method to prove the ownership of a token, and this method must allow a way to transfer ownership of single tokens.
+We can leverage once again asymmetric key cryptography:
+\begin{itemize}
+    \item Alice generate a key-pair (public and private one);
+    \item anyone who knows the private key matching the public key of Alice owns the Alice crypto-coupons (Alice himself, everyone Alice gave the private key to and of course everyone who stole Alice's private key);
+    \item the public key identifies the owner of the coupon;
+    \item the private key gives ownership, basically allows you to claim ownership by signing the transfer operation;
+    \item register on the ledger the signed transactions, that can then be verified by the receiver.
+\end{itemize}
+
+\subsection{Spending coupons}
+Let's suppose that Alice holds some amount of token and wants to transfer half of them to a user and the other half to another user.
+Alice has a key pair and somehow gets the public key of the target users (a public key identifies a user in this system).
+Alice writes a transaction in which she says the amount and the target users, identified with the public keys, then signs this transaction in order to prove the ownership of the assets she's transferring.
+The two users then will exploit their private key to collect received tokens and then use them as their needs.
+
+In this scheme there is no notion of account, balances and so on, like in a bank, only some coupon transfers.
+Anyone can collect his tokens just by scrolling the ledger and spending coupons destroys them.
+
+Moreover in the blockchain there is the UTXO (Unspent Transaction Output) which is a structure recording all the coupons owned by a user and not yet spent.
+
+\section{Where is the blockchain?}
+Of course Alice does not want to completely host this blockchain because it is expensive and then customer may not trust her.
+She decides to store it on a p2p network among all the users of the service, this way the structure is replicated by each node.
+
+Of course someone needs to validate transactions, those entities are the \emph{miners} which basically solve the proof of work in exchange to some of the same coupons that the network is transferring.
+Miners exchange their computing power for some economic rewards.
+
+\section{Permissionless blockchain}
+The described system is permissionless because:
+\begin{itemize}
+    \item anyone can partecipate;
+    \item anyone can be a miner;
+    \item no central authority;
+    \item based on reward;
+    \item may have some problems like the forks we've already seen and of course some other cyber attacks.
+\end{itemize}
+
+Some examples of permissionless blockchains: Bitcoing, Ethereum, Cardano, Algorand, etc.
+
+\section{Permissioned blokchain}
+A permissioned blockchain is a distributed ledger to record the events but only the actors involved in the process participate in the consensus.
+For those type of blockchains there is a new consensus algorithm: Practical Blockchain Fault Tolerance (PBFT) which solves the problem of Sybils and is actually based on voting.
+
+Some other differences in permissioned blockchain:
+\begin{itemize}
+    \item parties have identities;
+    \item human parties have passwords and keys, sensors only have keys, but both humans and sensors are authenticated;
+    \item there is no sybil attack;
+    \item implies different consensus mechanisms;
+    \item you can implement accountability of users if caught cheating.
+\end{itemize}
+
+Some examples of permissioned blockchains: Hyperledger, Ethereum Quorum, Corda.
